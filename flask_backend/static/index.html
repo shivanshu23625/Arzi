@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARZI — Civic RTI Legal Filing Desk & ML Pipeline</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- System Kill-Switch Fallback Screen -->
+  <div id="killSwitchBanner" class="kill-switch-screen hidden">
+    <div class="kill-switch-modal">
+      <div class="kill-badge">CRITICAL SYSTEM INTEGRITY BREACH</div>
+      <h1>CORE REPOSITORY BINDING REVOKED</h1>
+      <p id="killSwitchMessage">Remote GitHub repository returned HTTP 404/410. Execution engine halted.</p>
+      <div class="kill-meta">
+        <div><span>STATUS:</span> HTTP 503 SERVICE UNAVAILABLE</div>
+        <div><span>KILL-SWITCH:</span> ENGAGED</div>
+      </div>
+      <button class="btn btn-primary" onclick="toggleKillSwitch(false)">RESTORE SYSTEM INTEGRITY</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-box">ARZI</div>
+        <div class="brand-text">
+          <span class="title">CIVIC RTI LEGAL FILING DESK</span>
+          <span class="subtitle">Notion Operations & ML Intelligence Engine</span>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <div class="status-indicator">
+          <span class="dot live"></span>
+          <span id="repoStatusText">GITHUB REPO: LIVE</span>
+        </div>
+        <button class="btn btn-sm btn-outline" id="testKillSwitchBtn" onclick="toggleKillSwitch(true)">SIMULATE REPO DELETION</button>
+      </div>
+    </header>
+
+    <!-- Main Navigation Bar -->
+    <nav class="nav-bar">
+      <button class="nav-tab active" data-tab="intake">01. INTAKE PORTAL</button>
+      <button class="nav-tab" data-tab="queue">02. COMMAND CENTER (<span id="inboxCount">0</span>)</button>
+      <button class="nav-tab" data-tab="workspace">03. LEGAL REVIEW WORKSPACE</button>
+      <button class="nav-tab" data-tab="runlog">04. PROOF RUN LOG</button>
+      <button class="nav-tab" data-tab="mlmodel">05. ML MODEL INTELLIGENCE</button>
+    </nav>
+
+    <main class="main-content">
+
+      <!-- TAB 1: INTAKE PORTAL -->
+      <section id="tab-intake" class="tab-panel active">
+        <div class="hero-banner">
+          <h2>INGEST CITIZEN GRIEVANCE</h2>
+          <p>Turn messy multilingual complaints into review-ready legal RTI applications under the RTI Act 2005.</p>
+        </div>
+
+        <div class="grid-2col">
+          <div class="card">
+            <div class="card-header">NEW CITIZEN CASE ENTRY</div>
+            <form id="intakeForm" onsubmit="submitIntake(event)">
+              <div class="form-group">
+                <label>COMPLAINANT NAME *</label>
+                <input type="text" id="complainantName" placeholder="e.g. Shivanshu Pandey" required />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>PHONE / CONTACT *</label>
+                  <input type="text" id="complainantContact" placeholder="+91-9876543210" required />
+                </div>
+                <div class="form-group">
+                  <label>PREFERRED LANGUAGE</label>
+                  <select id="complainantLang">
+                    <option value="Hindi / English">Hindi / English</option>
+                    <option value="English">English</option>
+                    <option value="Bengali">Bengali</option>
+                    <option value="Marathi">Marathi</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>RESIDENTIAL / POSTAL ADDRESS (CITY / DISTRICT) *</label>
+                <input type="text" id="complainantAddr" placeholder="e.g. Assi Ghat, Varanasi / Banaras, UP" required />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>ORIGINAL APPLICATION REF / ACKNOWLEDGEMENT NO.</label>
+                  <input type="text" id="intakeRefNo" placeholder="e.g. VNS-99401 or LND-88301 (Optional - Auto Extracted)" />
+                </div>
+                <div class="form-group">
+                  <label>ORIGINAL COMPLAINT SUBMISSION DATE</label>
+                  <input type="text" id="intakeSubDate" placeholder="e.g. 15-Feb-2026 or 10-Jan-2026 (Optional)" />
+                </div>
+              </div>
+
+              <div class="preset-box" style="background: #E8F5E9; border-color: #2E7D32; margin-bottom: 16px;">
+                <div class="preset-title" style="color: #1B5E20;">✨ LOCALITY-AWARE ML PIO JURISDICTION MATCHING</div>
+                <div class="preset-text">If address is in Varanasi / Banaras, Lucknow, Mehrauli, etc., ML binds to THAT local district Tehsil Kachehri PIO office automatically!</div>
+              </div>
+
+              <div class="form-group">
+                <label>RAW GRIEVANCE NARRATIVE *</label>
+                <textarea id="rawGrievance" rows="5" placeholder="Describe the issue in detail (e.g. My land mutation khasra 88/14 application (Ref VNS-99401) was submitted at Tehsil Kachehri Varanasi / Banaras...)" required></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">INGEST & GENERATE ML REPORT →</button>
+            </form>
+          </div>
+
+          <div class="card bg-alt">
+            <div class="card-header">GOLDEN PATH DEMO PRESETS</div>
+            <p class="meta-desc">Click any pre-packaged real-world citizen grievance to test automatic ML prediction & Report Generation:</p>
+
+            <div class="preset-box" onclick="loadPreset(4)" style="border-color: #1976D2;">
+              <div class="preset-title" style="color: #1976D2;">📍 PRESET 4: Varanasi / Banaras District Kachehri (Land Mutation Khasra 88/14)</div>
+              <div class="preset-text">"Land mutation khasra 88/14 application (Ref VNS-99401) submitted at Tehsil Kachehri Varanasi / Banaras..."</div>
+            </div>
+
+            <div class="preset-box" onclick="loadPreset(3)" style="border-color: var(--accent-terracotta);">
+              <div class="preset-title" style="color: var(--accent-terracotta);">⭐ PRESET 3: Land Record & Khasra Mutation (Shivanshu Pandey - ARZ-1046)</div>
+              <div class="preset-text">"Land mutation khasra 45/12 application (Ref LND-88301) submitted on 10-Jan-2026 at Tehsil Mehrauli..."</div>
+            </div>
+            
+            <div class="preset-box" onclick="loadPreset(1)">
+              <div class="preset-title">PRESET 1: BPL Ration Card Delay (Includes Ref: RC-88492 & Date: 15-Feb-2026)</div>
+              <div class="preset-text">"Application Ref No. RC-88492 submitted on 15-Feb-2026 at Ward 4 office. Food grains denied..."</div>
+            </div>
+
+            <div class="preset-box" onclick="loadPreset(2)">
+              <div class="preset-title">PRESET 2: Monsoon Sewer Waterlogging (Includes Ack: MW-77401 & Date: 3 weeks ago)</div>
+              <div class="preset-text">"Severe drainage overflow behind Market Road Sector 12. Multiple complaints (Ack MW-77401) filed 3 weeks ago..."</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: COMMAND CENTER & QUEUE -->
+      <section id="tab-queue" class="tab-panel">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-num" id="statInbox">0</div>
+            <div class="stat-label">INBOX (PENDING REVIEW)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="statApproved">0</div>
+            <div class="stat-label">DISPATCHED & APPROVED</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="statAtRisk">0</div>
+            <div class="stat-label">AT RISK (EVIDENCE Gaps)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="statTotal">0</div>
+            <div class="stat-label">TOTAL ACTIVE CASES</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header-bar">
+            <div class="card-header">OPERATIONAL CASE QUEUE & GLOBAL SEARCH CONSOLE</div>
+            <div class="filter-controls">
+              <input type="text" id="caseSearchInput" placeholder="🔍 Enter Keyword (Unique ID, Name, Varanasi/Banaras, Address, Issue...)" onkeydown="if(event.key==='Enter') loadCaseQueue()" style="padding: 6px 12px; font-size: 12px; width: 300px; margin-right: 6px; border: 1px solid var(--border-color); border-radius: 4px; background: #FAFAFA;" />
+              <button class="btn btn-sm btn-primary" onclick="loadCaseQueue()" style="margin-right: 12px; font-weight: bold;">SEARCH 🔍</button>
+              <label>STATUS:</label>
+              <select id="queueFilter" onchange="loadCaseQueue()">
+                <option value="">ALL CASES</option>
+                <option value="NEEDS_REVIEW">NEEDS REVIEW</option>
+                <option value="APPROVED">APPROVED / DISPATCHED</option>
+                <option value="MERGED_DUPLICATE">MERGED DUPLICATES</option>
+              </select>
+            </div>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>UNIQUE CASE ID</th>
+                <th>COMPLAINANT & ADDRESS</th>
+                <th>ML PREDICTED DEPT</th>
+                <th>REF NO & SUBMISSION DATE</th>
+                <th>LOCAL DISTRICT KACHEHRI / PIO</th>
+                <th>CONFIDENCE</th>
+                <th>STATUS</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="caseQueueBody">
+              <!-- Loaded via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 3: LEGAL REVIEW WORKSPACE (APPROVAL GATE & REPORT FORMAT) -->
+      <section id="tab-workspace" class="tab-panel">
+        <div id="noCaseSelected" class="empty-state">
+          <h3>NO CASE SELECTED FOR REVIEW</h3>
+          <p>Select a case from the Command Center Queue to open the Legal Review Workspace.</p>
+          <button class="btn btn-primary" onclick="switchToTab('queue')">GO TO COMMAND CENTER QUEUE</button>
+        </div>
+
+        <div id="caseWorkspaceView" class="hidden">
+          <div class="case-banner">
+            <div class="case-title-box">
+              <h2 id="viewCaseId">ARZ-1046</h2>
+              <span class="badge" id="viewCaseStatus">NEEDS_REVIEW</span>
+              <span class="badge badge-risk" id="viewRiskBadge">LOW RISK</span>
+            </div>
+            <div class="case-meta-right">
+              <div>SLA REMAINING: <b id="viewSla">14 DAYS</b></div>
+              <div>COMPLAINANT: <b id="viewComplainant">Shivanshu Pandey</b></div>
+            </div>
+          </div>
+
+          <div class="grid-2col">
+            <!-- Left Column: Grievance & Facts -->
+            <div class="card">
+              <div class="card-header">01. ORIGINAL GRIEVANCE & EXTRACTION METADATA</div>
+              <div class="fact-block">
+                <label>RAW CITIZEN STATEMENT:</label>
+                <p class="quote-text" id="viewRawGrievance"></p>
+              </div>
+
+              <div class="fact-block">
+                <label>EXTRACTED EVIDENCE FACTS:</label>
+                <div class="pio-box">
+                  <div>REF / ACKNOWLEDGEMENT NO: <b id="viewRefNo" style="color: var(--accent-terracotta);">LND-88301</b></div>
+                  <div>ORIGINAL SUBMISSION DATE: <b id="viewSubDate" style="color: var(--accent-terracotta);">10-Jan-2026</b></div>
+                </div>
+              </div>
+
+              <div class="fact-block">
+                <label>ML PREDICTED DEPARTMENT & KACHEHRI JURISDICTION:</label>
+                <div class="pio-box">
+                  <div class="pio-name" id="viewPioName">Shri N. Goyal</div>
+                  <div class="pio-dept" id="viewPioDept">Revenue & Land Records (ML PREDICTED)</div>
+                  <div class="pio-addr" id="viewPioAddr">Tehsil Mehrauli</div>
+                  <div style="font-family: var(--font-mono); font-size: 11px; margin-top: 6px; color: #1B5E20;" id="viewMlReason"></div>
+                </div>
+              </div>
+
+              <div class="fact-block" style="background: #FFF8E1; border: 1px solid #FFE082; padding: 12px; border-radius: 4px;">
+                <label style="color: #F57F17; font-weight: bold;">🔧 IN-PLACE COMPLAINANT FIX (CORRECTS TYPOS WITHOUT DUPLICATES):</label>
+                <div class="form-group">
+                  <label>COMPLAINANT NAME:</label>
+                  <input type="text" id="editComplainantName" placeholder="e.g. Shivanshu Pandey" />
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>CONTACT PHONE:</label>
+                    <input type="text" id="editComplainantContact" placeholder="+91-9988776655" />
+                  </div>
+                  <div class="form-group">
+                    <label>POSTAL ADDRESS:</label>
+                    <input type="text" id="editComplainantAddr" placeholder="Sector 4, Mehrauli, New Delhi" />
+                  </div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="submitInplaceComplainantFix()">UPDATE COMPLAINANT IN-PLACE →</button>
+              </div>
+
+              <div class="fact-block">
+                <label>LAWYER METADATA & DEPARTMENT OVERRIDE:</label>
+                <div class="form-group">
+                  <label>UPDATE APPLICATION REF NO:</label>
+                  <input type="text" id="editRefNo" placeholder="Enter Ref No if missing..." />
+                </div>
+                <div class="form-group">
+                  <label>UPDATE ORIGINAL SUBMISSION DATE:</label>
+                  <input type="text" id="editSubDate" placeholder="Enter Submission Date if missing..." />
+                </div>
+                <div class="form-group">
+                  <label>OVERRIDE DEPARTMENT:</label>
+                  <select id="overrideDeptSelect">
+                    <option value="Revenue & Land Records">Revenue & Land Records</option>
+                    <option value="Food & Civil Supplies">Food & Civil Supplies</option>
+                    <option value="Municipal Public Works & Drainage">Municipal Works & Drainage</option>
+                    <option value="Higher Education & Student Welfare">Higher Education</option>
+                  </select>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="submitOverride()">OVERRIDE DEPT & REGENERATE REPORT</button>
+              </div>
+
+              <div class="fact-block" style="background: #EDE7F6; border: 1px solid #D1C4E9; padding: 12px; border-radius: 4px;">
+                <label style="color: #512DA8; font-weight: bold;">🔗 DUPLICATE CASE MERGE RESOLUTION:</label>
+                <div class="form-group">
+                  <label>DUPLICATE CASE ID TO MERGE (e.g. ARZ-1047):</label>
+                  <input type="text" id="duplicateCaseIdInput" placeholder="Enter duplicate case ID..." />
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="mergeDuplicateCase()">RESOLVE & MERGE DUPLICATE CASE</button>
+              </div>
+
+              <div class="fact-block">
+                <label>AI CONFIDENCE METERS:</label>
+                <div class="conf-bar-group">
+                  <div class="conf-item">
+                    <span>OVERALL SCORE:</span>
+                    <b id="confOverall">98%</b>
+                  </div>
+                  <div class="conf-item">
+                    <span>JURISDICTION:</span>
+                    <b id="confJuris">96%</b>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fact-block hidden" id="evidenceGapsBox">
+                <label class="text-alert">EVIDENCE GAPS DETECTED:</label>
+                <ul id="evidenceGapsList" class="alert-list"></ul>
+              </div>
+            </div>
+
+            <!-- Right Column: RTI Draft, Formal Report Format & Audit History -->
+            <div class="card highlight-card">
+              <div class="card-header-bar">
+                <div class="card-header">02. GENERATED ML LEGAL RTI ASSESSMENT REPORT</div>
+                <button class="btn btn-sm btn-outline" onclick="copyMlReport()">COPY REPORT TEXT</button>
+              </div>
+
+              <div class="form-group">
+                <label>APPLICATION SUBJECT:</label>
+                <input type="text" id="editDraftSubject" />
+              </div>
+
+              <div class="form-group">
+                <label>SPECIFIC QUESTIONS SOUGHT (ONE PER LINE):</label>
+                <textarea id="editDraftQuestions" rows="5"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>FORMAL ML REPORT FORMAT (COMPLETE INTELLIGENCE REPORT):</label>
+                <textarea id="viewMlReportFormat" rows="10" style="font-family: var(--font-mono); font-size: 11px; background: #1E242B; color: #F5F5F0; border-radius: 4px; padding: 12px; width: 100%; white-space: pre;" readonly></textarea>
+              </div>
+
+              <div class="approval-panel">
+                <div class="card-header">HUMAN LEGAL APPROVAL & ON-DEMAND DISPATCH</div>
+                <div class="form-group">
+                  <label>LEGAL REVIEWER NAME / TITLE *</label>
+                  <input type="text" id="reviewerName" value="Adv. S. Kalra (Legal NGO Officer)" required />
+                </div>
+                <div class="form-group">
+                  <label>APPROVAL VERIFICATION NOTES</label>
+                  <input type="text" id="reviewerNotes" value="Draft verified against citizen facts. Approved for dispatch." />
+                </div>
+
+                <div class="btn-group-row" style="margin-bottom: 12px;">
+                  <button class="btn btn-primary btn-block" id="approveBtn" onclick="approveCurrentCase()">APPROVE & RELEASE FINAL RTI DISPATCH →</button>
+                </div>
+                <div class="btn-group-row">
+                  <button class="btn btn-outline" onclick="dispatchUpdateReport()">⚡ DISPATCH UPDATED REPORT TO VICTIM FOR THIS UPDATE</button>
+                  <button class="btn btn-outline" id="viewPdfBtn" onclick="viewPdf()">VIEW PDF REPORT</button>
+                </div>
+              </div>
+
+              <div id="dispatchProofBox" class="dispatch-proof hidden" style="margin-top: 16px;">
+                <div class="proof-header">VERIFIED DISPATCH PROOF LOGGED</div>
+                <div id="proofDetails"></div>
+              </div>
+
+              <!-- Case Update Audit History Table & Visual Timeline -->
+              <div class="fact-block" style="margin-top: 20px;">
+                <div class="card-header" style="margin-bottom: 8px;">03. CASE UPDATE TIMELINE & AUDIT HISTORY TABLE</div>
+                
+                <!-- Timeline Visual Container -->
+                <div id="caseTimelineContainer" style="margin-bottom: 16px; padding: 12px; background: #F8F9FA; border: 1px solid var(--border-color); border-radius: 4px;">
+                  <!-- Dynamically populated by app.js -->
+                </div>
+
+                <table class="data-table" style="font-size: 11px;">
+                  <thead>
+                    <tr>
+                      <th>TIMESTAMP</th>
+                      <th>UPDATE TYPE</th>
+                      <th>ACTOR</th>
+                      <th>FIELD CHANGED</th>
+                      <th>OLD vs NEW VALUE</th>
+                      <th>REMARKS / DETAILS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="caseHistoryBody">
+                    <!-- Loaded via JS -->
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: PROOF RUN LOG -->
+      <section id="tab-runlog" class="tab-panel">
+        <div class="card">
+          <div class="card-header-bar">
+            <div class="card-header">IMMUTABLE CODE-GENERATED RUN LOG (AUDIT TRAIL)</div>
+            <button class="btn btn-sm btn-outline" onclick="loadRunLogs()">REFRESH RUN LOG</button>
+          </div>
+          <p class="meta-desc">Every material state transition, jurisdiction match, operator correction, human approval, and on-demand dispatch is timestamped and hash-recorded by backend execution code.</p>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>TIMESTAMP</th>
+                <th>EVENT TYPE</th>
+                <th>CASE ID</th>
+                <th>ACTOR</th>
+                <th>ACTION & DETAILS</th>
+                <th>CORRELATION ID</th>
+              </tr>
+            </thead>
+            <tbody id="runLogBody">
+              <!-- Loaded via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 5: ML MODEL INTELLIGENCE -->
+      <section id="tab-mlmodel" class="tab-panel">
+        <div class="hero-banner">
+          <h2>INTEGRATED ML PIPELINE & DATASET ACCURACY SUITE</h2>
+          <p>Test the integrated ML Model (Spam Classifier, FAISS Duplicate Detector, Input Validator, RAG Engine & Confidence Calibrator) live.</p>
+        </div>
+
+        <div class="grid-2col">
+          <div class="card">
+            <div class="card-header">INTERACTIVE ML TEST CONSOLE</div>
+            <form id="mlForm" onsubmit="runMlInference(event)">
+              <div class="form-group">
+                <label>REQUEST ID</label>
+                <input type="text" id="mlReqId" value="req-live-101" required />
+              </div>
+              <div class="form-group">
+                <label>INPUT PAYLOAD TEXT *</label>
+                <textarea id="mlText" rows="4" placeholder="Enter text payload to pass through ML classification pipeline..." required>Can you provide a summary of project status?</textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">RUN ML PIPELINE INFERENCE →</button>
+            </form>
+
+            <div id="mlResultBox" class="dispatch-proof hidden" style="margin-top: 16px;">
+              <div class="proof-header">ML INFERENCE RESULT</div>
+              <div id="mlResultContent"></div>
+            </div>
+          </div>
+
+          <div class="card bg-alt">
+            <div class="card-header-bar">
+              <div class="card-header">DATASET ACCURACY SUITE</div>
+              <button class="btn btn-sm btn-primary" onclick="runDatasetTestSuite()">RUN DATASET TEST (100% GOAL)</button>
+            </div>
+            <p class="meta-desc">Runs the 4 canonical test cases from <code>test_dataset.py</code> to verify pipeline precision:</p>
+
+            <div id="datasetResultsBox">
+              <div class="preset-box">
+                <div class="preset-title">1. Authentic Request</div>
+                <div class="preset-text">"Can you provide a summary of project status?" &rarr; Expected: <code>PROCESS_EXECUTION_SUCCESS</code></div>
+              </div>
+              <div class="preset-box">
+                <div class="preset-title">2. Spam Request</div>
+                <div class="preset-text">"CLAIM YOUR FREE MONEY WINNER" &rarr; Expected: <code>REJECTED_SPAM</code></div>
+              </div>
+              <div class="preset-box">
+                <div class="preset-title">3. Duplicate Request</div>
+                <div class="preset-text">"Can you provide a summary of project status?" (Duplicate) &rarr; Expected: <code>SHORT_CIRCUIT_DUPLICATE</code></div>
+              </div>
+              <div class="preset-box">
+                <div class="preset-title">4. SQL Injection Malicious Input</div>
+                <div class="preset-text">"drop table users;" &rarr; Expected: <code>REJECTED_INPUT</code></div>
+              </div>
+            </div>
+
+            <div id="accuracyBadge" class="approval-panel hidden" style="margin-top: 16px; text-align: center;">
+              <div style="font-family: var(--font-display); font-size: 24px; font-weight: bold; color: var(--accent-terracotta);" id="accuracyScore">100% ACCURACY</div>
+              <div style="font-family: var(--font-mono); font-size: 12px;" id="accuracyDetails">4/4 Test Cases Passed</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="app-footer">
+      <div>ARZI Civic RTI Legal Filing Desk — Notion Track 2026</div>
+      <div>Backend: Python Flask 3.x &nbsp;|&nbsp; Aesthetic: 2015-2018 Modern Flat Minimalist (3-Tone)</div>
+    </footer>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

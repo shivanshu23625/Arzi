@@ -1,0 +1,37 @@
+/* -------------------------------------------------------------
+   ARZI CIVIC RTI LEGAL FILING DESK - NEXT.JS GLOBAL DESIGN SYSTEM
+   Aesthetic: 2015-2018 Modern Flat Minimalist (Human Crafted)
+   Palette: Strict 3-Tone (Zero Gradients)
+   1. Base Surface: #F5F5F0 (Parchment Paper)
+   2. Dark Structure & Typography: #1E242B (Charcoal Ink)
+   3. Accent & Action: #D94E28 (RTI Stamp Terracotta)
+------------------------------------------------------------- */
+
+:root {
+  --bg-parchment: #F5F5F0;
+  --ink-dark: #1E242B;
+  --accent-terracotta: #D94E28;
+  --surface-white: #FFFFFF;
+  
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --border-ink: 2px solid var(--ink-dark);
+  --shadow-offset: 4px 4px 0px var(--ink-dark);
+  --shadow-offset-sm: 2px 2px 0px var(--ink-dark);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-parchment);
+  color: var(--ink-dark);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  font-size: 15px;
+}
