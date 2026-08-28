@@ -2,7 +2,11 @@ import threading
 import time
 import hashlib
 from datetime import datetime, timedelta
+from pydantic import BaseModel, ConfigDict
 
+class YourModel(BaseModel):
+    model_config = ConfigDict(protected_namespaces=()) # Add this line
+    model_version: str
 class DataStore:
     def __init__(self):
         self._lock = threading.RLock()
