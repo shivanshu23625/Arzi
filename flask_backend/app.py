@@ -12,10 +12,19 @@ from flask_backend.routes.cases import cases_bp
 from flask_backend.routes.run_log import run_log_bp
 from flask_backend.routes.system import system_bp
 from flask_backend.routes.ml_pipeline import ml_bp
+from flask_backend.routes.notion_routes import notion_bp
+from flask_backend.services.notion_poller import notion_poller
+from flask_backend.models.store import db_store
 
 def create_app():
     app = Flask(__name__, static_folder="static", static_url_path="")
     app.config.from_object(Config)
+
+    # Start autonomous Notion background poller
+    try:
+        notion_poller.start(db_store)
+    except Exception as e:
+        print(f"Warning: could not start notion poller: {e}")
 
     # Enable CORS for frontend interaction
     CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -41,6 +50,7 @@ def create_app():
     app.register_blueprint(run_log_bp)
     app.register_blueprint(system_bp)
     app.register_blueprint(ml_bp)
+    app.register_blueprint(notion_bp)
 
     # Root & Health check endpoints
     @app.route("/health")

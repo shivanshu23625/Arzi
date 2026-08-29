@@ -2,11 +2,9 @@ import threading
 import time
 import hashlib
 from datetime import datetime, timedelta
-from pydantic import BaseModel, ConfigDict
+from flask_backend.services.legal_engine import legal_engine
+from flask_backend.services.geo_locator import geo_locator
 
-class YourModel(BaseModel):
-    model_config = ConfigDict(protected_namespaces=()) # Add this line
-    model_version: str
 class DataStore:
     def __init__(self):
         self._lock = threading.RLock()
@@ -20,6 +18,8 @@ class DataStore:
                 "office_address": "Tehsil & District Kachehri Complex, Revenue Circle 2, Mehrauli, New Delhi - 110030",
                 "email": "pio.revenue.mehrauli@gov.in",
                 "phone": "+91-11-26641209",
+                "latitude": 28.5180,
+                "longitude": 77.1850,
                 "jurisdiction_keywords": [
                     "land", "zameen", "property", "khasra", "khatauni", "mutation", 
                     "daakhil kharij", "patwari", "tehsildar", "registry", "land deed", 
@@ -34,6 +34,8 @@ class DataStore:
                 "office_address": "Office of the District Supply Officer, Sub-Divisional Tehsil Kachehri Complex, Ward 4, Civil Lines, New Delhi - 110054",
                 "email": "pio.foodsupplies.ward4@gov.in",
                 "phone": "+91-11-23891042",
+                "latitude": 28.6750,
+                "longitude": 77.2250,
                 "jurisdiction_keywords": [
                     "ration", "rashan", "food", "khadya", "grain", "bpl", 
                     "bpl card", "ration card", "pds shop", "fair price shop", 
@@ -47,6 +49,8 @@ class DataStore:
                 "office_address": "Municipal Kachehri Complex, Zone 7, Sector 12, Dwarka, New Delhi - 110075",
                 "email": "pio.drainage.zone7@mc.gov.in",
                 "phone": "+91-11-25083110",
+                "latitude": 28.5920,
+                "longitude": 77.0460,
                 "jurisdiction_keywords": [
                     "drainage", "waterlogging", "sewer line", "gutter", "monsoon overflow", 
                     "road repair", "drain", "sewer", "nalla", "nadi", "sadak", "pothole", "municipal",
@@ -60,6 +64,8 @@ class DataStore:
                 "office_address": "State Scholarship Cell, District Education Kachehri, Rajpur Road, New Delhi - 110007",
                 "email": "scholarships.pio@edu.gov.in",
                 "phone": "+91-11-23954200",
+                "latitude": 28.6720,
+                "longitude": 77.2210,
                 "jurisdiction_keywords": [
                     "scholarship", "disbursement", "tuition fee waiver", "post-matric scholarship", 
                     "student grant", "college", "university", "education", "chhatravriti", "student",
@@ -73,6 +79,8 @@ class DataStore:
                 "office_address": "Police Headquarters, Civic Center Kachehri, New Delhi - 110001",
                 "email": "pio.police@delhipolice.gov.in",
                 "phone": "+91-11-23314567",
+                "latitude": 28.6340,
+                "longitude": 77.2280,
                 "jurisdiction_keywords": [
                     "police", "fir", "complaint", "thana", "daroga", "cop", 
                     "investigation", "challan", "police station", "crime", "chori", "theft"
@@ -85,6 +93,8 @@ class DataStore:
                 "office_address": "Directorate of Health Services, Civil Hospital Complex, New Delhi - 110002",
                 "email": "pio.health@dhs.gov.in",
                 "phone": "+91-11-22301234",
+                "latitude": 28.6480,
+                "longitude": 77.2420,
                 "jurisdiction_keywords": [
                     "health", "hospital", "doctor", "medicine", "dawa", "ilaj", 
                     "cmo", "dispensary", "medical", "treatment", "swasthya", "aspatal"
@@ -97,8 +107,14 @@ class DataStore:
         with self._lock:
             now = datetime.now()
 
-            # Seed 1: Ration Card Delay Case
+            # Seed 1: Ration Card Delay Case (ARZ-1042)
             c1_id = "ARZ-1042"
+            pio1 = self.pio_directory[1]
+            c1_legal = legal_engine.analyze_legal_standing(
+                grievance_text="My family's BPL ration card application (Ref No. RC-88492) was submitted 6 months ago at Ward 4 supply office.",
+                department="Food & Civil Supplies",
+                days_overdue=180
+            )
             c1 = {
                 "case_id": c1_id,
                 "complainant": {
@@ -112,7 +128,22 @@ class DataStore:
                 "department": "Food & Civil Supplies",
                 "application_ref_no": "RC-88492",
                 "original_submission_date": "15-Feb-2026",
-                "suggested_pio": self.pio_directory[1],
+                "suggested_pio": pio1,
+                "suggested_faa": {
+                    "faa_name": "Smt. Anjali Sehgal",
+                    "designation": "Additional Commissioner (PDS) / First Appellate Authority",
+                    "office_address": "Khadya Sadan, Vikas Bhawan, New Delhi - 110002",
+                    "email": "ac-pds.delhi@gov.in",
+                    "phone": "+91-11-23378512"
+                },
+                "geospatial_meta": {
+                    "distance_km": 0.8,
+                    "distance_label": "800 meters away (Ward 4 DSO Complex)",
+                    "room_no": "Room 4, Food & Supplies Block",
+                    "user_coords": {"latitude": 28.6750, "longitude": 77.2250},
+                    "pio_coords": {"latitude": 28.6750, "longitude": 77.2250}
+                },
+                "statutory_legal_analysis": c1_legal,
                 "confidence": {
                     "overall": 96,
                     "department_confidence": 96,
@@ -121,7 +152,9 @@ class DataStore:
                     "user_locality": "Ward 4, Civil Lines",
                     "draft_confidence": 94,
                     "risk_level": "LOW",
-                    "evidence_gaps": []
+                    "evidence_gaps": [],
+                    "case_merit_score": c1_legal["case_merit_score"],
+                    "win_probability": c1_legal["win_probability"]
                 },
                 "status": "NEEDS_REVIEW",
                 "priority": "HIGH",
@@ -156,14 +189,22 @@ class DataStore:
                 "approval_notes": None,
                 "dispatch_info": None
             }
+            c1["first_appeal_draft"] = legal_engine.generate_first_appeal_draft(c1)
+            c1["legal_notice_draft"] = legal_engine.generate_legal_notice_draft(c1, c1_legal)
             self.cases[c1_id] = c1
 
-            # Seed 2: Primary Target Case ARZ-1046 (With audit trail of overrides & in-place complainant fix)
+            # Seed 2: Primary Target Case ARZ-1046
             c46_id = "ARZ-1046"
             t1 = (now - timedelta(minutes=90)).strftime("%Y-%m-%d %H:%M:%S.104")
             t2 = (now - timedelta(minutes=89, seconds=45)).strftime("%Y-%m-%d 20:57:26.110")
             t3 = (now - timedelta(minutes=89, seconds=30)).strftime("%Y-%m-%d 20:57:41.892")
             t4 = (now - timedelta(minutes=79)).strftime("%Y-%m-%d 21:07:00.014")
+
+            c46_legal = legal_engine.analyze_legal_standing(
+                grievance_text="My land mutation khasra 45/12 application (Ref LND-88301) submitted on 10-Jan-2026 at Tehsil office Mehrauli is pending. Patwari is not updating land record registry.",
+                department="Revenue & Land Records",
+                days_overdue=45
+            )
 
             c46 = {
                 "case_id": c46_id,
@@ -178,7 +219,22 @@ class DataStore:
                 "department": "Revenue & Land Records",
                 "application_ref_no": "LND-88301",
                 "original_submission_date": "10-Jan-2026",
-                "suggested_pio": self.pio_directory[0], # Revenue & Land Records
+                "suggested_pio": self.pio_directory[0],
+                "suggested_faa": {
+                    "faa_name": "Shri Sandeep Kumar, IAS",
+                    "designation": "District Magistrate (South Delhi) / First Appellate Authority",
+                    "office_address": "DM Office Complex, M.B. Road, Saket, New Delhi - 110068",
+                    "email": "dm-south.delhi@nic.in",
+                    "phone": "+91-11-29535025"
+                },
+                "geospatial_meta": {
+                    "distance_km": 1.2,
+                    "distance_label": "1.2 km away (Tehsil Complex Mehrauli)",
+                    "room_no": "Room 101, SDM Office Complex",
+                    "user_coords": {"latitude": 28.5180, "longitude": 77.1850},
+                    "pio_coords": {"latitude": 28.5180, "longitude": 77.1850}
+                },
+                "statutory_legal_analysis": c46_legal,
                 "confidence": {
                     "overall": 98,
                     "department_confidence": 98,
@@ -187,7 +243,9 @@ class DataStore:
                     "user_locality": "Mehrauli",
                     "draft_confidence": 96,
                     "risk_level": "LOW",
-                    "evidence_gaps": []
+                    "evidence_gaps": [],
+                    "case_merit_score": c46_legal["case_merit_score"],
+                    "win_probability": c46_legal["win_probability"]
                 },
                 "status": "NEEDS_REVIEW",
                 "priority": "HIGH",
@@ -218,7 +276,7 @@ class DataStore:
                         "remarks": "Initial grievance intake ingested (Ref: LND-88301)"
                     },
                     {
-                        "timestamp": t2, # 20:57:26
+                        "timestamp": t2,
                         "update_type": "DEPT_OVERRIDE_MISTAKE",
                         "actor": "Legal Operator",
                         "field_changed": "Target Department",
@@ -227,7 +285,7 @@ class DataStore:
                         "remarks": "Erroneous manual operator override"
                     },
                     {
-                        "timestamp": t3, # 20:57:41 (15 sec later)
+                        "timestamp": t3,
                         "update_type": "DEPT_OVERRIDE_CORRECTED",
                         "actor": "Legal Operator",
                         "field_changed": "Target Department",
@@ -236,7 +294,7 @@ class DataStore:
                         "remarks": "Operator corrected department back to Revenue & Land Records"
                     },
                     {
-                        "timestamp": t4, # 21:07:00
+                        "timestamp": t4,
                         "update_type": "INPLACE_COMPLAINANT_FIX",
                         "actor": "Adv. S. Kalra (Legal NGO)",
                         "field_changed": "Complainant Name & Duplicacy Resolution",
@@ -249,9 +307,11 @@ class DataStore:
                 "approval_notes": None,
                 "dispatch_info": None
             }
+            c46["first_appeal_draft"] = legal_engine.generate_first_appeal_draft(c46)
+            c46["legal_notice_draft"] = legal_engine.generate_legal_notice_draft(c46, c46_legal)
             self.cases[c46_id] = c46
 
-            # Seed 3: Duplicate Case ARZ-1047 Marked as Merged to Avoid Loophole
+            # Seed 3: Duplicate Case ARZ-1047
             c47_id = "ARZ-1047"
             c47 = {
                 "case_id": c47_id,
@@ -302,7 +362,7 @@ class DataStore:
             }
             self.cases[c47_id] = c47
 
-            # Seed Run Logs for Proof Audit Screen
+            # Seed Run Logs
             self.add_run_log(
                 event_type="INTAKE_RECEIVED",
                 case_id="ARZ-1046",
@@ -333,10 +393,7 @@ class DataStore:
 
     def add_case(self, case_data: dict) -> dict:
         with self._lock:
-            # Check for existing duplicate by complainant contact or reference number
             ref_no = case_data.get("application_ref_no")
-            contact = case_data.get("complainant", {}).get("contact")
-
             existing_case = None
             if ref_no and ref_no not in ("Not Provided", "Unconfirmed"):
                 for c in self.cases.values():
@@ -345,7 +402,6 @@ class DataStore:
                         break
 
             if existing_case:
-                # Update existing case IN-PLACE rather than creating a duplicate case ID!
                 case_id = existing_case["case_id"]
                 now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
@@ -378,7 +434,7 @@ class DataStore:
                 )
                 return existing_case
 
-            # Create new case with guaranteed strictly unique Case ID (e.g. ARZ-1048, ARZ-1049, etc.)
+            # Strictly unique Case ID
             existing_nums = [1047]
             for cid in self.cases.keys():
                 if cid.startswith("ARZ-"):
@@ -448,8 +504,68 @@ class DataStore:
                 return self.cases[case_id]
             return None
 
+    def transfer_case_sec6_3(self, case_id: str, new_target_dept: str, reason: str, officer_actor: str = "Designated PIO Desk") -> dict:
+        """
+        Executes Section 6(3) 5-Day Mandatory Transfer of RTI Application to the Competent Public Authority.
+        """
+        with self._lock:
+            case = self.cases.get(case_id)
+            if not case:
+                return None
+
+            user_loc = case.get("confidence", {}).get("user_locality", "Local Division")
+            new_pio = geo_locator.find_nearest_public_authority(
+                category=new_target_dept,
+                address=case.get("complainant", {}).get("address", user_loc),
+                narrative=case.get("raw_grievance", "")
+            )
+
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            old_dept = case.get("department")
+
+            transfer_notice = {
+                "transfer_id": f"TRF-SEC63-{hashlib.md5((case_id + now_str).encode()).hexdigest()[:6].upper()}",
+                "transferred_at": now_str[:19],
+                "from_department": old_dept,
+                "to_department": new_target_dept,
+                "transferee_pio": new_pio,
+                "statutory_basis": "Section 6(3) of RTI Act 2005 (Mandatory 5-Day Transfer Window)",
+                "transfer_reason": reason or "Subject matter falls under exclusive jurisdiction of transferee public authority."
+            }
+
+            case["section_6_3_transfer"] = transfer_notice
+            case["suggested_pio"] = new_pio
+            case["department"] = new_target_dept
+            case["category"] = new_target_dept
+            case["status"] = "TRANSFERRED_SEC_6_3"
+            case["updated_at"] = now_str[:19]
+
+            audit_meta = {
+                "update_type": "SECTION_6_3_TRANSFER_EXECUTED",
+                "actor": officer_actor,
+                "field_changed": "Public Authority Jurisdiction",
+                "old_value": old_dept,
+                "new_value": f"Transferred to {new_target_dept} under Sec 6(3)",
+                "remarks": f"RTI Application transferred to {new_pio['pio_name']} ({new_pio['office_address']}) under Section 6(3)."
+            }
+            case.setdefault("update_history", []).append({
+                "timestamp": now_str,
+                **audit_meta
+            })
+
+            self.add_run_log(
+                event_type="SECTION_6_3_TRANSFER",
+                case_id=case_id,
+                actor=officer_actor,
+                source="Government PIO Compliance Desk",
+                action=f"Transferred {case_id} from {old_dept} -> {new_target_dept} under Section 6(3)",
+                result="TRANSFER_SUCCESS",
+                correlation_id=transfer_notice["transfer_id"]
+            )
+
+            return case
+
     def merge_cases(self, master_case_id: str, duplicate_case_id: str, actor: str = "Adv. S. Kalra") -> dict:
-        """Merge a duplicate case ID into a primary master case ID to eliminate legal duplication."""
         with self._lock:
             master = self.cases.get(master_case_id)
             duplicate = self.cases.get(duplicate_case_id)
@@ -496,6 +612,163 @@ class DataStore:
 
             return master
 
+    def get_compliance_radar_metrics(self) -> dict:
+        """
+        Computes real-time compliance metrics for Government PIO desks & Law Firms.
+        """
+        with self._lock:
+            all_cases = list(self.cases.values())
+            overdue_cases = []
+            total_penalty_inr = 0
+            deemed_refusals = 0
+
+            for c in all_cases:
+                if c.get("status") == "MERGED_DUPLICATE":
+                    continue
+                legal = c.get("statutory_legal_analysis", {})
+                pen = legal.get("section_20_penalty_liability_inr", 0)
+                if pen > 0 or c.get("sla_days_remaining", 30) <= 0:
+                    overdue_cases.append(c)
+                    total_penalty_inr += pen
+                    deemed_refusals += 1
+
+            return {
+                "total_cases": len(all_cases),
+                "inbox_pending": len([c for c in all_cases if c["status"] == "NEEDS_REVIEW"]),
+                "approved_dispatched": len([c for c in all_cases if c["status"] in ("APPROVED", "DISPATCHED")]),
+                "deemed_refusal_count": deemed_refusals,
+                "overdue_cases": overdue_cases,
+                "total_penalty_liability_inr": total_penalty_inr,
+                "statutory_rate_per_day_inr": 250,
+                "max_penalty_cap_inr": 25000
+            }
+
+    def add_custom_act(self, act_data: dict) -> dict:
+        """Adds a lawyer-defined custom Act, Section, or statutory ground."""
+        with self._lock:
+            if not hasattr(self, "custom_acts"):
+                self.custom_acts = []
+            
+            act_id = f"ACT-{len(self.custom_acts) + 101}"
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            entry = {
+                "act_id": act_id,
+                "act_title": act_data.get("act_title", "Custom Statutory Act"),
+                "section": act_data.get("section", "Section 1"),
+                "domain": act_data.get("domain", "General Public Law"),
+                "statutory_grounds": act_data.get("statutory_grounds", ""),
+                "punishment_or_relief": act_data.get("punishment_or_relief", "Statutory Compensation / Penalty"),
+                "added_by": act_data.get("added_by", "Advocate Legal Counsel"),
+                "created_at": now_str
+            }
+            self.custom_acts.insert(0, entry)
+
+            self.add_run_log(
+                event_type="CUSTOM_ACT_REGISTERED",
+                case_id=act_data.get("linked_case_id", "GLOBAL-LIBRARY"),
+                actor=entry["added_by"],
+                source="Statutory Codex Library",
+                action=f"Lawyer added custom act: {entry['act_title']} ({entry['section']})",
+                result="ACT_REGISTERED_SUCCESS",
+                correlation_id=f"CORR-{act_id}"
+            )
+            return entry
+
+    def get_custom_acts(self) -> list:
+        with self._lock:
+            if not hasattr(self, "custom_acts") or not self.custom_acts:
+                # Seed default custom library
+                self.custom_acts = [
+                    {
+                        "act_id": "ACT-101",
+                        "act_title": "Consumer Protection Act, 2019",
+                        "section": "Section 35 & Section 38 (Consumer Grievance Redressal)",
+                        "domain": "Consumer Protection & Essential Services",
+                        "statutory_grounds": "Empowers citizens to claim full restitution, litigation costs, and severe damages for deficiency in public/private services within statutory 90-day time-limit.",
+                        "punishment_or_relief": "Full refund + General damages up to Rs. 5,00,000 + Product recall orders",
+                        "added_by": "Adv. S. Kalra (Bar Council Counsel)",
+                        "created_at": "2026-08-29 10:00:00"
+                    },
+                    {
+                        "act_id": "ACT-102",
+                        "act_title": "Bharatiya Nagarik Suraksha Sanhita (BNSS 2023)",
+                        "section": "Section 175(3) & Section 173(4) (Magisterial Direction for Investigation)",
+                        "domain": "Police & Criminal Justice",
+                        "statutory_grounds": "Mandates Judicial Magistrate to direct immediate registration of FIR and monitor investigation upon police refusal under Section 173.",
+                        "punishment_or_relief": "Judicial Court Order for immediate criminal investigation against accused public servants",
+                        "added_by": "Advocate Legal Team",
+                        "created_at": "2026-08-29 10:15:00"
+                    },
+                    {
+                        "act_id": "ACT-103",
+                        "act_title": "Uttar Pradesh Revenue Code, 2006",
+                        "section": "Section 32 & Section 38 (Correction of Revenue Land Maps & Registers)",
+                        "domain": "Revenue & Land Records",
+                        "statutory_grounds": "Statutory duty of Sub-Divisional Officer (SDO) to correct clerical and map errors in Khasra/Khatauni within 45 days of application.",
+                        "punishment_or_relief": "Mandatory administrative rectification of Land Title Records",
+                        "added_by": "Advocate Legal Team",
+                        "created_at": "2026-08-29 10:30:00"
+                    }
+                ]
+            return self.custom_acts
+
+    def delete_custom_act(self, act_id: str) -> bool:
+        with self._lock:
+            acts = self.get_custom_acts()
+            initial_len = len(acts)
+            self.custom_acts = [a for a in acts if a["act_id"] != act_id]
+            return len(self.custom_acts) < initial_len
+
+    def apply_custom_act_to_case(self, case_id: str, act_id: str, actor: str = "Advocate Counsel") -> dict:
+        """Appends a custom act to the case's statutory analysis and regenerates ML report."""
+        with self._lock:
+            case = self.cases.get(case_id)
+            if not case:
+                return None
+
+            act = next((a for a in self.get_custom_acts() if a["act_id"] == act_id), None)
+            if not act:
+                return None
+
+            act_citation = f"{act['act_title']} ({act['section']})"
+            legal = case.setdefault("statutory_legal_analysis", {})
+            allied = legal.setdefault("allied_acts", [])
+            if act_citation not in allied:
+                allied.append(act_citation)
+
+            grounds = legal.setdefault("legal_grounds", [])
+            custom_ground = f"Custom Ground ({act['act_title']}): {act['statutory_grounds']}"
+            if custom_ground not in grounds:
+                grounds.append(custom_ground)
+
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            case["updated_at"] = now_str[:19]
+
+            audit_meta = {
+                "update_type": "CUSTOM_STATUTORY_ACT_LINKED",
+                "actor": actor,
+                "field_changed": "Statutory Acts & Grounds",
+                "old_value": "Standard RTI/IPC Suite",
+                "new_value": f"Added {act_citation}",
+                "remarks": f"Lawyer linked custom act {act_citation} to case docket {case_id}."
+            }
+            case.setdefault("update_history", []).append({
+                "timestamp": now_str,
+                **audit_meta
+            })
+
+            self.add_run_log(
+                event_type="CUSTOM_ACT_LINKED_TO_CASE",
+                case_id=case_id,
+                actor=actor,
+                source="Statutory Codex Library",
+                action=f"Linked custom act {act_citation} to case {case_id}",
+                result="LINK_SUCCESS",
+                correlation_id=f"CORR-LINK-{case_id}"
+            )
+            return case
+
     def add_run_log(self, event_type: str, case_id: str, actor: str, source: str, action: str, result: str, correlation_id: str):
         with self._lock:
             log_entry = {
@@ -510,6 +783,14 @@ class DataStore:
                 "correlation_id": correlation_id
             }
             self.run_logs.insert(0, log_entry)
+
+            # Auto-sync to Notion Run Log Database
+            try:
+                from flask_backend.services.notion_service import notion_service
+                notion_service.log_run_to_notion(log_entry)
+            except Exception:
+                pass
+
             return log_entry
 
     def get_run_logs(self, limit: int = 50) -> list:
@@ -518,3 +799,4 @@ class DataStore:
 
 # Global store instance
 db_store = DataStore()
+

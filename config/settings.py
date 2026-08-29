@@ -28,6 +28,12 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3:8b-instruct-q4_0"
 
+    NOTION_API_KEY: str = ""
+    NOTION_CASES_DB_ID: str = ""
+    NOTION_RUN_LOG_DB_ID: str = ""
+    NOTION_PARENT_PAGE_ID: str = ""
+    NOTION_SYNC_INTERVAL_SEC: int = 8
+
     class Config:
         env_file = ".env"
         extra = "ignore"
