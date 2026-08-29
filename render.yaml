@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: arzi-legal-engine
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn flask_backend.app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NOTION_API_KEY
+        sync: false
+      - key: NOTION_CASES_DB_ID
+        sync: false
+      - key: NOTION_RUN_LOG_DB_ID
+        sync: false
+      - key: NOTION_PARENT_PAGE_ID
+        sync: false

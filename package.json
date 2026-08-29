@@ -1,0 +1,25 @@
+{
+  "name": "arzi-fullstack",
+  "version": "2.0.0",
+  "description": "ARZI Civic RTI & Statutory Legal Intelligence Platform - Notion Track Edition",
+  "main": "flask_backend/app.py",
+  "scripts": {
+    "start": "python start.py",
+    "dev": "python start.py",
+    "backend": "python flask_backend/app.py",
+    "frontend": "cd arzi-frontend && npm run dev",
+    "fullstack": "python start.py",
+    "test": "python -m pytest tests/test_notion_sync.py tests/test_flask_api.py",
+    "build": "cd arzi-frontend && npm run build"
+  },
+  "keywords": [
+    "arzi",
+    "rti",
+    "notion-track",
+    "flask",
+    "legal-ai",
+    "hackathon"
+  ],
+  "author": "ARZI Team",
+  "license": "MIT"
+}
