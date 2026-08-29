@@ -17,7 +17,8 @@ from flask_backend.services.notion_poller import notion_poller
 from flask_backend.models.store import db_store
 
 def create_app():
-    app = Flask(__name__, static_folder="static", static_url_path="")
+    static_dir = os.path.join(os.path.dirname(__file__), "static")
+    app = Flask(__name__, static_folder=static_dir, static_url_path="")
     app.config.from_object(Config)
 
     # Start autonomous Notion background poller
