@@ -6,6 +6,12 @@ let activePersona = "law_firm"; // 'law_firm' or 'gov_desk'
 let currentDocTab = "rti"; // 'rti', 'appeal', 'notice', 'report'
 let radarAnimationId = null;
 
+function renderLucide() {
+  if (window.lucide && typeof window.lucide.createIcons === "function") {
+    window.lucide.createIcons();
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   setupNavigation();
   loadCaseQueue();
@@ -14,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadDirectoryInRadarTab();
   loadCustomActs();
   loadNotionStatus();
+  renderLucide();
 });
 
 // Persona Switcher (Law Firm vs Gov Desk)
@@ -37,39 +44,108 @@ function switchPersona(persona) {
   if (currentCase) {
     updateWorkspacePersonaView(currentCase);
   }
+  renderLucide();
 }
 
-// Global Tab Navigation
-function setupNavigation() {
-  const tabs = document.querySelectorAll(".nav-tab");
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      const targetTab = tab.dataset.tab;
-      if (targetTab) switchToTab(targetTab);
-    });
-  });
+// Top-Level Site Navigation Router (Home, About, Pillars, Dashboard)
+function showPage(pageId) {
+  document.querySelectorAll(".nav-link-btn").forEach(b => b.classList.remove("active"));
+  const navDashBtn = document.getElementById("navDashboardBtn");
+  if (navDashBtn) navDashBtn.classList.remove("active");
+  document.querySelectorAll(".site-page").forEach(p => p.classList.remove("active"));
+
+  const navMap = {
+    home: "siteNavHome",
+    about: "siteNavAbout",
+    pillars: "siteNavPillars"
+  };
+
+  const navBtn = navMap[pageId] ? document.getElementById(navMap[pageId]) : null;
+  const pageEl = document.getElementById(`page-${pageId}`);
+
+  if (navBtn) navBtn.classList.add("active");
+  if (pageId === "dashboard" && navDashBtn) navDashBtn.classList.add("active");
+  if (pageEl) {
+    pageEl.classList.add("active");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  if (pageId === "dashboard") {
+    loadCaseQueue();
+    loadRunLogs();
+    loadCustomActs();
+    loadNotionStatus();
+  } else if (pageId === "home") {
+    loadCaseQueue();
+  }
+
+  renderLucide();
+}
+
+// Dashboard Sub-Tab Switcher (Casework, Statutory, PIO, Compliance, RunLog, Notion)
+function switchDashTab(tabId) {
+  showPage("dashboard");
+  document.querySelectorAll(".desk-subnav-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".dash-module").forEach(m => m.classList.remove("active"));
+
+  const subnavMap = {
+    casework: "subnavCasework",
+    statutory: "subnavStatutory",
+    pio: "subnavPio",
+    compliance: "subnavCompliance",
+    runlog: "subnavRunlog",
+    notion: "subnavNotion"
+  };
+
+  const targetBtn = subnavMap[tabId] ? document.getElementById(subnavMap[tabId]) : null;
+  const targetModule = document.getElementById(`dashtab-${tabId}`);
+
+  if (targetBtn) targetBtn.classList.add("active");
+  if (targetModule) targetModule.classList.add("active");
+
+  if (tabId === "casework") loadCaseQueue();
+  if (tabId === "statutory") loadCustomActs();
+  if (tabId === "runlog") loadRunLogs();
+  if (tabId === "notion") loadNotionStatus();
+  if (tabId === "pio" && currentCase) updateRadarTelemetry(currentCase);
+
+  renderLucide();
+}
+
+// Backwards compatibility aliases
+function switchMainModule(modName) {
+  if (modName === "home" || modName === "about" || modName === "pillars") {
+    showPage(modName);
+  } else {
+    switchDashTab(modName);
+  }
 }
 
 function switchToTab(tabName) {
-  document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
-  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  if (tabName === "intake" || tabName === "queue" || tabName === "workspace") switchDashTab("casework");
+  else if (tabName === "precedents") switchDashTab("statutory");
+  else if (tabName === "radar") switchDashTab("pio");
+  else if (tabName === "runlog") switchDashTab("runlog");
+  else if (tabName === "notion") switchDashTab("notion");
+  else switchDashTab("casework");
+}
 
-  const targetTabBtn = document.querySelector(`.nav-tab[data-tab="${tabName}"]`);
-  const targetPanel = document.getElementById(`tab-${tabName}`);
-
-  if (targetTabBtn) targetTabBtn.classList.add("active");
-  if (targetPanel) {
-    targetPanel.classList.add("active");
-    targetPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+function toggleIntakeForm() {
+  const c = document.getElementById("intakeFormContainer");
+  const t = document.getElementById("intakeToggleText");
+  if (c) {
+    if (c.style.display === "none") {
+      c.style.display = "block";
+      if (t) t.textContent = "Hide Form";
+    } else {
+      c.style.display = "none";
+      if (t) t.textContent = "+ Expand Form";
+    }
   }
+}
 
-  if (tabName === "queue") loadCaseQueue();
-  if (tabName === "runlog") loadRunLogs();
-  if (tabName === "precedents") loadCustomActs();
-  if (tabName === "notion") loadNotionStatus();
-  if (tabName === "radar") {
-    if (currentCase) updateRadarTelemetry(currentCase);
-  }
+function setupNavigation() {
+  // Navigation setup
 }
 
 // Document Sub-Tabs in Legal Workspace
@@ -132,6 +208,10 @@ async function submitIntake(event) {
 
 // Golden Path Preset Loader
 function loadPreset(num) {
+  switchMainModule("casework");
+  const c = document.getElementById("intakeFormContainer");
+  if (c) c.style.display = "block";
+
   if (num === 1) {
     document.getElementById("complainantName").value = "Sunita Devi";
     document.getElementById("complainantContact").value = "+91-9876543210";
@@ -182,11 +262,22 @@ async function loadCaseQueue() {
     if (!res.ok) return;
 
     // Update Counts
-    document.getElementById("statInbox").textContent = data.counts.inbox;
-    document.getElementById("statApproved").textContent = data.counts.approved;
-    document.getElementById("statAtRisk").textContent = data.counts.at_risk;
-    document.getElementById("statTotal").textContent = data.counts.total;
-    document.getElementById("inboxCount").textContent = data.counts.inbox;
+    const statInbox = document.getElementById("statInbox");
+    if (statInbox) statInbox.textContent = data.counts.inbox;
+    const statApproved = document.getElementById("statApproved");
+    if (statApproved) statApproved.textContent = data.counts.approved;
+    const statAtRisk = document.getElementById("statAtRisk");
+    if (statAtRisk) statAtRisk.textContent = data.counts.at_risk;
+    const statTotal = document.getElementById("statTotal");
+    if (statTotal) statTotal.textContent = data.counts.total;
+    const inboxCount = document.getElementById("inboxCount");
+    if (inboxCount) inboxCount.textContent = data.counts.inbox;
+    const homeBadge = document.getElementById("homeQueueBadge");
+    if (homeBadge) homeBadge.textContent = data.counts.inbox;
+    const homeInboxEl = document.getElementById("homeStatInbox");
+    if (homeInboxEl) homeInboxEl.textContent = data.counts.inbox;
+    const homeTotalEl = document.getElementById("homeStatTotal");
+    if (homeTotalEl) homeTotalEl.textContent = data.counts.total;
 
     const tbody = document.getElementById("caseQueueBody");
     tbody.innerHTML = "";
@@ -211,20 +302,18 @@ async function loadCaseQueue() {
       const legal = c.statutory_legal_analysis || {};
       const ipcBrief = legal.ipc_sections ? legal.ipc_sections[0] : "IPC Sec 420";
       const bnsBrief = legal.bns_sections ? legal.bns_sections[0] : "BNS Sec 318(4)";
-      const distLabel = pio.distance_label || "Nearest Hub";
-
       tr.innerHTML = `
-        <td><b>${c.case_id}</b></td>
-        <td>${c.complainant.name}<br/><small class="text-mono" style="color: var(--text-secondary);">${c.complainant.address || 'Local'}</small></td>
-        <td><b>${c.department}</b><br/><small style="color: var(--accent-gold);">${legal.statutory_infraction || 'Administrative Infraction'}</small></td>
-        <td><small class="text-mono">${ipcBrief}<br/>${bnsBrief}</small></td>
-        <td>${pio.pio_name || 'Designated PIO'}<br/><small class="text-mono" style="color: var(--text-secondary);">${pio.office_address || ''}</small></td>
-        <td><span class="badge badge-blue">${distLabel}</span></td>
-        <td><span class="badge ${c.status === 'APPROVED' ? 'badge-live' : (c.status === 'TRANSFERRED_SEC_6_3' ? 'badge-gold' : '')}">${c.status}</span></td>
-        <td><button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); openCaseById('${c.case_id}')">OPEN DOCKET →</button></td>
+        <td><b style="font-family: var(--font-mono); color: var(--gov-navy); font-size: 11.5px;">${c.case_id}</b></td>
+        <td><b>${c.complainant.name}</b><br/><span style="font-size: 10px; color: var(--ink-muted);">${c.complainant.address || 'Local'}</span></td>
+        <td><b>${c.department}</b><br/><span style="font-size: 10px; color: var(--gov-copper);">${legal.statutory_infraction || 'Administrative Infraction'}</span></td>
+        <td><span class="statutory-tag bns" style="font-size: 9.5px; padding: 1px 4px;">${bnsBrief}</span><br/><span class="statutory-tag ipc" style="font-size: 9.5px; padding: 1px 4px; margin-top: 2px;">${ipcBrief}</span></td>
+        <td><b>${pio.pio_name || 'Designated PIO'}</b><br/><span style="font-size: 9.5px; color: var(--status-active); font-family: var(--font-mono);">${distLabel}</span></td>
+        <td><span class="status-pill ${c.status === 'APPROVED' ? 'approved' : (c.status === 'TRANSFERRED_SEC_6_3' ? 'transferred' : 'under-review')}">● ${c.status}</span></td>
+        <td><button class="btn-gov-outline" style="padding: 3px 8px; font-size: 10.5px;" onclick="event.stopPropagation(); openCaseById('${c.case_id}')">View</button></td>
       `;
       tbody.appendChild(tr);
     });
+    renderLucide();
   } catch (err) {
     console.error("Queue load error:", err);
   }
@@ -236,7 +325,7 @@ async function openCaseById(caseId) {
     const data = await res.json();
     if (res.ok) {
       openCaseWorkspace(data.case);
-      switchToTab("workspace");
+      switchMainModule("casework");
     }
   } catch (err) {
     console.error("Open case error:", err);
@@ -247,7 +336,7 @@ async function openCaseById(caseId) {
 function openCaseWorkspace(c) {
   currentCase = c;
   populateWorkspaceFields(c);
-  switchToTab("workspace");
+  switchMainModule("casework");
 }
 
 function populateWorkspaceFields(c) {
@@ -257,16 +346,22 @@ function populateWorkspaceFields(c) {
   if (workspaceView) workspaceView.classList.remove("hidden");
 
   document.getElementById("viewCaseId").textContent = c.case_id;
-  document.getElementById("viewCaseStatus").textContent = c.status;
+  
+  const statusEl = document.getElementById("viewCaseStatus");
+  if (statusEl) {
+    statusEl.textContent = `● ${c.status}`;
+    statusEl.className = `status-pill ${c.status === 'APPROVED' ? 'approved' : (c.status === 'TRANSFERRED_SEC_6_3' ? 'transferred' : 'under-review')}`;
+  }
+
   document.getElementById("viewComplainant").textContent = c.complainant.name;
   document.getElementById("viewRawGrievance").textContent = `"${c.raw_grievance}"`;
 
   const legal = c.statutory_legal_analysis || {};
-  document.getElementById("viewMeritBadge").textContent = `${legal.case_merit_score || 92}/100 MERIT (${legal.win_probability || 'HIGH'})`;
+  document.getElementById("viewMeritBadge").textContent = `${legal.case_merit_score || 92}/100 Merit (${legal.win_probability || 'High'})`;
   
   const pen = legal.section_20_penalty_liability_inr || 0;
-  document.getElementById("viewPenaltyBadge").textContent = `SEC 20 PENALTY: ₹${pen}`;
-  document.getElementById("viewSla").textContent = `${c.sla_days_remaining || 30} DAYS`;
+  document.getElementById("viewPenaltyBadge").textContent = `Section 20(1) Penalty Liability: ₹${pen} (Mandatory ₹250/day deduction applicable on delinquent PIO)`;
+  document.getElementById("viewSla").textContent = `${c.sla_days_remaining || 30} Days Remaining`;
 
   document.getElementById("viewRefNo").textContent = c.application_ref_no || "Not Provided";
   document.getElementById("viewSubDate").textContent = c.original_submission_date || "Unconfirmed";
@@ -279,11 +374,9 @@ function populateWorkspaceFields(c) {
   document.getElementById("viewPioName").textContent = pio.pio_name || "Designated PIO";
   document.getElementById("viewPioDept").textContent = pio.department || c.department;
   document.getElementById("viewPioAddr").textContent = pio.office_address || "District Kachehri";
-  document.getElementById("viewPioRoom").textContent = `Room: ${pio.room_no || 'Room 101, Ground Floor'}`;
-  document.getElementById("viewPioContact").textContent = `Email: ${pio.email || 'N/A'} | Phone: ${pio.phone || 'N/A'}`;
+  document.getElementById("viewPioRoom").textContent = `Room: ${pio.room_no || 'Room 101, Ground Floor'} &middot; Email: ${pio.email || 'N/A'}`;
 
   document.getElementById("viewFaaName").textContent = faa.faa_name || "Additional District Magistrate (Revenue)";
-  document.getElementById("viewFaaOffice").textContent = `${faa.designation || 'First Appellate Authority'} — ${faa.office_address || 'Collectorate'}`;
 
   // Statutory Pills (IPC & BNS)
   const ipcPillsBox = document.getElementById("viewIpcPills");
@@ -293,21 +386,26 @@ function populateWorkspaceFields(c) {
 
   (legal.ipc_sections || ["IPC Section 420 (Cheating)", "IPC Section 166 (Disobedience of Law)"]).forEach(s => {
     const span = document.createElement("span");
-    span.className = "badge badge-gold";
+    span.className = "statutory-tag ipc";
+    span.style.cssText = "margin-right: 4px; margin-bottom: 4px; display: inline-block;";
     span.textContent = s;
     ipcPillsBox.appendChild(span);
   });
 
   (legal.bns_sections || ["BNS Section 318(4) (Cheating)", "BNS Section 198 (Public Servant Disobedience)"]).forEach(s => {
     const span = document.createElement("span");
-    span.className = "badge badge-blue";
+    span.className = "statutory-tag bns";
+    span.style.cssText = "margin-right: 4px; margin-bottom: 4px; display: inline-block;";
     span.textContent = s;
     bnsPillsBox.appendChild(span);
   });
 
-  document.getElementById("viewIpcCount").textContent = `${(legal.ipc_sections || []).length} Sections`;
-  document.getElementById("viewBnsCount").textContent = `${(legal.bns_sections || []).length} Sections`;
-  document.getElementById("viewMaxPunishment").textContent = legal.maximum_punishment || "Rigorous Imprisonment + Fine";
+  const ipcCountEl = document.getElementById("viewIpcCount");
+  const bnsCountEl = document.getElementById("viewBnsCount");
+  if (ipcCountEl) ipcCountEl.textContent = `${(legal.ipc_sections || []).length} Sections`;
+  if (bnsCountEl) bnsCountEl.textContent = `${(legal.bns_sections || []).length} Sections`;
+  const maxPunEl = document.getElementById("viewMaxPunishment");
+  if (maxPunEl) maxPunEl.textContent = legal.maximum_punishment || "Rigorous Imprisonment + Fine";
 
   const groundsList = document.getElementById("viewLegalGrounds");
   groundsList.innerHTML = "";
@@ -362,10 +460,11 @@ function populateWorkspaceFields(c) {
 
 function updateWorkspacePersonaView(c) {
   if (activePersona === "gov_desk") {
-    document.getElementById("approveBtn").textContent = "🏛️ DISPOSE / APPROVE ON GOV DESK →";
+    document.getElementById("approveBtn").innerHTML = `<i data-lucide="check-check"></i> <span>Dispose / Approve on Gov Desk</span>`;
   } else {
-    document.getElementById("approveBtn").textContent = "⚖️ ADVOCATE APPROVE & RELEASE DISPATCH →";
+    document.getElementById("approveBtn").innerHTML = `<i data-lucide="send"></i> <span>Advocate Approve & Release Dispatch</span>`;
   }
+  renderLucide();
 }
 
 function renderCaseTimeline(c) {
@@ -501,15 +600,16 @@ async function loadRunLogs() {
     data.run_logs.forEach(log => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td class="text-mono">${log.timestamp}</td>
-        <td><span class="badge badge-gold">${log.event_type}</span></td>
-        <td><b>${log.case_id}</b></td>
-        <td>${log.actor}</td>
-        <td>${log.action}<br/><small class="text-mono" style="color: var(--accent-emerald);">Result: ${log.result}</small></td>
-        <td class="text-mono" style="color: var(--accent-cyan);">${log.correlation_id}</td>
+        <td style="font-family: var(--font-mono); font-size: 11px;">${log.timestamp}</td>
+        <td><span class="statutory-tag" style="font-size: 10px;">${log.event_type}</span></td>
+        <td><b style="font-family: var(--font-mono); color: var(--gov-navy); font-size: 11.5px;">${log.case_id}</b></td>
+        <td><b>${log.actor}</b></td>
+        <td>${log.action}<br/><span style="font-family: var(--font-mono); font-size: 10px; color: var(--status-active);">Result: ${log.result}</span></td>
+        <td style="font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-muted);">${log.correlation_id}</td>
       `;
       tbody.appendChild(tr);
     });
+    renderLucide();
   } catch (err) {
     console.error("Run log error:", err);
   }
@@ -526,14 +626,13 @@ function initRadarAnimation() {
   const radius = cx - 15;
 
   function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#F8FAFC";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Background circle
+    // Outer Circle
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.fillStyle = "#090E17";
-    ctx.fill();
-    ctx.strokeStyle = "#1E293B";
+    ctx.strokeStyle = "#CBD5E1";
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -542,13 +641,13 @@ function initRadarAnimation() {
     rings.forEach((r, idx) => {
       ctx.beginPath();
       ctx.arc(cx, cy, radius * r, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(6, 182, 212, 0.2)";
+      ctx.strokeStyle = "#E2E8F0";
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      ctx.fillStyle = "rgba(6, 182, 212, 0.5)";
-      ctx.font = "9px JetBrains Mono";
-      ctx.fillText(`${(idx + 1) * 3.75}km`, cx + 4, cy - radius * r + 12);
+      ctx.fillStyle = "#64748B";
+      ctx.font = "10px Segoe UI, Arial, sans-serif";
+      ctx.fillText(`${(idx + 1) * 3.75}km`, cx + 6, cy - radius * r + 14);
     });
 
     // Crosshairs
@@ -557,7 +656,7 @@ function initRadarAnimation() {
     ctx.lineTo(cx, cy + radius);
     ctx.moveTo(cx - radius, cy);
     ctx.lineTo(cx + radius, cy);
-    ctx.strokeStyle = "rgba(6, 182, 212, 0.15)";
+    ctx.strokeStyle = "#E2E8F0";
     ctx.stroke();
 
     // Rotating Sweep Line
@@ -571,8 +670,8 @@ function initRadarAnimation() {
     ctx.arc(cx, cy, radius, sweepAngle - 0.4, sweepAngle);
     ctx.closePath();
     const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-    grad.addColorStop(0, "rgba(6, 182, 212, 0)");
-    grad.addColorStop(1, "rgba(6, 182, 212, 0.25)");
+    grad.addColorStop(0, "rgba(37, 99, 235, 0)");
+    grad.addColorStop(1, "rgba(37, 99, 235, 0.15)");
     ctx.fillStyle = grad;
     ctx.fill();
 
@@ -580,18 +679,15 @@ function initRadarAnimation() {
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(sweepX, sweepY);
-    ctx.strokeStyle = "rgba(6, 182, 212, 0.8)";
+    ctx.strokeStyle = "rgba(37, 99, 235, 0.6)";
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
     // Center Blip: Citizen Complainant Location
     ctx.beginPath();
     ctx.arc(cx, cy, 6, 0, Math.PI * 2);
-    ctx.fillStyle = "#F59E0B";
-    ctx.shadowColor = "#F59E0B";
-    ctx.shadowBlur = 10;
+    ctx.fillStyle = "#D97706";
     ctx.fill();
-    ctx.shadowBlur = 0;
 
     // Target Blip: Nearest PIO Office
     let pioOffsetX = 45;
@@ -604,16 +700,13 @@ function initRadarAnimation() {
 
     ctx.beginPath();
     ctx.arc(cx + pioOffsetX, cy + pioOffsetY, 7, 0, Math.PI * 2);
-    ctx.fillStyle = "#10B981";
-    ctx.shadowColor = "#10B981";
-    ctx.shadowBlur = 12;
+    ctx.fillStyle = "#1D4ED8";
     ctx.fill();
-    ctx.shadowBlur = 0;
 
-    ctx.fillStyle = "#F8FAFC";
-    ctx.font = "10px JetBrains Mono";
-    ctx.fillText("YOU", cx - 12, cy + 18);
-    ctx.fillStyle = "#10B981";
+    ctx.fillStyle = "#0F172A";
+    ctx.font = "bold 11px Segoe UI, Arial, sans-serif";
+    ctx.fillText("YOU (CITIZEN)", cx - 28, cy + 20);
+    ctx.fillStyle = "#1D4ED8";
     ctx.fillText("PIO (NEAREST)", cx + pioOffsetX - 30, cy + pioOffsetY - 10);
 
     radarAnimationId = requestAnimationFrame(draw);
@@ -666,6 +759,7 @@ function loadDirectoryInRadarTab() {
     `;
     list.appendChild(div);
   });
+  renderLucide();
 }
 
 // ----------------------------------------------------
@@ -718,16 +812,18 @@ async function loadCustomActs() {
         </div>
 
         <div style="display: flex; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 10px;">
-          <button class="btn btn-sm btn-primary" style="flex: 1;" onclick="applyCustomActToActiveCase('${act.act_id}')">
-            ⚡ LINK TO ACTIVE CASE
+          <button class="btn btn-sm btn-primary framer-button" style="flex: 1;" onclick="applyCustomActToActiveCase('${act.act_id}')">
+            <i data-lucide="link"></i>
+            <span>Link to Case</span>
           </button>
-          <button class="btn btn-sm btn-danger" onclick="deleteCustomAct('${act.act_id}')">
-            🗑️
+          <button class="btn btn-sm btn-outline framer-button" style="color: var(--color-rose); border-color: #FECDD3;" onclick="deleteCustomAct('${act.act_id}')">
+            <i data-lucide="trash-2"></i>
           </button>
         </div>
       `;
       container.appendChild(card);
     });
+    renderLucide();
   } catch (err) {
     console.error("Error loading custom acts:", err);
   }
@@ -931,6 +1027,7 @@ async function loadNotionMirror() {
         });
       }
     }
+    renderLucide();
   } catch (err) {
     console.error("Mirror load error:", err);
   }
