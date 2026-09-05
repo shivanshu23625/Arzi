@@ -86,15 +86,17 @@ class RTIEngine:
 
     def get_pio_for_dept_and_location(self, category: str, user_locality: str, user_address: str = "", grievance_text: str = "", matched_pio_base: dict = None) -> dict:
         """
-        Finds the nearest Public Information Officer (PIO) and First Appellate Authority (FAA)
-        using geodetic Haversine positioning.
+        Finds the nearest Public Information Officer (PIO) matching the domain
+        and collects all nearest area PIOs using geodetic Haversine positioning.
         """
-        nearest_auth = geo_locator.find_nearest_public_authority(
+        geo_data = geo_locator.get_area_and_domain_pios(
             category=category,
             address=user_address or user_locality,
             narrative=grievance_text
         )
-        return nearest_auth
+        assigned = geo_data["assigned_pio"]
+        assigned["nearby_area_pios"] = geo_data["nearby_area_pios"]
+        return assigned
 
     def predict_department_and_pio(self, grievance_text: str, user_locality: str) -> tuple[dict, int, str]:
         """
@@ -249,13 +251,16 @@ class RTIEngine:
             "ipo_number": ipo_no,
             "ipo_date": ipo_date,
             "suggested_pio": matched_pio,
+            "assigned_pio": matched_pio,
+            "nearby_area_pios": matched_pio.get("nearby_area_pios", []),
             "suggested_faa": matched_pio.get("faa"),
             "geospatial_meta": {
                 "distance_km": matched_pio.get("distance_km", 1.5),
                 "distance_label": matched_pio.get("distance_label", "1.5 km away"),
                 "room_no": matched_pio.get("room_no", "Room 101"),
                 "user_coords": matched_pio.get("user_coordinates", {}),
-                "pio_coords": matched_pio.get("pio_coordinates", {})
+                "pio_coords": matched_pio.get("pio_coordinates", {}),
+                "nearby_pios": matched_pio.get("nearby_area_pios", [])
             },
             "statutory_legal_analysis": statutory_legal_analysis,
             "first_appeal_draft": first_appeal_draft,

@@ -129,6 +129,8 @@ class DataStore:
                 "application_ref_no": "RC-88492",
                 "original_submission_date": "15-Feb-2026",
                 "suggested_pio": pio1,
+                "assigned_pio": pio1,
+                "nearby_area_pios": geo_locator.get_area_and_domain_pios("Food & Civil Supplies", "House No. 45, BPL Cluster, Ward 4, New Delhi")["nearby_area_pios"],
                 "suggested_faa": {
                     "faa_name": "Smt. Anjali Sehgal",
                     "designation": "Additional Commissioner (PDS) / First Appellate Authority",
@@ -141,7 +143,8 @@ class DataStore:
                     "distance_label": "800 meters away (Ward 4 DSO Complex)",
                     "room_no": "Room 4, Food & Supplies Block",
                     "user_coords": {"latitude": 28.6750, "longitude": 77.2250},
-                    "pio_coords": {"latitude": 28.6750, "longitude": 77.2250}
+                    "pio_coords": {"latitude": 28.6750, "longitude": 77.2250},
+                    "nearby_pios": geo_locator.get_area_and_domain_pios("Food & Civil Supplies", "House No. 45, BPL Cluster, Ward 4, New Delhi")["nearby_area_pios"]
                 },
                 "statutory_legal_analysis": c1_legal,
                 "confidence": {
@@ -220,6 +223,8 @@ class DataStore:
                 "application_ref_no": "LND-88301",
                 "original_submission_date": "10-Jan-2026",
                 "suggested_pio": self.pio_directory[0],
+                "assigned_pio": self.pio_directory[0],
+                "nearby_area_pios": geo_locator.get_area_and_domain_pios("Revenue & Land Records", "Sector 4, Mehrauli, New Delhi")["nearby_area_pios"],
                 "suggested_faa": {
                     "faa_name": "Shri Sandeep Kumar, IAS",
                     "designation": "District Magistrate (South Delhi) / First Appellate Authority",
@@ -232,7 +237,8 @@ class DataStore:
                     "distance_label": "1.2 km away (Tehsil Complex Mehrauli)",
                     "room_no": "Room 101, SDM Office Complex",
                     "user_coords": {"latitude": 28.5180, "longitude": 77.1850},
-                    "pio_coords": {"latitude": 28.5180, "longitude": 77.1850}
+                    "pio_coords": {"latitude": 28.5180, "longitude": 77.1850},
+                    "nearby_pios": geo_locator.get_area_and_domain_pios("Revenue & Land Records", "Sector 4, Mehrauli, New Delhi")["nearby_area_pios"]
                 },
                 "statutory_legal_analysis": c46_legal,
                 "confidence": {
@@ -504,6 +510,65 @@ class DataStore:
                 return self.cases[case_id]
             return None
 
+    def assign_case_pio(self, case_id: str, pio_data: dict, actor: str = "Counsel / Citizen Desk") -> dict:
+        """
+        Assigns or switches the primary PIO officer for an active case docket,
+        updating assigned flags across nearby area PIOs and logging an immutable audit trail.
+        """
+        with self._lock:
+            case = self.cases.get(case_id)
+            if not case:
+                return None
+
+            old_pio = case.get("suggested_pio", {})
+            old_name = old_pio.get("pio_name", "Previous PIO")
+            new_name = pio_data.get("pio_name", "New Designated PIO")
+            new_dept = pio_data.get("department", case.get("department"))
+
+            case["suggested_pio"] = pio_data
+            case["assigned_pio"] = pio_data
+            if new_dept:
+                case["department"] = new_dept
+                case["category"] = new_dept
+            if pio_data.get("faa"):
+                case["suggested_faa"] = pio_data.get("faa")
+
+            # Update assigned flags in nearby_area_pios
+            new_id = pio_data.get("id")
+            for p in case.get("nearby_area_pios", []):
+                p["is_assigned"] = (p.get("id") == new_id)
+            if "geospatial_meta" in case and "nearby_pios" in case["geospatial_meta"]:
+                for p in case["geospatial_meta"]["nearby_pios"]:
+                    p["is_assigned"] = (p.get("id") == new_id)
+
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            case["updated_at"] = now_str[:19]
+
+            audit_meta = {
+                "update_type": "PIO_ASSIGNMENT_UPDATED",
+                "actor": actor,
+                "field_changed": "Designated Public Information Officer",
+                "old_value": f"{old_name} ({old_pio.get('department', '')})",
+                "new_value": f"{new_name} ({new_dept})",
+                "remarks": f"Designated nearest domain PIO {new_name} ({pio_data.get('office_address', '')})"
+            }
+            case.setdefault("update_history", []).append({
+                "timestamp": now_str,
+                **audit_meta
+            })
+
+            self.add_run_log(
+                event_type="PIO_ASSIGNED",
+                case_id=case_id,
+                actor=actor,
+                source="Geospatial PIO Desk",
+                action=f"Assigned PIO {new_name} for case {case_id} ({new_dept})",
+                result="ASSIGN_SUCCESS",
+                correlation_id=f"PIO-ASN-{hashlib.md5((case_id + new_name).encode()).hexdigest()[:6].upper()}"
+            )
+
+            return case
+
     def transfer_case_sec6_3(self, case_id: str, new_target_dept: str, reason: str, officer_actor: str = "Designated PIO Desk") -> dict:
         """
         Executes Section 6(3) 5-Day Mandatory Transfer of RTI Application to the Competent Public Authority.
@@ -514,11 +579,13 @@ class DataStore:
                 return None
 
             user_loc = case.get("confidence", {}).get("user_locality", "Local Division")
-            new_pio = geo_locator.find_nearest_public_authority(
+            geo_res = geo_locator.get_area_and_domain_pios(
                 category=new_target_dept,
                 address=case.get("complainant", {}).get("address", user_loc),
                 narrative=case.get("raw_grievance", "")
             )
+            new_pio = geo_res["assigned_pio"]
+            nearby_area_pios = geo_res["nearby_area_pios"]
 
             now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
             old_dept = case.get("department")
@@ -535,6 +602,12 @@ class DataStore:
 
             case["section_6_3_transfer"] = transfer_notice
             case["suggested_pio"] = new_pio
+            case["assigned_pio"] = new_pio
+            case["nearby_area_pios"] = nearby_area_pios
+            if "geospatial_meta" in case:
+                case["geospatial_meta"]["nearby_pios"] = nearby_area_pios
+                case["geospatial_meta"]["distance_km"] = new_pio.get("distance_km", 1.5)
+                case["geospatial_meta"]["distance_label"] = new_pio.get("distance_label", "1.5 km away")
             case["department"] = new_target_dept
             case["category"] = new_target_dept
             case["status"] = "TRANSFERRED_SEC_6_3"

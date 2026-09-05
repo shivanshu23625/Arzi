@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadCaseQueue();
   loadRunLogs();
   initRadarAnimation();
-  loadDirectoryInRadarTab();
+  updatePioMapForCase();
   loadCustomActs();
   renderLucide();
 });
@@ -102,8 +102,7 @@ function switchDashTab(tabId) {
 
   if (tabId === "casework") loadCaseQueue();
   if (tabId === "statutory") loadCustomActs();
-  if (tabId === "runlog") loadRunLogs();
-  if (tabId === "pio" && currentCase) updateRadarTelemetry(currentCase);
+  if (tabId === "pio") updatePioMapForCase(currentCase);
 
   renderLucide();
 }
@@ -190,8 +189,28 @@ async function submitIntake(event) {
     const data = await res.json();
     if (res.ok) {
       document.getElementById("intakeForm").reset();
-      openCaseWorkspace(data.case);
-      switchToTab("workspace");
+      currentCase = data.case;
+      populateWorkspaceFields(data.case);
+      
+      // Update PIO map for this registered complaint
+      updatePioMapForCase(data.case);
+
+      // Switch to PIO Geospatial Map tab
+      showPage("dashboard");
+      switchDashTab("pio");
+
+      // Show the banner on the PIO map
+      const banner = document.getElementById("pioRegistrationBanner");
+      const bannerText = document.getElementById("pioBannerText");
+      if (banner && bannerText) {
+        const pio = data.case.suggested_pio || {};
+        const nearbyCount = data.case.nearby_area_pios ? data.case.nearby_area_pios.length : 6;
+        bannerText.innerHTML = `✓ Complaint <b>${data.case.case_id}</b> Registered! Assigned nearest domain (<b>${data.case.department}</b>) PIO: <b>${pio.pio_name}</b> (${pio.distance_label}). All ${nearbyCount} nearest area PIO officers mapped below.`;
+        banner.style.display = "block";
+      }
+
+      loadCaseQueue();
+      loadRunLogs();
     } else {
       alert(`Error: ${data.message || "Failed to create case"}`);
     }
@@ -282,10 +301,13 @@ async function loadCaseQueue() {
       return;
     }
 
+    allCasesCache = data.cases || [];
+
     // Auto-select first case if none is selected yet
     if (!currentCase && data.cases.length > 0) {
       currentCase = data.cases[0];
       populateWorkspaceFields(data.cases[0]);
+      updatePioMapForCase(data.cases[0]);
     }
 
     data.cases.forEach(c => {
@@ -331,6 +353,7 @@ async function openCaseById(caseId) {
 function openCaseWorkspace(c) {
   currentCase = c;
   populateWorkspaceFields(c);
+  updatePioMapForCase(c);
   switchMainModule("casework");
 }
 
@@ -828,8 +851,10 @@ function setRunLogSearchQuery(term) {
   }
 }
 
-// Live Canvas Radar Animation
+// Live Canvas Radar Animation with Multi-PIO Geodesic Telemetry
 let sweepAngle = 0;
+let currentPioFilter = "all";
+
 function initRadarAnimation() {
   const canvas = document.getElementById("radarCanvas");
   if (!canvas) return;
@@ -842,15 +867,16 @@ function initRadarAnimation() {
     ctx.fillStyle = "#F8FAFC";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Outer Circle
+    // Outer Range Boundary
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
     ctx.strokeStyle = "#CBD5E1";
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Concentric Range Rings (1km, 5km, 10km, 15km)
+    // Concentric Range Rings (1.5km, 3.5km, 7.5km, 12km)
     const rings = [0.25, 0.5, 0.75, 1.0];
+    const ringLabels = ["1.5km", "3.5km", "7.5km", "12km"];
     rings.forEach((r, idx) => {
       ctx.beginPath();
       ctx.arc(cx, cy, radius * r, 0, Math.PI * 2);
@@ -859,68 +885,136 @@ function initRadarAnimation() {
       ctx.stroke();
 
       ctx.fillStyle = "#64748B";
-      ctx.font = "10px Segoe UI, Arial, sans-serif";
-      ctx.fillText(`${(idx + 1) * 3.75}km`, cx + 6, cy - radius * r + 14);
+      ctx.font = "9.5px Segoe UI, Arial, sans-serif";
+      ctx.fillText(ringLabels[idx], cx + 6, cy - radius * r + 13);
     });
 
-    // Crosshairs
+    // Radar Crosshairs
     ctx.beginPath();
     ctx.moveTo(cx, cy - radius);
     ctx.lineTo(cx, cy + radius);
     ctx.moveTo(cx - radius, cy);
     ctx.lineTo(cx + radius, cy);
     ctx.strokeStyle = "#E2E8F0";
+    ctx.lineWidth = 1;
     ctx.stroke();
 
     // Rotating Sweep Line
-    sweepAngle += 0.03;
+    sweepAngle += 0.035;
     const sweepX = cx + Math.cos(sweepAngle) * radius;
     const sweepY = cy + Math.sin(sweepAngle) * radius;
 
-    // Sweep gradient
+    // Sweep cone gradient
     ctx.beginPath();
     ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, radius, sweepAngle - 0.4, sweepAngle);
+    ctx.arc(cx, cy, radius, sweepAngle - 0.45, sweepAngle);
     ctx.closePath();
     const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
     grad.addColorStop(0, "rgba(37, 99, 235, 0)");
-    grad.addColorStop(1, "rgba(37, 99, 235, 0.15)");
+    grad.addColorStop(1, "rgba(37, 99, 235, 0.18)");
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // Sweep leading edge
+    // Sweep leading line
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(sweepX, sweepY);
-    ctx.strokeStyle = "rgba(37, 99, 235, 0.6)";
+    ctx.strokeStyle = "rgba(37, 99, 235, 0.7)";
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Center Blip: Citizen Complainant Location
+    // 1. Center Blip: Citizen Complainant Origin
     ctx.beginPath();
     ctx.arc(cx, cy, 6, 0, Math.PI * 2);
     ctx.fillStyle = "#D97706";
     ctx.fill();
-
-    // Target Blip: Nearest PIO Office
-    let pioOffsetX = 45;
-    let pioOffsetY = -35;
-    if (currentCase?.geospatial_meta?.distance_km) {
-      const d = currentCase.geospatial_meta.distance_km;
-      pioOffsetX = Math.min(radius - 20, (d / 15) * radius * 0.8 + 25);
-      pioOffsetY = -pioOffsetX * 0.7;
-    }
-
-    ctx.beginPath();
-    ctx.arc(cx + pioOffsetX, cy + pioOffsetY, 7, 0, Math.PI * 2);
-    ctx.fillStyle = "#1D4ED8";
-    ctx.fill();
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
     ctx.fillStyle = "#0F172A";
-    ctx.font = "bold 11px Segoe UI, Arial, sans-serif";
-    ctx.fillText("YOU (CITIZEN)", cx - 28, cy + 20);
-    ctx.fillStyle = "#1D4ED8";
-    ctx.fillText("PIO (NEAREST)", cx + pioOffsetX - 30, cy + pioOffsetY - 10);
+    ctx.font = "bold 10px Segoe UI, Arial, sans-serif";
+    ctx.fillText("YOU (CITIZEN)", cx - 34, cy + 18);
+
+    // 2. Multi-PIO Blips for Nearest Area Officers
+    const c = currentCase;
+    const areaPios = c?.nearby_area_pios || c?.geospatial_meta?.nearby_pios || [];
+    const citizenCoords = c?.geospatial_meta?.user_coords || c?.suggested_pio?.user_coordinates || { latitude: 25.2905, longitude: 82.9995 };
+
+    if (areaPios.length === 0) {
+      // Fallback single target blip
+      let pioOffsetX = 45;
+      let pioOffsetY = -35;
+      if (currentCase?.geospatial_meta?.distance_km) {
+        const d = currentCase.geospatial_meta.distance_km;
+        pioOffsetX = Math.min(radius - 20, (d / 15) * radius * 0.8 + 25);
+        pioOffsetY = -pioOffsetX * 0.7;
+      }
+      ctx.beginPath();
+      ctx.arc(cx + pioOffsetX, cy + pioOffsetY, 7, 0, Math.PI * 2);
+      ctx.fillStyle = "#1D4ED8";
+      ctx.fill();
+      ctx.fillStyle = "#1D4ED8";
+      ctx.font = "bold 10px Segoe UI, Arial, sans-serif";
+      ctx.fillText("PIO (NEAREST)", cx + pioOffsetX - 30, cy + pioOffsetY - 10);
+    } else {
+      const maxDist = Math.max(8.0, ...areaPios.map(p => p.distance_km || 4.0));
+
+      areaPios.forEach((p, idx) => {
+        const isAssigned = p.is_assigned || (c.suggested_pio && c.suggested_pio.pio_name === p.pio_name);
+        const dist = p.distance_km || 1.5;
+        const rDist = Math.min(radius - 22, (dist / maxDist) * (radius - 40) + 24);
+
+        // Calculate angular offset based on coordinate delta
+        const dLat = (p.latitude || 0) - citizenCoords.latitude;
+        const dLon = (p.longitude || 0) - citizenCoords.longitude;
+        let angle = Math.atan2(dLat, dLon);
+        if (Math.abs(dLat) < 0.0001 && Math.abs(dLon) < 0.0001) {
+          angle = (idx * (2 * Math.PI / areaPios.length)) - (Math.PI / 2);
+        }
+
+        const bx = cx + Math.cos(angle) * rDist;
+        const by = cy - Math.sin(angle) * rDist;
+
+        if (isAssigned) {
+          // Pulsing Halo for Assigned Domain PIO
+          const pulse = Math.sin(sweepAngle * 4) * 2.5;
+          ctx.beginPath();
+          ctx.arc(bx, by, 9 + pulse, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(29, 78, 216, 0.45)";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Main Blip
+          ctx.beginPath();
+          ctx.arc(bx, by, 7, 0, Math.PI * 2);
+          ctx.fillStyle = "#1D4ED8";
+          ctx.fill();
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          // Label
+          ctx.fillStyle = "#1D4ED8";
+          ctx.font = "bold 10.5px Segoe UI, Arial, sans-serif";
+          ctx.fillText(`★ ${p.pio_name} (${p.distance_label})`, bx - 40, by - 12);
+        } else {
+          // Other Area Authorities
+          ctx.beginPath();
+          ctx.arc(bx, by, 4.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#64748B";
+          ctx.fill();
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          ctx.fillStyle = "#475569";
+          ctx.font = "9px Segoe UI, Arial, sans-serif";
+          const shortDept = (p.department || "").split("&")[0].trim();
+          ctx.fillText(`${shortDept} (${p.distance_label})`, bx + 7, by + 3);
+        }
+      });
+    }
 
     radarAnimationId = requestAnimationFrame(draw);
   }
@@ -944,35 +1038,229 @@ function updateRadarTelemetry(c) {
   if (dEl) dEl.textContent = geo.distance_label || pio.distance_label || "1.42 km away";
 }
 
-function loadDirectoryInRadarTab() {
+// Full PIO Geospatial Map & Directory Controller for Active Docket
+async function updatePioMapForCase(c) {
+  if (!c) {
+    if (allCasesCache && allCasesCache.length > 0) {
+      c = allCasesCache[0];
+      currentCase = c;
+    } else {
+      try {
+        const res = await fetch(`${API_BASE}/cases`);
+        const data = await res.json();
+        if (data.cases && data.cases.length > 0) {
+          c = data.cases[0];
+          currentCase = c;
+          allCasesCache = data.cases;
+        }
+      } catch (e) {
+        console.warn("Could not fetch case for PIO map:", e);
+      }
+    }
+  }
+  if (!c) return;
+
+  // Preload nearby area PIOs if not already cached on the docket
+  if (!c.nearby_area_pios || c.nearby_area_pios.length === 0) {
+    try {
+      const geoRes = await fetch(`${API_BASE}/cases/${c.case_id}/nearby-pios`);
+      const geoData = await geoRes.json();
+      if (geoRes.ok && geoData.nearby_area_pios) {
+        c.nearby_area_pios = geoData.nearby_area_pios;
+        if (geoData.assigned_pio) c.suggested_pio = geoData.assigned_pio;
+      }
+    } catch (e) {
+      console.warn("Could not fetch nearby area PIOs:", e);
+    }
+  }
+
+  // 1. Update Active Docket Context Bar
+  const caseIdEl = document.getElementById("pioMapCaseId");
+  const compEl = document.getElementById("pioMapComplainant");
+  const locEl = document.getElementById("pioMapLocality");
+  const domainEl = document.getElementById("pioMapDomain");
+  const assignedNameEl = document.getElementById("pioMapAssignedName");
+  const assignedDistEl = document.getElementById("pioMapAssignedDist");
+
+  const pio = c.suggested_pio || {};
+  const locality = c.confidence?.user_locality || c.complainant?.address || "Administrative Jurisdiction";
+
+  if (caseIdEl) caseIdEl.textContent = c.case_id;
+  if (compEl) compEl.textContent = c.complainant?.name || "Citizen Applicant";
+  if (locEl) locEl.textContent = locality;
+  if (domainEl) domainEl.textContent = c.department || c.category || "General Administration";
+  if (assignedNameEl) assignedNameEl.textContent = `${pio.pio_name || 'Designated PIO'} (${pio.designation || 'PIO'})`;
+  if (assignedDistEl) assignedDistEl.textContent = `${pio.distance_label || 'Jurisdiction Assigned'} • ${pio.department || c.department}`;
+
+  // Populate Dropdown Selector
+  populatePioCaseSelector(c.case_id);
+
+  // 2. Update Radar Telemetry
+  updateRadarTelemetry(c);
+
+  // 3. Render Nearest Area PIOs in Directory List
+  renderAreaPiosDirectory(c, currentPioFilter);
+
+  renderLucide();
+}
+
+function populatePioCaseSelector(selectedCaseId) {
+  const sel = document.getElementById("pioMapCaseSelect");
+  if (!sel) return;
+
+  const cases = (allCasesCache && allCasesCache.length > 0) ? allCasesCache : (currentCase ? [currentCase] : []);
+  sel.innerHTML = cases.map(cs => {
+    const isSel = cs.case_id === selectedCaseId ? "selected" : "";
+    return `<option value="${cs.case_id}" ${isSel}>${cs.case_id} - ${cs.complainant?.name || 'Citizen'} (${cs.department || 'Public Authority'})</option>`;
+  }).join("");
+}
+
+async function switchPioMapCase(caseId) {
+  try {
+    const res = await fetch(`${API_BASE}/cases/${caseId}`);
+    const data = await res.json();
+    if (res.ok) {
+      currentCase = data.case;
+      populateWorkspaceFields(data.case);
+      updatePioMapForCase(data.case);
+    }
+  } catch (e) {
+    console.error("Error switching PIO map case:", e);
+  }
+}
+
+function filterRadarDirectory(filterType) {
+  currentPioFilter = filterType;
+  ["pioFilterAll", "pioFilterDomain", "pioFilterClose"].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.remove("active");
+  });
+  if (filterType === "all" && document.getElementById("pioFilterAll")) document.getElementById("pioFilterAll").classList.add("active");
+  if (filterType === "domain" && document.getElementById("pioFilterDomain")) document.getElementById("pioFilterDomain").classList.add("active");
+  if (filterType === "close" && document.getElementById("pioFilterClose")) document.getElementById("pioFilterClose").classList.add("active");
+
+  if (currentCase) {
+    renderAreaPiosDirectory(currentCase, filterType);
+  }
+}
+
+function renderAreaPiosDirectory(c, filterType = "all") {
   const list = document.getElementById("radarDirectoryList");
+  const countBadge = document.getElementById("radarAreaCount");
   if (!list) return;
 
-  const hubs = [
-    { city: "Varanasi / Banaras", dept: "Revenue & Land Records", name: "Shri A. K. Rai (Tehsildar Sadar)", coords: "25.3340, 82.9860", addr: "Tehsil Sadar Kachehri Complex" },
-    { city: "Varanasi / Banaras", dept: "Food & Civil Supplies", name: "Shri V. P. Singh (DSO)", coords: "25.3375, 82.9810", addr: "Nadesar DSO Complex" },
-    { city: "Varanasi / Banaras", dept: "Police Commissionerate", name: "Shri R. K. Singh (DCP)", coords: "25.3420, 82.9830", addr: "Police Line Headquarters" },
-    { city: "New Delhi", dept: "Revenue (South Delhi)", name: "Shri N. Goyal (Tehsildar)", coords: "28.5180, 77.1850", addr: "Mehrauli Revenue Circle 2" },
-    { city: "New Delhi", dept: "Food Supplies (Central)", name: "Shri R. K. Sharma (Asst Comm)", coords: "28.6750, 77.2250", addr: "Ward 4 Civil Lines" },
-    { city: "New Delhi", dept: "Municipal Works (Dwarka)", name: "Er. S. K. Kalra (Executive Eng)", coords: "28.5920, 77.0460", addr: "Zone 7 Sector 12 Dwarka" }
-  ];
+  let areaPios = c.nearby_area_pios || c.geospatial_meta?.nearby_pios || [];
 
-  list.innerHTML = "";
-  hubs.forEach(h => {
-    const div = document.createElement("div");
-    div.className = "pio-box";
-    div.innerHTML = `
-      <div style="display: flex; justify-content: space-between;">
-        <b>${h.dept}</b>
-        <span class="badge badge-blue">${h.city}</span>
+  if (filterType === "domain") {
+    const dept = (c.department || "").toLowerCase();
+    areaPios = areaPios.filter(p => (p.department || "").toLowerCase().includes(dept) || dept.includes((p.department || "").toLowerCase()));
+  } else if (filterType === "close") {
+    areaPios = areaPios.filter(p => (p.distance_km || 0) <= 3.0);
+  }
+
+  if (countBadge) countBadge.textContent = areaPios.length;
+
+  if (areaPios.length === 0) {
+    list.innerHTML = `<div style="text-align: center; color: var(--ink-muted); padding: 24px; font-size: 12px; background: var(--bg-surface); border: 1px dashed var(--border-medium); border-radius: 4px;">No PIO officers match the filter "${filterType}".</div>`;
+    return;
+  }
+
+  list.innerHTML = areaPios.map(p => {
+    const isAssigned = p.is_assigned || (c.suggested_pio && c.suggested_pio.pio_name === p.pio_name);
+    const cardClass = isAssigned ? "nearby-pio-card assigned-domain-pio" : "nearby-pio-card";
+    const faa = p.faa || {};
+
+    let badgeHtml = "";
+    if (isAssigned) {
+      badgeHtml = `<span class="status-pill approved" style="font-size: 9.5px; font-weight: 700; background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC;">★ ASSIGNED DOMAIN PIO</span>`;
+    } else if (p.is_domain_match || (c.department && p.department && p.department.toLowerCase().includes(c.department.toLowerCase()))) {
+      badgeHtml = `<span class="statutory-tag bns" style="font-size: 9.5px;">Domain Match &bull; ${p.department}</span>`;
+    } else {
+      badgeHtml = `<span class="statutory-tag" style="font-size: 9.5px; background: var(--bg-subtle); color: var(--ink-secondary);">${p.department}</span>`;
+    }
+
+    return `
+      <div class="${cardClass}" id="pio-card-${p.id || p.latitude}">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+          <div>${badgeHtml}</div>
+          <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--gov-copper);">${p.distance_label || (p.distance_km ? p.distance_km + ' km away' : 'Near')}</span>
+        </div>
+
+        <div style="font-size: 13px; font-weight: 700; color: var(--ink-primary); margin-bottom: 2px;">
+          ${p.pio_name}
+          <span style="font-weight: 400; font-size: 11.5px; color: var(--ink-muted);">&mdash; ${p.designation}</span>
+        </div>
+
+        <div style="font-size: 11px; color: var(--ink-secondary); margin-bottom: 6px;">
+          <i data-lucide="building" style="width: 11px; height: 11px; display: inline-block; vertical-align: middle; color: var(--gov-navy);"></i>
+          <span>${p.office_address} &bull; ${p.room_no || 'RTI Nodal Office'}</span>
+        </div>
+
+        <div style="display: flex; gap: 12px; font-size: 10.5px; color: var(--ink-muted); margin-bottom: 8px;">
+          <span><b>Email:</b> ${p.email || 'pio@gov.in'}</span>
+          <span><b>Phone:</b> ${p.phone || '+91-XX-XXXX'}</span>
+        </div>
+
+        <!-- First Appellate Authority Information -->
+        <div style="background: var(--bg-subtle); padding: 6px 8px; border-radius: 3px; font-size: 10.5px; margin-bottom: 8px; border-left: 2px solid var(--gov-navy);">
+          <div style="color: var(--gov-navy); font-weight: 600;">
+            First Appellate Authority (FAA):
+          </div>
+          <div style="color: var(--ink-secondary); margin-top: 1px;">
+            <b>${faa.faa_name || 'Designated Appellate Authority'}</b> &bull; ${faa.designation || 'Appellate Officer'}
+          </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-subtle); padding-top: 6px;">
+          <span style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted);">ID: ${p.id || 'GOV-PIO'} &bull; (${p.latitude?.toFixed(4)}, ${p.longitude?.toFixed(4)})</span>
+          <div style="display: flex; gap: 6px;">
+            ${isAssigned 
+              ? `<button class="btn-gov-primary" style="font-size: 10.5px; padding: 3px 8px; background: #16A34A; cursor: default; border: none;">✓ Assigned PIO</button>`
+              : `<button class="btn-gov-outline" style="font-size: 10.5px; padding: 3px 8px;" onclick="assignPioFromMap('${p.id}')"><span>Assign as Docket PIO</span></button>
+                 <button class="btn-gov-outline" style="font-size: 10.5px; padding: 3px 8px;" onclick="openTransferModalForDept('${p.department}')"><span>Transfer Sec 6(3)</span></button>`
+            }
+          </div>
+        </div>
       </div>
-      <div style="font-size: 11px; color: var(--accent-gold);">${h.name}</div>
-      <div style="font-size: 10.5px; color: var(--text-secondary);">${h.addr}</div>
-      <div class="text-mono" style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">GPS: ${h.coords}</div>
     `;
-    list.appendChild(div);
-  });
+  }).join("");
+
   renderLucide();
+}
+
+async function assignPioFromMap(pioId) {
+  if (!currentCase) return;
+  const areaPios = currentCase.nearby_area_pios || [];
+  const selected = areaPios.find(p => p.id === pioId);
+  if (!selected) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/cases/${currentCase.case_id}/assign-pio`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pio: selected, reviewer: "Counsel / Citizen Desk" })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      currentCase = data.case;
+      populateWorkspaceFields(data.case);
+      updatePioMapForCase(data.case);
+      alert(`✓ PIO Assigned Successfully!\n\n• Docket: ${data.case.case_id}\n• Designated PIO: ${selected.pio_name} (${selected.designation})\n• Department: ${selected.department}\n• Distance: ${selected.distance_label}`);
+    } else {
+      alert(`Error: ${data.message || "Failed to assign PIO"}`);
+    }
+  } catch (err) {
+    console.error("Assign PIO error:", err);
+  }
+}
+
+function openTransferModalForDept(targetDept) {
+  if (!currentCase) return;
+  const modal = document.getElementById("transferModal");
+  if (modal) modal.style.display = "flex";
+  const deptSelect = document.getElementById("transferDeptSelect");
+  if (deptSelect && targetDept) deptSelect.value = targetDept;
 }
 
 // ----------------------------------------------------

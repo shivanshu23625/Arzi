@@ -874,13 +874,96 @@
 
       <!-- TAB 3: PIO RADAR & DIRECTORY -->
       <div id="dashtab-pio" class="dash-module">
+        
+        <!-- Case Registration & Domain Alignment Banner (Dynamic) -->
+        <div id="pioRegistrationBanner" class="legal-basis-box" style="display: none; margin-bottom: 12px; background: rgba(16, 185, 129, 0.08); border-left: 3px solid var(--status-active); padding: 10px 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="check-circle-2" style="width: 16px; height: 16px; color: var(--status-active);"></i>
+              <span id="pioBannerText" style="font-size: 12px; color: var(--ink-primary); font-weight: 600;">Complaint Registered & Nearest Domain PIO Assigned!</span>
+            </div>
+            <button class="btn-gov-outline" style="font-size: 10.5px; padding: 2px 8px;" onclick="document.getElementById('pioRegistrationBanner').style.display='none'">Dismiss</button>
+          </div>
+        </div>
+
+        <!-- Active Complaint Context Bar -->
+        <div class="ops-panel" style="margin-bottom: 14px;">
+          <div class="ops-panel-header" style="background: var(--bg-subtle);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="map-pin" style="width: 15px; height: 15px; color: var(--gov-navy);"></i>
+              <span class="ops-panel-title">Active Complaint Docket Geodesy</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11px; color: var(--ink-muted);">Inspect Docket:</span>
+              <select id="pioMapCaseSelect" onchange="switchPioMapCase(this.value)" style="padding: 3px 8px; font-size: 11.5px; border: 1px solid var(--border-medium); border-radius: 3px; background: #FFFFFF;"></select>
+            </div>
+          </div>
+          <div style="padding: 12px 16px; display: grid; grid-template-columns: 1fr 1fr 1.3fr auto; gap: 14px; align-items: center;">
+            <div>
+              <span style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Docket & Complainant</span>
+              <div style="margin-top: 2px; font-size: 12px; font-weight: 700; color: var(--ink-primary);">
+                <span id="pioMapCaseId" style="font-family: var(--font-mono); color: var(--gov-navy);">ARZ-1046</span> &bull; 
+                <span id="pioMapComplainant">Shivanshu Pandey</span>
+              </div>
+              <div style="font-size: 11px; color: var(--ink-secondary); margin-top: 1px;" id="pioMapLocality">Mehrauli, New Delhi</div>
+            </div>
+
+            <div>
+              <span style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Complaint Domain</span>
+              <div style="margin-top: 2px;">
+                <span id="pioMapDomain" class="statutory-tag bns" style="font-size: 11px; font-weight: 600;">Revenue & Land Records</span>
+              </div>
+              <div style="font-size: 10.5px; color: var(--ink-muted); margin-top: 2px;">Domain auto-classified from grievance</div>
+            </div>
+
+            <div style="background: rgba(11, 29, 58, 0.04); padding: 8px 10px; border-radius: 4px; border: 1px dashed var(--border-medium);">
+              <span style="font-size: 10px; font-weight: 700; color: var(--gov-navy); text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="shield-check" style="width: 12px; height: 12px; color: var(--gov-navy);"></i>
+                <span>Assigned Nearest Domain PIO</span>
+              </span>
+              <div style="font-size: 12px; font-weight: 700; color: var(--gov-navy); margin-top: 2px;" id="pioMapAssignedName">
+                Shri N. Goyal (Tehsildar)
+              </div>
+              <div style="font-size: 10.5px; color: var(--status-active); font-weight: 600;" id="pioMapAssignedDist">
+                1.2 km away (Mehrauli Circle)
+              </div>
+            </div>
+
+            <div>
+              <button class="btn-gov-outline" style="padding: 7px 12px; font-size: 11.5px; white-space: nowrap;" onclick="switchDashTab('casework')">
+                <span>Casework Desk &rarr;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="desk-split-layout">
+          <!-- Radar Canvas -->
           <div class="ops-panel">
             <div class="ops-panel-header">
               <span class="ops-panel-title">Geospatial Proximity Radar</span>
+              <span class="status-pill approved" id="radarTelemetryStatus" style="font-size: 10px;">Great-Circle Active</span>
             </div>
             <div style="padding: 16px; text-align: center;">
+              
+              <!-- Radar Legend -->
+              <div style="display: flex; justify-content: center; gap: 14px; margin-bottom: 10px; font-size: 10.5px; color: var(--ink-secondary);">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #D97706;"></span>
+                  <span>Citizen Origin</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #1D4ED8; border: 2px solid #93C5FD;"></span>
+                  <span style="font-weight: 700; color: #1D4ED8;">Assigned Domain PIO</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #64748B;"></span>
+                  <span>Other Nearby Authorities</span>
+                </div>
+              </div>
+
               <canvas id="radarCanvas" width="380" height="380"></canvas>
+
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; font-size: 11px; text-align: left;">
                 <div class="legal-basis-box" style="margin-bottom: 0; padding: 6px 10px;">
                   Citizen Location: <b id="radarUserCoords">25.2905° N, 82.9995° E</b>
@@ -895,11 +978,21 @@
             </div>
           </div>
 
+          <!-- Public Authority Directory & Nearest Area PIOs -->
           <div class="ops-panel">
-            <div class="ops-panel-header">
-              <span class="ops-panel-title">Public Authority Directory & Geodetic Hubs</span>
+            <div class="ops-panel-header" style="flex-wrap: wrap; gap: 8px;">
+              <div>
+                <span class="ops-panel-title">Nearest PIO Officers in Area (<span id="radarAreaCount">0</span> Authorities)</span>
+              </div>
+              <div style="display: flex; gap: 4px;">
+                <button type="button" class="statutory-tag active" id="pioFilterAll" style="cursor: pointer; padding: 2px 8px; font-size: 10px;" onclick="filterRadarDirectory('all')">All Nearby</button>
+                <button type="button" class="statutory-tag" id="pioFilterDomain" style="cursor: pointer; padding: 2px 8px; font-size: 10px;" onclick="filterRadarDirectory('domain')">Domain Only</button>
+                <button type="button" class="statutory-tag" id="pioFilterClose" style="cursor: pointer; padding: 2px 8px; font-size: 10px;" onclick="filterRadarDirectory('close')">&lt; 3 km</button>
+              </div>
             </div>
-            <div id="radarDirectoryList" style="padding: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 480px; overflow-y: auto;"></div>
+            <div id="radarDirectoryList" style="padding: 12px; display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto;">
+              <!-- Dynamic list of nearest PIO officers in that area -->
+            </div>
           </div>
         </div>
       </div>

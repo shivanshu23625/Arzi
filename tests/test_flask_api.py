@@ -220,3 +220,53 @@ def test_github_repo_kill_switch(client):
 
     response = client.get("/api/v1/cases")
     assert response.status_code == 200
+
+def test_area_and_domain_pio_assignment(client):
+    # 1. Register a complaint in Varanasi for Food & Civil Supplies
+    payload = {
+        "complainant": {
+            "name": "Kavita Devi",
+            "contact": "+91-9876500000",
+            "address": "Nadesar, Varanasi / Banaras, Uttar Pradesh - 221002",
+            "language": "Hindi"
+        },
+        "raw_grievance": "My ration quota (Ref VNS-FOOD-881) is not being distributed at Nadesar PDS shop. Officer is unresponsive.",
+        "department": "Food & Civil Supplies",
+        "application_ref_no": "VNS-FOOD-881"
+    }
+    res = client.post("/api/v1/cases/intake", json=payload)
+    assert res.status_code == 201
+    data = res.get_json()
+    case = data["case"]
+    case_id = case["case_id"]
+
+    # Verify nearest PIO of DOMAIN was assigned
+    suggested = case["suggested_pio"]
+    assert suggested["department"] == "Food & Civil Supplies"
+    assert "V. P. Singh" in suggested["pio_name"] or "Food" in suggested["department"]
+    assert "nearby_area_pios" in case
+    assert len(case["nearby_area_pios"]) >= 4
+
+    # Verify all nearby PIOs in that area are included and ranked
+    area_pios = case["nearby_area_pios"]
+    assert any(p["is_assigned"] for p in area_pios)
+    # The assigned domain officer has is_domain_match == True and is_assigned == True
+    assigned_match = [p for p in area_pios if p["is_assigned"]][0]
+    assert assigned_match["is_domain_match"] is True
+
+    # 2. Test GET /cases/<case_id>/nearby-pios
+    geo_res = client.get(f"/api/v1/cases/{case_id}/nearby-pios")
+    assert geo_res.status_code == 200
+    geo_data = geo_res.get_json()
+    assert geo_data["case_id"] == case_id
+    assert len(geo_data["nearby_area_pios"]) >= 4
+
+    # 3. Test re-assigning PIO via POST /cases/<case_id>/assign-pio
+    alt_pio = area_pios[0] if area_pios[0]["id"] != assigned_match["id"] else area_pios[1]
+    assign_res = client.post(f"/api/v1/cases/{case_id}/assign-pio", json={
+        "pio": alt_pio,
+        "reviewer": "Adv. S. Kalra"
+    })
+    assert assign_res.status_code == 200
+    reassigned_case = assign_res.get_json()["case"]
+    assert reassigned_case["suggested_pio"]["pio_name"] == alt_pio["pio_name"]

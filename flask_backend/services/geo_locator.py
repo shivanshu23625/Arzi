@@ -339,58 +339,116 @@ class GeospatialLocator:
         # Default to Delhi Center
         return 28.6139, 77.2090, "Central Division"
 
-    def find_nearest_public_authority(self, category: str, address: str, narrative: str = "") -> dict:
+    def get_area_and_domain_pios(self, category: str, address: str, narrative: str = "") -> dict:
         """
-        Finds the closest designated PIO and First Appellate Authority (FAA) for a given department
-        relative to the citizen's geocoded location.
+        Geocodes citizen location, computes geodesic distances to ALL public authorities in the directory,
+        suggests all nearest PIO officers in that administrative area, and assigns the nearest PIO officer
+        matching the complaint's specific domain/department.
         """
         user_lat, user_lon, locality_name = self.geocode_location(address, narrative)
         
-        # Filter candidates matching the target department
-        dept_candidates = [
-            p for p in GEO_PUBLIC_AUTHORITIES 
-            if p["department"].lower() == category.lower()
-        ]
+        all_candidates = []
+        c_dept = (category or "").strip().lower()
 
-        if not dept_candidates:
-            # Fallback to any in the city or first available
-            dept_candidates = [p for p in GEO_PUBLIC_AUTHORITIES if category.lower() in p["department"].lower()]
-            if not dept_candidates:
-                dept_candidates = [GEO_PUBLIC_AUTHORITIES[0]]
+        for p in GEO_PUBLIC_AUTHORITIES:
+            dist = self.haversine_distance(user_lat, user_lon, p["latitude"], p["longitude"])
+            if dist < 1.0:
+                dist_str = f"{int(dist * 1000)} meters away"
+            else:
+                dist_str = f"{dist} km away"
 
-        # Find closest candidate using Haversine
-        best_candidate = None
-        min_distance = float('inf')
+            p_dept = p.get("department", "").strip().lower()
+            is_domain_match = bool(c_dept and ((p_dept == c_dept) or (c_dept in p_dept) or (p_dept in c_dept)))
 
-        for candidate in dept_candidates:
-            dist = self.haversine_distance(user_lat, user_lon, candidate["latitude"], candidate["longitude"])
-            if dist < min_distance:
-                min_distance = dist
-                best_candidate = candidate
+            item = {
+                "id": p.get("id"),
+                "city": p.get("city", locality_name),
+                "district": p.get("district", ""),
+                "state": p.get("state", ""),
+                "department": p.get("department"),
+                "pio_name": p.get("pio_name"),
+                "designation": p.get("designation"),
+                "office_address": p.get("office_address"),
+                "room_no": p.get("room_no", "Ground Floor RTI Desk"),
+                "email": p.get("email"),
+                "phone": p.get("phone"),
+                "latitude": p.get("latitude"),
+                "longitude": p.get("longitude"),
+                "distance_km": dist,
+                "distance_label": dist_str,
+                "is_domain_match": is_domain_match,
+                "faa": p.get("faa", {})
+            }
+            all_candidates.append(item)
 
-        # Format distance string
-        if min_distance < 1.0:
-            dist_str = f"{int(min_distance * 1000)} meters away"
+        # Sort all candidates by distance ascending
+        all_candidates.sort(key=lambda x: x["distance_km"])
+
+        # Determine nearby area cluster (within regional radius or top nearby)
+        closest_dist = all_candidates[0]["distance_km"] if all_candidates else 0
+        area_radius = max(60.0, closest_dist * 2.5) if closest_dist < 100 else closest_dist + 50
+        nearby_area_candidates = [c for c in all_candidates if c["distance_km"] <= area_radius]
+        if len(nearby_area_candidates) < 4:
+            nearby_area_candidates = all_candidates[:6]
+
+        # Identify nearest PIO matching the complaint domain
+        domain_matches = [c for c in nearby_area_candidates if c["is_domain_match"]]
+        if not domain_matches:
+            domain_matches = [c for c in all_candidates if c["is_domain_match"]]
+
+        if domain_matches:
+            assigned_candidate = domain_matches[0]
         else:
-            dist_str = f"{min_distance} km away"
+            assigned_candidate = nearby_area_candidates[0] if nearby_area_candidates else all_candidates[0]
+
+        # Tag is_assigned flag
+        assigned_id = assigned_candidate.get("id")
+        for c in nearby_area_candidates:
+            c["is_assigned"] = (c.get("id") == assigned_id)
+        for c in all_candidates:
+            c["is_assigned"] = (c.get("id") == assigned_id)
+
+        assigned_pio_dict = {
+            "id": assigned_candidate.get("id"),
+            "department": assigned_candidate["department"],
+            "pio_name": assigned_candidate["pio_name"],
+            "designation": assigned_candidate["designation"],
+            "office_address": assigned_candidate["office_address"],
+            "room_no": assigned_candidate.get("room_no", "Ground Floor RTI Desk"),
+            "email": assigned_candidate["email"],
+            "phone": assigned_candidate["phone"],
+            "distance_km": assigned_candidate["distance_km"],
+            "distance_label": assigned_candidate["distance_label"],
+            "user_coordinates": {"latitude": user_lat, "longitude": user_lon},
+            "pio_coordinates": {"latitude": assigned_candidate["latitude"], "longitude": assigned_candidate["longitude"]},
+            "matched_user_locality": locality_name,
+            "faa": assigned_candidate.get("faa", {}),
+            "jurisdiction_radius_km": 15.0,
+            "is_domain_match": True,
+            "is_assigned": True,
+            "ml_prediction_reason": f"Geospatially assigned nearest domain ({category}) PIO {assigned_candidate['pio_name']} ({assigned_candidate['distance_label']}) in {locality_name}"
+        }
 
         return {
-            "department": best_candidate["department"],
-            "pio_name": best_candidate["pio_name"],
-            "designation": best_candidate["designation"],
-            "office_address": best_candidate["office_address"],
-            "room_no": best_candidate.get("room_no", "Ground Floor RTI Desk"),
-            "email": best_candidate["email"],
-            "phone": best_candidate["phone"],
-            "distance_km": min_distance,
-            "distance_label": dist_str,
+            "assigned_pio": assigned_pio_dict,
+            "nearby_area_pios": nearby_area_candidates,
+            "all_pios": all_candidates,
             "user_coordinates": {"latitude": user_lat, "longitude": user_lon},
-            "pio_coordinates": {"latitude": best_candidate["latitude"], "longitude": best_candidate["longitude"]},
             "matched_user_locality": locality_name,
-            "faa": best_candidate.get("faa", {}),
-            "jurisdiction_radius_km": 15.0,
-            "ml_prediction_reason": f"Geospatially matched nearest {category} Public Authority ({dist_str}) in {locality_name}"
+            "target_domain": category,
+            "distance_km": assigned_candidate["distance_km"],
+            "distance_label": assigned_candidate["distance_label"]
         }
+
+    def find_nearest_public_authority(self, category: str, address: str, narrative: str = "") -> dict:
+        """
+        Finds the closest designated PIO and First Appellate Authority (FAA) for a given department
+        relative to the citizen's geocoded location, including all nearby area PIOs.
+        """
+        geo_data = self.get_area_and_domain_pios(category, address, narrative)
+        assigned = geo_data["assigned_pio"]
+        assigned["nearby_area_pios"] = geo_data["nearby_area_pios"]
+        return assigned
 
 
 geo_locator = GeospatialLocator()

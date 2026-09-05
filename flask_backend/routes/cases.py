@@ -99,17 +99,68 @@ def get_compliance_radar():
 
 @cases_bp.route("/nearest-pio", methods=["GET"])
 def find_nearest_pio_endpoint():
-    """Live geocoding lookup finding the nearest PIO and FAA for an address and department."""
+    """Live geocoding lookup finding the nearest PIO and FAA for an address and department, plus all nearby area PIOs."""
     address = request.args.get("address", "")
     department = request.args.get("department", "Revenue & Land Records")
     narrative = request.args.get("narrative", "")
 
-    result = geo_locator.find_nearest_public_authority(
+    result = geo_locator.get_area_and_domain_pios(
         category=department,
         address=address,
         narrative=narrative
     )
-    return jsonify({"status": "success", "nearest_public_authority": result}), 200
+    return jsonify({
+        "status": "success", 
+        "nearest_public_authority": result["assigned_pio"],
+        "assigned_pio": result["assigned_pio"],
+        "nearby_area_pios": result["nearby_area_pios"],
+        "all_pios": result["all_pios"]
+    }), 200
+
+@cases_bp.route("/<case_id>/assign-pio", methods=["POST"])
+def assign_case_pio_endpoint(case_id):
+    """Assigns or switches the primary designated PIO for a specific case docket."""
+    data = request.get_json() or {}
+    pio_data = data.get("pio")
+    actor = data.get("reviewer", "Counsel / Citizen Desk")
+
+    if not pio_data or not pio_data.get("pio_name"):
+        return jsonify({"error": "Bad Request", "message": "Valid pio object is required"}), 400
+
+    updated_case = db_store.assign_case_pio(case_id, pio_data, actor=actor)
+    if not updated_case:
+        return jsonify({"error": "Not Found", "message": f"Case {case_id} not found"}), 404
+
+    return jsonify({
+        "status": "assigned",
+        "message": f"Case {case_id} successfully assigned to PIO {pio_data.get('pio_name')}.",
+        "case": updated_case
+    }), 200
+
+@cases_bp.route("/<case_id>/nearby-pios", methods=["GET"])
+def get_case_nearby_pios(case_id):
+    """Retrieves all nearby PIO officers for a specific case docket."""
+    case = db_store.get_case(case_id)
+    if not case:
+        return jsonify({"error": "Not Found", "message": f"Case {case_id} not found"}), 404
+
+    nearby = case.get("nearby_area_pios")
+    if not nearby:
+        user_loc = case.get("confidence", {}).get("user_locality", "Local Division")
+        geo_res = geo_locator.get_area_and_domain_pios(
+            category=case.get("department", "Revenue & Land Records"),
+            address=case.get("complainant", {}).get("address", user_loc),
+            narrative=case.get("raw_grievance", "")
+        )
+        nearby = geo_res["nearby_area_pios"]
+        case["nearby_area_pios"] = nearby
+
+    return jsonify({
+        "status": "success",
+        "case_id": case_id,
+        "assigned_pio": case.get("suggested_pio"),
+        "nearby_area_pios": nearby
+    }), 200
 
 @cases_bp.route("/custom-acts", methods=["GET"])
 def list_custom_acts():
@@ -248,6 +299,10 @@ def update_complainant_in_place(case_id):
         grievance_text=new_narrative
     )
     case["suggested_pio"] = matched_pio
+    case["assigned_pio"] = matched_pio
+    case["nearby_area_pios"] = matched_pio.get("nearby_area_pios", [])
+    if "geospatial_meta" in case:
+        case["geospatial_meta"]["nearby_pios"] = matched_pio.get("nearby_area_pios", [])
     case["suggested_faa"] = matched_pio.get("faa")
 
     case["draft_rti"]["questions"] = rti_engine._generate_rti_questions(
@@ -363,6 +418,10 @@ def override_pio(case_id):
         )
 
         case["suggested_pio"] = matched_pio
+        case["assigned_pio"] = matched_pio
+        case["nearby_area_pios"] = matched_pio.get("nearby_area_pios", [])
+        if "geospatial_meta" in case:
+            case["geospatial_meta"]["nearby_pios"] = matched_pio.get("nearby_area_pios", [])
         case["suggested_faa"] = matched_pio.get("faa")
         case["department"] = matched_pio["department"]
         case["category"] = matched_pio["department"]
