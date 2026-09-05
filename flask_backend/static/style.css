@@ -1067,3 +1067,22 @@ input[type="text"]:focus, select:focus, textarea:focus {
 .dash-module.active {
   display: block;
 }
+
+/* Matched Case Card (Run Log Search) */
+.matched-case-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.matched-case-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--gov-navy);
+  box-shadow: 0 4px 12px rgba(11, 29, 58, 0.08);
+}

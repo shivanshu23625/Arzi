@@ -582,31 +582,249 @@ function viewPdf(type = "rti") {
   window.open(`${API_BASE}/cases/${currentCase.case_id}/pdf?type=${type}`, "_blank");
 }
 
-// Immutable Run Logs
+// Immutable Run Logs & Multi-Field Search Cache
+let allRunLogsCache = [];
+let allCasesCache = [];
+
 async function loadRunLogs() {
   try {
     const res = await fetch(`${API_BASE}/run-log`);
     const data = await res.json();
     if (!res.ok) return;
 
-    const tbody = document.getElementById("runLogBody");
-    tbody.innerHTML = "";
+    allRunLogsCache = data.run_logs || [];
 
-    data.run_logs.forEach(log => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td style="font-family: var(--font-mono); font-size: 11px;">${log.timestamp}</td>
-        <td><span class="statutory-tag" style="font-size: 10px;">${log.event_type}</span></td>
-        <td><b style="font-family: var(--font-mono); color: var(--gov-navy); font-size: 11.5px;">${log.case_id}</b></td>
-        <td><b>${log.actor}</b></td>
-        <td>${log.action}<br/><span style="font-family: var(--font-mono); font-size: 10px; color: var(--status-active);">Result: ${log.result}</span></td>
-        <td style="font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-muted);">${log.correlation_id}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-    renderLucide();
+    // Also load cases to cross-reference keywords across Name, Place, Subject, Address, Officer
+    try {
+      const caseRes = await fetch(`${API_BASE}/cases`);
+      const caseData = await caseRes.json();
+      if (caseRes.ok) {
+        allCasesCache = caseData.cases || [];
+      }
+    } catch (e) {
+      console.warn("Could not preload cases for run log search:", e);
+    }
+
+    const searchInput = document.getElementById("runLogSearchInput");
+    if (searchInput && searchInput.value.trim()) {
+      handleRunLogSearch(searchInput.value.trim());
+    } else {
+      renderRunLogsTable(allRunLogsCache);
+      const countBadge = document.getElementById("runLogCountBadge");
+      if (countBadge) countBadge.textContent = allRunLogsCache.length;
+      const matchedCasesPanel = document.getElementById("matchedCasesPanel");
+      if (matchedCasesPanel) matchedCasesPanel.style.display = "none";
+      const filterBadge = document.getElementById("runLogFilterBadge");
+      if (filterBadge) {
+        filterBadge.textContent = "All Events";
+        filterBadge.className = "status-pill approved";
+      }
+      const searchStatus = document.getElementById("runLogSearchStatus");
+      if (searchStatus) {
+        searchStatus.textContent = "All Logs Active";
+        searchStatus.className = "status-pill approved";
+      }
+    }
   } catch (err) {
     console.error("Run log error:", err);
+  }
+}
+
+function renderRunLogsTable(logs) {
+  const tbody = document.getElementById("runLogBody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  if (!logs || logs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--ink-muted); padding: 24px;">No execution run logs match the active query.</td></tr>`;
+    return;
+  }
+
+  logs.forEach(log => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-family: var(--font-mono); font-size: 11px;">${log.timestamp}</td>
+      <td><span class="statutory-tag" style="font-size: 10px;">${log.event_type}</span></td>
+      <td>
+        <a href="#" style="font-family: var(--font-mono); color: var(--gov-navy); font-weight: 700; font-size: 11.5px; text-decoration: underline;" onclick="event.preventDefault(); inspectCaseFromRunLog('${log.case_id}')">
+          ${log.case_id}
+        </a>
+      </td>
+      <td><b>${log.actor}</b></td>
+      <td>${log.action}<br/><span style="font-family: var(--font-mono); font-size: 10px; color: var(--status-active);">Result: ${log.result}</span></td>
+      <td style="font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-muted);">${log.correlation_id}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  renderLucide();
+}
+
+function handleRunLogSearch(rawQuery) {
+  const query = (rawQuery || "").trim().toLowerCase();
+  const matchedCasesContainer = document.getElementById("matchedCasesContainer");
+  const matchedCasesPanel = document.getElementById("matchedCasesPanel");
+  const matchedCasesCount = document.getElementById("matchedCasesCount");
+  const runLogFilterBadge = document.getElementById("runLogFilterBadge");
+  const runLogSearchStatus = document.getElementById("runLogSearchStatus");
+  const countBadge = document.getElementById("runLogCountBadge");
+
+  if (!query) {
+    if (matchedCasesPanel) matchedCasesPanel.style.display = "none";
+    if (runLogFilterBadge) {
+      runLogFilterBadge.textContent = "All Events";
+      runLogFilterBadge.className = "status-pill approved";
+    }
+    if (runLogSearchStatus) {
+      runLogSearchStatus.textContent = "All Logs Active";
+      runLogSearchStatus.className = "status-pill approved";
+    }
+    renderRunLogsTable(allRunLogsCache);
+    if (countBadge) countBadge.textContent = allRunLogsCache.length;
+    return;
+  }
+
+  // Synonym expansions (Varanasi / Banaras / Kashi)
+  const synonyms = query.includes("varanasi") || query.includes("banaras") || query.includes("kashi")
+    ? ["varanasi", "banaras", "kashi"]
+    : [query];
+
+  // 1. Search cases across: Complainant Name, Place/Address, Subject/Grievance/Department, Officer Name
+  const matchedCases = allCasesCache.filter(c => {
+    const complainantName = (c.complainant?.name || "").toLowerCase();
+    const complainantAddr = (c.complainant?.address || "").toLowerCase();
+    const userLocality = (c.confidence?.user_locality || "").toLowerCase();
+    const department = (c.department || c.category || "").toLowerCase();
+    const rawGrievance = (c.raw_grievance || "").toLowerCase();
+    const draftSubject = (c.draft_rti?.application_subject || "").toLowerCase();
+    const refNo = (c.application_ref_no || "").toLowerCase();
+    const pioName = (c.suggested_pio?.pio_name || "").toLowerCase();
+    const pioAddr = (c.suggested_pio?.office_address || "").toLowerCase();
+    const pioDesig = (c.suggested_pio?.designation || "").toLowerCase();
+    const caseId = (c.case_id || "").toLowerCase();
+
+    const fullSearchText = `${caseId} ${complainantName} ${complainantAddr} ${userLocality} ${department} ${rawGrievance} ${draftSubject} ${refNo} ${pioName} ${pioAddr} ${pioDesig}`;
+
+    return synonyms.some(term => fullSearchText.includes(term));
+  });
+
+  const matchedCaseIds = new Set(matchedCases.map(c => c.case_id.toUpperCase()));
+
+  // 2. Render Matched Case Dockets
+  if (matchedCasesPanel && matchedCasesContainer) {
+    matchedCasesPanel.style.display = "block";
+    if (matchedCasesCount) matchedCasesCount.textContent = matchedCases.length;
+
+    if (matchedCases.length === 0) {
+      matchedCasesContainer.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: 18px; text-align: center; color: var(--ink-muted); font-size: 12px; background: var(--bg-surface); border: 1px dashed var(--border-medium); border-radius: 4px;">
+          <i data-lucide="info" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 4px; color: var(--gov-copper);"></i>
+          No case dockets matched the keyword "<b>${rawQuery}</b>". Checking audit event trail below...
+        </div>
+      `;
+    } else {
+      matchedCasesContainer.innerHTML = matchedCases.map(c => {
+        const pio = c.suggested_pio || {};
+        const pioOfficer = pio.pio_name ? `${pio.pio_name} (${pio.designation || 'PIO'})` : 'Designation Pending';
+        const locality = c.confidence?.user_locality || c.complainant?.address?.split(',').slice(-2).join(',').trim() || 'Jurisdiction Assigned';
+        const subjectBrief = c.draft_rti?.application_subject || c.raw_grievance || 'Public Record Inquiry';
+        const truncatedSubject = subjectBrief.length > 95 ? subjectBrief.substring(0, 92) + '...' : subjectBrief;
+        const statusClass = c.status === 'APPROVED' ? 'approved' : (c.status === 'TRANSFERRED_SEC_6_3' ? 'neutral' : 'under-review');
+
+        return `
+          <div class="matched-case-card">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <b style="font-family: var(--font-mono); color: var(--gov-navy); font-size: 12.5px;">${c.case_id}</b>
+                  <span class="status-pill ${statusClass}" style="font-size: 9.5px;">${c.status.replace(/_/g, ' ')}</span>
+                </div>
+                <span style="font-family: var(--font-mono); font-size: 10.5px; color: var(--gov-copper); font-weight: 700;">SLA: ${c.sla_days_remaining ?? 14}d</span>
+              </div>
+              
+              <div style="font-size: 12px; font-weight: 700; color: var(--ink-primary); margin-bottom: 3px; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="user" style="width: 12px; height: 12px; color: var(--gov-navy);"></i>
+                <span>${c.complainant?.name || 'Anonymous Citizen'}</span>
+                <span style="font-weight: 400; color: var(--ink-muted); font-size: 11px;">&bull; ${locality}</span>
+              </div>
+
+              <div style="font-size: 11px; color: var(--ink-secondary); margin-bottom: 6px; line-height: 1.35;">
+                <b>Subject:</b> ${truncatedSubject}
+              </div>
+
+              <div style="font-size: 10.5px; color: var(--ink-secondary); background: var(--bg-subtle); padding: 6px 8px; border-radius: 2px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 4px; color: var(--gov-navy); font-weight: 600;">
+                  <i data-lucide="building-2" style="width: 11px; height: 11px;"></i>
+                  <span>${c.department || 'Public Authority'}</span>
+                </div>
+                <div style="margin-top: 2px; color: var(--ink-muted);">
+                  <b>Officer:</b> ${pioOfficer}
+                </div>
+                <div style="margin-top: 1px; color: var(--ink-muted);">
+                  <b>Address:</b> ${pio.office_address || c.complainant?.address || 'Designated Administrative Complex'}
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--border-subtle);">
+              <span style="font-size: 10.5px; color: var(--ink-muted);">Ref: <b>${c.application_ref_no || 'Standard Docket'}</b></span>
+              <button class="btn-gov-outline" style="font-size: 11px; padding: 3px 8px; background: #FFFFFF;" onclick="inspectCaseFromRunLog('${c.case_id}')">
+                <span>Inspect Dossier &rarr;</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+  }
+
+  // 3. Filter Run Log table rows: match log directly OR match case ID of matched cases
+  const filteredLogs = allRunLogsCache.filter(log => {
+    const caseId = (log.case_id || "").toUpperCase();
+    if (matchedCaseIds.has(caseId)) return true;
+
+    const actor = (log.actor || "").toLowerCase();
+    const action = (log.action || "").toLowerCase();
+    const eventType = (log.event_type || "").toLowerCase();
+    const result = (log.result || "").toLowerCase();
+    const correlationId = (log.correlation_id || "").toLowerCase();
+    const logCaseId = (log.case_id || "").toLowerCase();
+
+    const logText = `${logCaseId} ${actor} ${action} ${eventType} ${result} ${correlationId}`;
+    return synonyms.some(term => logText.includes(term));
+  });
+
+  renderRunLogsTable(filteredLogs);
+
+  if (runLogFilterBadge) {
+    runLogFilterBadge.textContent = `Filtered: ${filteredLogs.length} Rows (${matchedCases.length} Cases)`;
+    runLogFilterBadge.className = "status-pill under-review";
+  }
+  if (runLogSearchStatus) {
+    runLogSearchStatus.textContent = `${matchedCases.length} Cases Matched`;
+    runLogSearchStatus.className = matchedCases.length > 0 ? "status-pill approved" : "status-pill under-review";
+  }
+  if (countBadge) {
+    countBadge.textContent = filteredLogs.length;
+  }
+  renderLucide();
+}
+
+function inspectCaseFromRunLog(caseId) {
+  openCaseById(caseId);
+  switchDashTab("casework");
+}
+
+function clearRunLogSearch() {
+  const input = document.getElementById("runLogSearchInput");
+  if (input) input.value = "";
+  handleRunLogSearch("");
+}
+
+function setRunLogSearchQuery(term) {
+  const input = document.getElementById("runLogSearchInput");
+  if (input) {
+    input.value = term;
+    handleRunLogSearch(term);
   }
 }
 

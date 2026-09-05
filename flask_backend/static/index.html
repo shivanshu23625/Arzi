@@ -79,7 +79,7 @@
 
 
     <!-- ================================================================= -->
-    <!-- PAGE 1: HOME OVERVIEW PAGE (WITH HERO, PIPELINE, CASE STUDIES & FAQ) -->
+    <!-- PAGE 1: HOME OVERVIEW PAGE -->
     <!-- ================================================================= -->
     <section id="page-home" class="site-page active">
       
@@ -91,7 +91,7 @@
         </div>
         <h1>Democratizing Indian Public Law with <br/><span style="color: var(--gov-navy);">Autonomous Statutory Intelligence</span></h1>
         <p class="hero-lead-text">
-          A unified operations desk for citizen grievances, statutory cross-referencing from IPC 1860 to Bharatiya Nyaya Sanhita (BNS 2023), geodetic Public Information Officer discovery, and Section 20 penalty enforcement.
+          ARZI is an autonomous civic operations desk that transforms citizen grievances into legally enforceable RTI applications, First Appeals, and Section 80 CPC notices—cross-referencing IPC 1860 with Bharatiya Nyaya Sanhita (BNS 2023), identifying designated Public Information Officers via geodesy, and enforcing statutory compliance deadlines.
         </p>
 
         <div class="hero-action-row">
@@ -101,9 +101,14 @@
             <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
           </button>
           
+          <button class="btn-gov-outline" style="padding: 9px 16px; font-size: 12px;" onclick="showPage('dashboard'); switchDashTab('runlog');">
+            <i data-lucide="scroll-text" style="width: 13px; height: 13px;"></i>
+            <span>Audit Run Log</span>
+          </button>
+
           <button class="btn-gov-outline" style="padding: 9px 16px; font-size: 12px;" onclick="showPage('pillars')">
             <i data-lucide="scale" style="width: 13px; height: 13px;"></i>
-            <span>Explore Statutory Codex</span>
+            <span>Statutory Codex</span>
           </button>
         </div>
 
@@ -120,10 +125,6 @@
           <button class="btn-gov-outline" style="font-size: 11px; padding: 4px 10px;" onclick="showPage('dashboard'); switchDashTab('pio');">
             <i data-lucide="map-pin" style="width: 12px; height: 12px;"></i>
             <span>PIO Proximity Radar</span>
-          </button>
-          <button class="btn-gov-outline" style="font-size: 11px; padding: 4px 10px;" onclick="showPage('dashboard'); switchDashTab('runlog');">
-            <i data-lucide="scroll-text" style="width: 12px; height: 12px;"></i>
-            <span>Audit Run Log</span>
           </button>
         </div>
       </div>
@@ -152,169 +153,22 @@
         </div>
       </div>
 
-      <!-- 5-Step Operational Pipeline Workflow -->
-      <div class="pipeline-section">
-        <div style="font-family: var(--font-serif); font-size: 16px; font-weight: 700; color: var(--ink-primary); display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="git-merge" style="width: 16px; height: 16px; color: var(--gov-navy);"></i>
-          <span>End-to-End Autonomous Statutory Enforcement Pipeline</span>
-        </div>
-        <p style="font-size: 12px; color: var(--ink-secondary); margin-top: 2px;">
-          How a raw citizen narrative is transformed into enforceable legal instruments and tribunal-grade proof:
-        </p>
-
-        <div class="pipeline-grid">
-          <div class="pipeline-step-card">
-            <div class="pipeline-step-num">STEP 01</div>
-            <h4>Grievance Ingestion</h4>
-            <p>Raw citizen statements are normalized into structured questions for records held under Section 2(f) of RTI Act.</p>
-          </div>
-          <div class="pipeline-step-card">
-            <div class="pipeline-step-num">STEP 02</div>
-            <h4>Statutory Cross-Mapping</h4>
-            <p>Offenses are analyzed; historical IPC 1860 sections are mapped to substantive Bharatiya Nyaya Sanhita (BNS 2023) provisions.</p>
-          </div>
-          <div class="pipeline-step-card">
-            <div class="pipeline-step-num">STEP 03</div>
-            <h4>Geodesic PIO Matching</h4>
-            <p>Haversine trigonometry computes distance across municipal hubs and designates the competent PIO and FAA.</p>
-          </div>
-          <div class="pipeline-step-card">
-            <div class="pipeline-step-num">STEP 04</div>
-            <h4>Section 20 Penalty Clock</h4>
-            <p>Calculates ₹250/day personal penalty liability on delinquent officers once the 30-day statutory SLA expires.</p>
-          </div>
-          <div class="pipeline-step-card">
-            <div class="pipeline-step-num">STEP 05</div>
-            <h4>Counsel Review & Dispatch</h4>
-            <p>Advocates review and approve inside the operations desk; signed Form-A RTI and First Appeal PDFs are generated with SHA-256 seals.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4 Core Pillars of ARZI Grid -->
-      <div style="font-family: var(--font-serif); font-size: 16px; font-weight: 700; color: var(--ink-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-        <i data-lucide="layers" style="width: 16px; height: 16px; color: var(--gov-navy);"></i>
-        <span>The 4 Core Statutory Pillars of ARZI</span>
-      </div>
-
-      <div class="pillars-editorial-grid">
+      <!-- 3 Concise Core Capabilities -->
+      <div class="pillars-editorial-grid" style="margin-bottom: 24px;">
         <div class="pillar-item-card">
           <i data-lucide="scale" style="width: 22px; height: 22px; color: var(--gov-navy);"></i>
-          <h3>AI Statutory IPC/BNS Parser</h3>
-          <p>Extracts penal offenses and maps historical IPC 1860 sections to modern Bharatiya Nyaya Sanhita (BNS 2023) provisions with punishment scopes and case citations.</p>
+          <h3>Statutory IPC & BNS Cross-Mapping</h3>
+          <p>Analyzes citizen statements into structured legal questions under Section 2(f) and maps historical IPC 1860 clauses to active Bharatiya Nyaya Sanhita (BNS 2023) provisions.</p>
         </div>
         <div class="pillar-item-card">
           <i data-lucide="map-pin" style="width: 22px; height: 22px; color: var(--gov-copper);"></i>
-          <h3>Haversine Geodesic PIO Matcher</h3>
-          <p>Spherical geocoding computes real distances across districts (Varanasi / Banaras, Delhi, Lucknow) and assigns the exact designated Public Authority room and officer.</p>
+          <h3>Geodesic PIO & FAA Discovery</h3>
+          <p>Calculates spherical coordinates using Haversine geodesy to designate the competent Public Information Officer and First Appellate Authority across districts.</p>
         </div>
         <div class="pillar-item-card">
-          <i data-lucide="database" style="width: 22px; height: 22px; color: var(--gov-navy);"></i>
-          <h3>Supabase Database & Audit Log</h3>
-          <p>Persistent case records and vector embeddings backed by Supabase PostgreSQL for high-scale legal information retrieval and audit verification.</p>
-        </div>
-        <div class="pillar-item-card">
-          <i data-lucide="file-check" style="width: 22px; height: 22px; color: var(--status-active);"></i>
-          <h3>Court-Ready Legal PDFs</h3>
-          <p>Deterministic 1-click generation of court-ready Form-A RTI (Sec 6(1)), First Appeal Memorandums (Sec 19(1)), and Section 80 CPC Legal Notices with SHA-256 digital seals.</p>
-        </div>
-      </div>
-
-      <!-- Real-World Statutory Case Studies -->
-      <div class="case-study-section">
-        <div style="font-family: var(--font-serif); font-size: 16px; font-weight: 700; color: var(--ink-primary); display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="file-text" style="width: 16px; height: 16px; color: var(--gov-navy);"></i>
-          <span>Real-World Civic Accountability Case Studies</span>
-        </div>
-        <p style="font-size: 12px; color: var(--ink-secondary); margin-top: 2px;">
-          Documented administrative scenarios resolved by ARZI across revenue, food supply, and municipal jurisdictions:
-        </p>
-
-        <div class="case-study-grid">
-          <div class="case-study-card">
-            <h4>Case 1: Varanasi Land Mutation Withholding</h4>
-            <div class="case-study-statute">Tehsil Sadar Kachehri &middot; BNS 318(4) & 231 &middot; Sec 20 Penalty</div>
-            <p>Citizen's Khasra 88/14 registry entry was withheld by local patwaris despite 30 days passing. ARZI routed Form-A RTI directly to Tehsildar Sadar with Section 20 ₹250/day penalty computation.</p>
-            <button class="btn-gov-outline" style="font-size: 10.5px; padding: 2px 6px;" onclick="loadPreset(4)">Load Docket &rarr;</button>
-          </div>
-
-          <div class="case-study-card">
-            <h4>Case 2: PDS Ration Card 6-Month Delay</h4>
-            <div class="case-study-statute">Ward 4 Civil Lines Delhi &middot; BNS 316(5) &middot; Essential Commodities</div>
-            <p>BPL food grain allotment delayed 6 months. ARZI demanded grain stock allocation logs under Section 2(f) and served Section 19(1) First Appeal memorandum on Assistant Commissioner.</p>
-            <button class="btn-gov-outline" style="font-size: 10.5px; padding: 2px 6px;" onclick="loadPreset(1)">Load Docket &rarr;</button>
-          </div>
-
-          <div class="case-study-card">
-            <h4>Case 3: Monsoon Storm Sewer Overflow</h4>
-            <div class="case-study-statute">Sector 12 Dwarka MCD &middot; BNS 270 (Public Nuisance) & 279</div>
-            <p>Uncovered drain overflowing near residential cluster. ARZI pinpointed MCD Executive Engineer (1.2 km away) and drafted Section 80 CPC Legal Notice with 48-hour emergency life & liberty clause.</p>
-            <button class="btn-gov-outline" style="font-size: 10.5px; padding: 2px 6px;" onclick="loadPreset(2)">Load Docket &rarr;</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Traditional Broken Process vs ARZI Platform Comparison -->
-      <div class="comparison-section">
-        <div style="font-family: var(--font-serif); font-size: 15px; font-weight: 700; color: var(--ink-primary); margin-bottom: 8px;">
-          Why Traditional Grievance Redressal Fails vs How ARZI Enforces Public Accountability
-        </div>
-        <div class="comparison-grid">
-          <div class="comparison-column broken">
-            <h4><i data-lucide="x-circle" style="width: 14px; height: 14px;"></i> Traditional Broken Workflow in India</h4>
-            <ul class="comparison-list">
-              <li>Citizen grievances die in unmonitored WhatsApp groups and physical registers.</li>
-              <li>Citizens do not know which public authority holds their records (Revenue vs Food vs Police).</li>
-              <li>Outdated IPC sections cited without BNS 2023 criminal cross-mapping.</li>
-              <li>Overdue applications sit without personal Section 20 ₹250/day penalty enforcement on delinquent PIOs.</li>
-            </ul>
-          </div>
-          <div class="comparison-column arzi">
-            <h4><i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> ARZI Autonomous Civic Intelligence Desk</h4>
-            <ul class="comparison-list">
-              <li>Automated ingestion parses raw facts into structured legal questions under Section 2(f).</li>
-              <li>Haversine geodesy assigns the nearest competent PIO and First Appellate Authority (FAA).</li>
-              <li>Full IPC 1860 &harr; BNS 2023 statutory cross-indexing and win-probability scoring.</li>
-              <li>Unified operations desk allows advocates and public authorities to approve in one click with live audit proof.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 18px;">
-          <button class="btn-gov-primary" style="padding: 9px 20px;" onclick="showPage('dashboard')">
-            <i data-lucide="layout-dashboard" style="width: 13px; height: 13px;"></i>
-            <span>Access Live Operations Desk & Track Cases &rarr;</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Institutional Frequently Asked Questions (FAQ) -->
-      <div class="faq-section">
-        <div style="font-family: var(--font-serif); font-size: 16px; font-weight: 700; color: var(--ink-primary); display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="help-circle" style="width: 16px; height: 16px; color: var(--gov-navy);"></i>
-          <span>Frequently Asked Questions & Statutory Guidelines</span>
-        </div>
-
-        <div class="faq-grid">
-          <div class="faq-item">
-            <div class="faq-question">How does ARZI cross-map IPC 1860 to Bharatiya Nyaya Sanhita (BNS 2023)?</div>
-            <div class="faq-answer">ARZI includes a dual statutory parsing engine that recognizes old Indian Penal Code criminal clauses (e.g. IPC 420 for cheating, IPC 409 for criminal breach of trust by public servant) and automatically cross-indexes them to corresponding BNS 2023 substantive sections with maximum punishment scopes.</div>
-          </div>
-
-          <div class="faq-item">
-            <div class="faq-question">What is the Section 20(1) ₹250/day personal penalty clock?</div>
-            <div class="faq-answer">Under Section 20(1) of the RTI Act 2005, when a Public Information Officer fails to furnish information within the 30-day statutory SLA without reasonable cause, the Central or State Information Commission is mandated to impose a penalty of ₹250 each day (up to ₹25,000) directly deducted from the officer's personal salary.</div>
-          </div>
-
-          <div class="faq-item">
-            <div class="faq-question">How does ARZI store and secure case dockets?</div>
-            <div class="faq-answer">ARZI connects directly to Supabase PostgreSQL with encrypted vector embeddings and immutable audit logging for every state transition, ensuring complete statutory compliance and data integrity.</div>
-          </div>
-
-          <div class="faq-item">
-            <div class="faq-question">Can advocates register custom State Acts and specialized legislation?</div>
-            <div class="faq-answer">Yes. The Statutory Library module allows advocates to register any Central or State Act (such as Consumer Protection Act 2019 or State Revenue Codes). Once registered, custom acts can be cited in legal notices and active case dossiers.</div>
-          </div>
+          <i data-lucide="shield-check" style="width: 22px; height: 22px; color: var(--status-active);"></i>
+          <h3>Enforceable Instruments & Audit Trail</h3>
+          <p>Generates court-ready Form-A RTI and First Appeal PDFs with SHA-256 digital seals while recording every action in an immutable execution audit log.</p>
         </div>
       </div>
 
@@ -1075,14 +929,76 @@
         </div>
       </div>
 
-      <!-- TAB 5: AUDIT RUN LOG -->
+      <!-- TAB 5: AUDIT RUN LOG (WITH MULTI-FIELD CASE SEARCH) -->
       <div id="dashtab-runlog" class="dash-module">
+        
+        <!-- Multi-Field Case & Audit Search Bar -->
+        <div class="ops-panel" style="margin-bottom: 14px;">
+          <div class="ops-panel-header">
+            <span class="ops-panel-title">Search Case Dockets & Audit Trail</span>
+            <span class="status-pill approved" id="runLogSearchStatus">All Logs Active</span>
+          </div>
+          <div style="padding: 14px;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <div style="position: relative; flex: 1;">
+                <i data-lucide="search" style="position: absolute; left: 10px; top: 10px; width: 14px; height: 14px; color: var(--ink-muted);"></i>
+                <input 
+                  type="text" 
+                  id="runLogSearchInput" 
+                  placeholder="Type any keyword: complainant name, place/district, subject, address, officer name, or Case ID..." 
+                  oninput="handleRunLogSearch(this.value)"
+                  style="padding-left: 32px; font-size: 12.5px; height: 34px;"
+                />
+              </div>
+              <button class="btn-gov-outline" style="padding: 6px 12px; font-size: 11.5px;" onclick="clearRunLogSearch()">
+                <i data-lucide="x" style="width: 12px; height: 12px;"></i>
+                <span>Clear</span>
+              </button>
+              <button class="btn-gov-outline" style="padding: 6px 12px; font-size: 11.5px;" onclick="loadRunLogs()">
+                <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i>
+                <span>Refresh</span>
+              </button>
+            </div>
+
+            <!-- Quick Filter Pill Suggestions -->
+            <div style="display: flex; gap: 6px; margin-top: 10px; align-items: center; flex-wrap: wrap;">
+              <span style="font-size: 10.5px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Quick Search:</span>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Shivanshu')">Shivanshu</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Sunita')">Sunita Devi</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Varanasi')">Varanasi</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Mehrauli')">Mehrauli</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Civil Lines')">Civil Lines</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Sharma')">Shri R. K. Sharma</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Land Mutation')">Land Mutation</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('ARZ-1046')">ARZ-1046</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Matching Case Dockets Display -->
+        <div class="ops-panel" id="matchedCasesPanel" style="margin-bottom: 14px; display: none;">
+          <div class="ops-panel-header" style="background: var(--bg-subtle);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="folder-search" style="width: 15px; height: 15px; color: var(--gov-navy);"></i>
+              <span class="ops-panel-title">Related Case Dockets (<span id="matchedCasesCount">0</span>)</span>
+            </div>
+            <span style="font-size: 11px; color: var(--ink-muted);">Click "Inspect Dossier" to open case in Casework Desk</span>
+          </div>
+          <div id="matchedCasesContainer" style="padding: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px;">
+            <!-- Dynamically rendered matched case cards -->
+          </div>
+        </div>
+
+        <!-- Execution Run Log Table -->
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">Immutable Code-Generated Execution Run Log</span>
-            <button class="btn-gov-outline" style="padding: 2px 8px; font-size: 10.5px;" onclick="loadRunLogs()">Refresh</button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="scroll-text" style="width: 14px; height: 14px; color: var(--gov-navy);"></i>
+              <span class="ops-panel-title">Immutable Code-Generated Execution Run Log (<span id="runLogCountBadge">0</span> Records)</span>
+            </div>
+            <span id="runLogFilterBadge" class="status-pill approved" style="font-size: 10px;">All Events</span>
           </div>
-          <div style="padding: 12px;">
+          <div style="padding: 12px; overflow-x: auto;">
             <table class="editorial-table">
               <thead>
                 <tr>
