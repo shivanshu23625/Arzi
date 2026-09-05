@@ -1,12 +1,12 @@
 # 🚀 ARZI Platform — Complete Deployment & Startup Guide
 
-This document provides step-by-step instructions to run the project locally with a **single command** or deploy it to the cloud using **Render** or **Vercel**.
+This document provides step-by-step instructions to run the project locally with a **single command** or deploy it to the cloud using **Railway** with **Supabase**.
 
 ---
 
 ## ⚡ 1. Single-Command Local Run
 
-You can now start the entire ARZI engine, Notion sync worker, and web dashboard using **any** of the following single commands from the project root:
+You can start the ARZI engine and web dashboard using **any** of the following single commands from the project root:
 
 ```bash
 # Option A (Standard NPM)
@@ -23,45 +23,32 @@ Once started, open your browser to **[http://localhost:5000](http://localhost:50
 
 ---
 
-## ☁️ 2. Deploying to Render (Recommended for Notion Track)
+## 🚂 2. Deploying to Railway
 
-Render is the **ideal free hosting platform** for ARZI because it supports long-running background threads (such as the autonomous Notion poller).
+Railway provides seamless container and Procfile hosting with automatic SSL, custom domains, and zero-configuration environment variables.
 
 ### Step-by-Step Deployment:
 1. Push your latest code to GitHub (**[https://github.com/shivanshu23625/Arzi](https://github.com/shivanshu23625/Arzi)**).
-2. Go to **[https://render.com](https://render.com)** and sign in with GitHub.
-3. Click **`New +`** $\rightarrow$ **`Web Service`**.
+2. Go to **[https://railway.app](https://railway.app)** and log in.
+3. Click **`New Project`** $\rightarrow$ **`Deploy from GitHub repo`**.
 4. Select your **`shivanshu23625/Arzi`** repository.
-5. Configure the service settings:
-   - **Name**: `arzi-legal-engine`
-   - **Language / Runtime**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn flask_backend.app:app --bind 0.0.0.0:$PORT`
-   - **Instance Type**: `Free`
-6. *(Optional)* Add Environment Variables under **Advanced**:
-   - `NOTION_API_KEY`: `secret_...`
-   - `NOTION_CASES_DB_ID`: `...`
-   - `NOTION_RUN_LOG_DB_ID`: `...`
-7. Click **`Create Web Service`**.
-8. Render will build and deploy your application. You will get a live public URL (e.g. `https://arzi-legal-engine.onrender.com`).
+5. Railway will automatically detect the **`Procfile`** / **`Dockerfile`**:
+   - Start Command: `gunicorn flask_backend.app:app` (via Procfile) or custom command.
+6. Under **Variables** in your Railway dashboard, configure:
+   - `PORT`: `5000` (or leave Railway to assign `$PORT` automatically)
+   - `DATABASE_URL`: `postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres`
+   - `FLASK_ENV`: `production`
+   - `SECRET_KEY`: `[YOUR-SECRET-KEY]`
+7. Railway will build and deploy your container with a public HTTPS URL (e.g., `https://arzi-production.up.railway.app`).
 
 ---
 
-## ▲ 3. Deploying to Vercel
+## 🗄️ 3. Connecting Supabase Database
 
-Vercel provides ultra-fast global CDN hosting for Python and Next.js applications using the included `vercel.json`.
-
-### Step-by-Step Deployment:
-1. Go to **[https://vercel.com](https://vercel.com)** and log in with GitHub.
-2. Click **`Add New...`** $\rightarrow$ **`Project`**.
-3. Import your **`shivanshu23625/Arzi`** repository.
-4. Framework Preset: **`Other`** (Root Directory: `./`).
-5. *(Optional)* Under **Environment Variables**, add:
-   - `NOTION_API_KEY`
-   - `NOTION_CASES_DB_ID`
-   - `NOTION_RUN_LOG_DB_ID`
-6. Click **`Deploy`**.
-7. Vercel will automatically detect `vercel.json` and deploy the Python backend.
+ARZI uses PostgreSQL (with pgvector support) hosted on **Supabase**:
+1. Create a project at **[https://supabase.com](https://supabase.com)**.
+2. In the Supabase SQL Editor, run `scripts/init_db.sql` to initialize database tables and the vector extension.
+3. Copy your database connection string from **Project Settings $\rightarrow$ Database** and add it as `DATABASE_URL` in Railway.
 
 ---
 
@@ -69,11 +56,10 @@ Vercel provides ultra-fast global CDN hosting for Python and Next.js application
 
 | Variable | Description | Default / Example |
 | :--- | :--- | :--- |
-| `PORT` | Web server listening port | `5000` (Local) / `10000` (Render) |
-| `NOTION_API_KEY` | Notion Internal Integration Token | `secret_...` |
-| `NOTION_CASES_DB_ID` | Notion Cases Database ID | `32-character hex ID` |
-| `NOTION_RUN_LOG_DB_ID` | Notion Run Log Database ID | `32-character hex ID` |
-| `NOTION_PARENT_PAGE_ID` | Notion Parent Page ID for auto-setup | `32-character hex ID` |
+| `PORT` | Web server listening port | `5000` (Assigned automatically by Railway) |
+| `DATABASE_URL` | Supabase / PostgreSQL URI | `postgresql://postgres:...@db...supabase.co:5432/postgres` |
+| `FLASK_ENV` | Application environment | `production` |
+| `SECRET_KEY` | Secret session key | Secure random string |
 
 ---
 
@@ -83,5 +69,5 @@ Run the automated test suite locally or in CI/CD:
 ```bash
 npm test
 # OR
-pytest tests/test_notion_sync.py tests/test_flask_api.py
+pytest tests/test_flask_api.py
 ```

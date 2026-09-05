@@ -783,14 +783,6 @@ class DataStore:
                 "correlation_id": correlation_id
             }
             self.run_logs.insert(0, log_entry)
-
-            # Auto-sync to Notion Run Log Database
-            try:
-                from flask_backend.services.notion_service import notion_service
-                notion_service.log_run_to_notion(log_entry)
-            except Exception:
-                pass
-
             return log_entry
 
     def get_run_logs(self, limit: int = 50) -> list:

@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initRadarAnimation();
   loadDirectoryInRadarTab();
   loadCustomActs();
-  loadNotionStatus();
   renderLucide();
 });
 
@@ -74,7 +73,6 @@ function showPage(pageId) {
     loadCaseQueue();
     loadRunLogs();
     loadCustomActs();
-    loadNotionStatus();
   } else if (pageId === "home") {
     loadCaseQueue();
   }
@@ -82,7 +80,7 @@ function showPage(pageId) {
   renderLucide();
 }
 
-// Dashboard Sub-Tab Switcher (Casework, Statutory, PIO, Compliance, RunLog, Notion)
+// Dashboard Sub-Tab Switcher (Casework, Statutory, PIO, Compliance, RunLog)
 function switchDashTab(tabId) {
   showPage("dashboard");
   document.querySelectorAll(".desk-subnav-btn").forEach(b => b.classList.remove("active"));
@@ -93,8 +91,7 @@ function switchDashTab(tabId) {
     statutory: "subnavStatutory",
     pio: "subnavPio",
     compliance: "subnavCompliance",
-    runlog: "subnavRunlog",
-    notion: "subnavNotion"
+    runlog: "subnavRunlog"
   };
 
   const targetBtn = subnavMap[tabId] ? document.getElementById(subnavMap[tabId]) : null;
@@ -106,7 +103,6 @@ function switchDashTab(tabId) {
   if (tabId === "casework") loadCaseQueue();
   if (tabId === "statutory") loadCustomActs();
   if (tabId === "runlog") loadRunLogs();
-  if (tabId === "notion") loadNotionStatus();
   if (tabId === "pio" && currentCase) updateRadarTelemetry(currentCase);
 
   renderLucide();
@@ -126,7 +122,6 @@ function switchToTab(tabName) {
   else if (tabName === "precedents") switchDashTab("statutory");
   else if (tabName === "radar") switchDashTab("pio");
   else if (tabName === "runlog") switchDashTab("runlog");
-  else if (tabName === "notion") switchDashTab("notion");
   else switchDashTab("casework");
 }
 
@@ -921,198 +916,6 @@ async function applyCustomActToActiveCase(actId) {
     }
   } catch (err) {
     console.error("Apply custom act error:", err);
-  }
-}
-
-// ----------------------------------------------------
-// NOTION TRACK ENGINE & TWO-WAY SYNC CONTROLLER
-// ----------------------------------------------------
-
-async function loadNotionStatus() {
-  try {
-    const res = await fetch(`${API_BASE}/notion/status`);
-    const data = await res.json();
-    if (!res.ok) return;
-
-    const n = data.notion || {};
-    const modeBadge = document.getElementById("notionModeBadge");
-    const headerBadge = document.getElementById("headerNotionStatus");
-
-    if (modeBadge) {
-      modeBadge.textContent = n.mode === "LIVE_NOTION_API" ? "LIVE NOTION API" : "IN-MEMORY MIRROR";
-      modeBadge.className = n.mode === "LIVE_NOTION_API" ? "badge badge-live" : "badge badge-gold";
-    }
-
-    if (headerBadge) {
-      headerBadge.textContent = n.mode === "LIVE_NOTION_API" ? "LIVE API" : "CONNECTED";
-    }
-
-    const lastSyncEl = document.getElementById("notionLastSyncTime");
-    const syncedCasesEl = document.getElementById("notionSyncedCasesCount");
-    const syncedLogsEl = document.getElementById("notionSyncedLogsCount");
-    const decisionsEl = document.getElementById("notionDecisionsCount");
-
-    if (lastSyncEl) lastSyncEl.textContent = n.last_sync_timestamp || "Never";
-    if (syncedCasesEl) syncedCasesEl.textContent = n.sync_stats?.total_synced_cases || 0;
-    if (syncedLogsEl) syncedLogsEl.textContent = n.sync_stats?.total_synced_run_logs || 0;
-    if (decisionsEl) decisionsEl.textContent = n.sync_stats?.human_decisions_processed || 0;
-
-    // Load Mirror Databases
-    loadNotionMirror();
-  } catch (err) {
-    console.error("Notion status load error:", err);
-  }
-}
-
-async function loadNotionMirror() {
-  try {
-    const res = await fetch(`${API_BASE}/notion/mirror`);
-    const data = await res.json();
-    if (!res.ok) return;
-
-    const casesList = document.getElementById("notionCasesMirrorList");
-    const logsList = document.getElementById("notionLogsMirrorList");
-    const casesBadge = document.getElementById("notionMirrorCasesBadge");
-    const logsBadge = document.getElementById("notionMirrorLogsBadge");
-
-    if (casesBadge) casesBadge.textContent = `${data.total_cases_mirrored || 0} Pages`;
-    if (logsBadge) logsBadge.textContent = `${data.total_logs_mirrored || 0} Rows`;
-
-    if (casesList) {
-      casesList.innerHTML = "";
-      if ((data.cases_database_mirror || []).length === 0) {
-        casesList.innerHTML = `<div style="color: var(--text-muted); font-size: 12px; padding: 16px;">No cases synced to Notion yet. Click 'SYNC ALL NOW' above.</div>`;
-      } else {
-        data.cases_database_mirror.forEach(p => {
-          const div = document.createElement("div");
-          div.className = "preset-box";
-          div.style.cssText = "border-left: 3px solid var(--accent-gold); margin-bottom: 8px;";
-          div.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <b style="color: var(--accent-gold); font-size: 12px;">${p.case_id}</b>
-              <span class="badge ${p.status?.includes('Approved') ? 'badge-live' : 'badge-gold'}">${p.status}</span>
-            </div>
-            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
-              Blocks: <b>${p.blocks_count || 12} formatted Notion blocks</b> (Callouts, Questions, Precedents, PDF links)
-            </div>
-            <div class="text-mono" style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-              Last Notion Synced: ${p.synced_at} &middot; <a href="#" style="color: var(--accent-cyan);" onclick="event.preventDefault(); openCaseById('${p.case_id}')">Open in Engine</a>
-            </div>
-          `;
-          casesList.appendChild(div);
-        });
-      }
-    }
-
-    if (logsList) {
-      logsList.innerHTML = "";
-      if ((data.run_log_database_mirror || []).length === 0) {
-        logsList.innerHTML = `<div style="color: var(--text-muted); font-size: 12px; padding: 16px;">No run logs synced to Notion yet.</div>`;
-      } else {
-        data.run_log_database_mirror.forEach(l => {
-          const div = document.createElement("div");
-          div.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 4px; font-size: 11px;";
-          div.innerHTML = `
-            <div>
-              <span class="text-mono" style="color: var(--accent-gold); font-weight: 700;">${l.run_id}</span>
-              <span class="badge badge-blue" style="margin-left: 6px;">${l.event_type}</span>
-              <div style="color: var(--text-secondary); font-size: 10.5px; margin-top: 2px;">${l.action}</div>
-            </div>
-            <div class="text-mono" style="font-size: 10px; color: var(--text-muted); text-align: right;">
-              ${l.timestamp}<br/>
-              <span style="color: var(--accent-emerald);">${l.result}</span>
-            </div>
-          `;
-          logsList.appendChild(div);
-        });
-      }
-    }
-    renderLucide();
-  } catch (err) {
-    console.error("Mirror load error:", err);
-  }
-}
-
-async function saveNotionConfig(event) {
-  event.preventDefault();
-
-  const apiKey = document.getElementById("notionApiKeyInput").value.trim();
-  const casesDbId = document.getElementById("notionCasesDbInput").value.trim();
-  const runLogDbId = document.getElementById("notionRunLogDbInput").value.trim();
-  const parentPageId = document.getElementById("notionParentPageInput").value.trim();
-
-  try {
-    const res = await fetch(`${API_BASE}/notion/configure`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        api_key: apiKey,
-        cases_db_id: casesDbId,
-        run_log_db_id: runLogDbId,
-        parent_page_id: parentPageId
-      })
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      alert("Notion Configuration Saved!\n\nARZI Engine is now bound to your Notion workspace.");
-      loadNotionStatus();
-      loadRunLogs();
-    } else {
-      alert(`Error: ${data.message}`);
-    }
-  } catch (err) {
-    console.error("Config save error:", err);
-    alert("Connection error saving Notion config.");
-  }
-}
-
-async function triggerFullNotionSync() {
-  try {
-    const res = await fetch(`${API_BASE}/notion/sync-all`, {
-      method: "POST"
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      alert(`Notion Sync Completed!\n\n• Synced ${data.synced_cases_count} Case Pages\n• Synced ${data.synced_run_logs_count} Run Log Rows\n• Mode: ${data.mode}`);
-      loadNotionStatus();
-      loadRunLogs();
-    } else {
-      alert(`Error: ${data.message}`);
-    }
-  } catch (err) {
-    console.error("Sync error:", err);
-    alert("Connection error executing Notion sync.");
-  }
-}
-
-async function triggerNotionWorkspaceProvision() {
-  const parentPageId = document.getElementById("notionParentPageInput").value.trim();
-  const apiKey = document.getElementById("notionApiKeyInput").value.trim();
-
-  if (!parentPageId || !apiKey) {
-    alert("Please enter your Notion API Key and Parent Page ID first to automatically provision the database schemas.");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/notion/setup-workspace`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ parent_page_id: parentPageId })
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      alert("Notion Workspace Provisioned Successfully!\n\nCreated Cases Database and Run Log Database on Notion.");
-      loadNotionStatus();
-      loadRunLogs();
-    } else {
-      alert(`Setup Error: ${data.details?.message || data.message || "Failed"}`);
-    }
-  } catch (err) {
-    console.error("Provision error:", err);
   }
 }
 
