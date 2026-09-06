@@ -466,6 +466,16 @@ function loadPreset(num) {
   if (intakeForm) intakeForm.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // Live ML Domain & Public Authority Prediction
 async function triggerLiveMlPrediction() {
   const grievanceEl = document.getElementById("rawGrievance");
@@ -719,9 +729,6 @@ function populateWorkspaceFields(c) {
   document.getElementById("viewSubDate").textContent = c.original_submission_date || "Unconfirmed";
 
   // PIO & FAA Block
-  const pio = c.suggested_pio || {};
-  const faa = c.suggested_faa || pio.faa || {};
-
   document.getElementById("viewDistanceLabel").textContent = pio.distance_label || "1.5 km away";
   document.getElementById("viewPioName").textContent = pio.pio_name || "Designated PIO";
   document.getElementById("viewPioDept").textContent = pio.department || c.department;
