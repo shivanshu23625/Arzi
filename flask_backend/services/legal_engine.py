@@ -130,10 +130,11 @@ class LegalIntelligenceEngine:
     generates Win-Probability scores, and drafts Form-A RTI and First Appeals.
     """
 
-    def analyze_legal_standing(self, grievance_text: str, department: str, days_overdue: int = 0) -> dict:
+    def analyze_legal_standing(self, grievance_text: str, department: str, days_overdue: int = 0, is_urgent_48h: bool = False) -> dict:
         """
         Classifies the grievance against IPC & BNS statutory codes, calculates case merit,
         extracts legal grounds, and pulls applicable landmark precedents.
+        Supports Proviso to Section 7(1) 48-hour Life & Liberty fast-track.
         """
         text_lower = grievance_text.lower()
         matched_entry = None
@@ -165,7 +166,9 @@ class LegalIntelligenceEngine:
             merit_score += 10
         if has_date:
             merit_score += 10
-        if days_overdue > 30:
+        if is_urgent_48h:
+            merit_score += 8  # Statutory priority under Article 21
+        elif days_overdue > 30:
             merit_score += 5
         merit_score = min(98, merit_score)
 
@@ -173,31 +176,42 @@ class LegalIntelligenceEngine:
         sec20_penalty_per_day = 250
         max_penalty = 25000
         potential_penalty = 0
-        if days_overdue > 30:
-            overdue_days = days_overdue - 30
+        sla_threshold = 2 if is_urgent_48h else 30
+        
+        if days_overdue > sla_threshold:
+            overdue_days = days_overdue - sla_threshold
             potential_penalty = min(max_penalty, overdue_days * sec20_penalty_per_day)
 
-        # Relevant Supreme Court Precedent
+        # Relevant Supreme Court Precedents
         precedents = []
         if "police" in department.lower():
             precedents.append(LANDMARK_CASE_PRECEDENTS[1])
         precedents.append(LANDMARK_CASE_PRECEDENTS[0])
-        if days_overdue > 30:
+        if days_overdue > sla_threshold:
             precedents.append(LANDMARK_CASE_PRECEDENTS[3])
+
+        allied = list(matched_entry["allied_acts"])
+        if is_urgent_48h and "Article 21 Constitution of India (Right to Life & Liberty)" not in allied:
+            allied.insert(0, "Article 21 Constitution of India (Right to Life & Liberty)")
+
+        grounds = list(matched_entry["legal_grounds"])
+        if is_urgent_48h:
+            grounds.insert(0, "Immediate threat to Life and Personal Liberty attracting mandatory 48-hour statutory disclosure under Proviso to Section 7(1) of RTI Act 2005.")
 
         return {
             "statutory_domain": matched_entry["domain"],
             "statutory_infraction": matched_entry["infraction"],
             "ipc_sections": matched_entry["ipc_sections"],
             "bns_sections": matched_entry["bns_sections"],
-            "allied_acts": matched_entry["allied_acts"],
+            "allied_acts": allied,
             "maximum_punishment": matched_entry["punishment"],
-            "legal_grounds": matched_entry["legal_grounds"],
+            "legal_grounds": grounds,
             "case_merit_score": merit_score,
-            "win_probability": "VERY HIGH (94%+)" if merit_score >= 85 else "HIGH (78%+)",
+            "win_probability": "VERY HIGH (95%+)" if merit_score >= 85 else "HIGH (80%+)",
             "section_20_penalty_liability_inr": potential_penalty,
             "section_20_daily_rate_inr": sec20_penalty_per_day,
-            "days_past_sla": max(0, days_overdue - 30),
+            "days_past_sla": max(0, days_overdue - sla_threshold),
+            "is_urgent_48h": is_urgent_48h,
             "landmark_precedents": precedents
         }
 
@@ -205,6 +219,7 @@ class LegalIntelligenceEngine:
         """
         Drafts a formal First Appeal Memorandum under Section 19(1) of the RTI Act 2005
         addressed to the designated First Appellate Authority (FAA).
+        Supports 48-Hour Urgent Life & Liberty fast-track under Section 7(1) Proviso.
         """
         complainant = case.get("complainant", {})
         pio = case.get("suggested_pio", {})
@@ -217,32 +232,48 @@ class LegalIntelligenceEngine:
         ref_no = case.get("application_ref_no", "N/A")
         sub_date = case.get("original_submission_date", "N/A")
         today_date = datetime.now().strftime("%d-%b-%Y")
+        is_urgent = bool(case.get("is_life_liberty") or case.get("statutory_sla_hours") == 48)
 
-        subject = f"FIRST APPEAL UNDER SECTION 19(1) OF RTI ACT 2005 AGAINST DEEMED REFUSAL / NON-RESPONSE BY PIO IN CASE {case_id}"
-        
-        grounds = [
-            f"1. The Appellant submitted an initial RTI Application (Case ID: {case_id}, Ref: {ref_no}) on {sub_date} seeking certified public records under Section 6(1).",
-            f"2. More than 30 days have elapsed since filing, and the Designated PIO ({pio.get('pio_name', 'Public Information Officer')}) has failed to provide the requested information within statutory SLA under Section 7(1).",
-            "3. Under Section 7(2) of the RTI Act 2005, the failure of the PIO to give a decision within 30 days constitutes a 'DEEMED REFUSAL' of the application.",
-            "4. Under Section 7(6) of the RTI Act 2005, the Appellant is now legally entitled to receive all requested certified information FREE OF COST without any further documentation charges.",
-            f"5. The PIO has incurred personal statutory penalty liability of Rs. 250 per day under Section 20(1) as affirmed in *Manohar v. State of Maharashtra AIR 2013 SC 681*."
-        ]
-
-        prayers = [
-            "a) Direct the Designated PIO to forthwith furnish certified copies of all requested file records FREE OF CHARGE to the Appellant within 7 days.",
-            "b) Grant an opportunity of personal hearing to the Appellant before the First Appellate Authority.",
-            "c) Recommend initiation of departmental disciplinary proceedings and Section 20(1) penalty proceedings against the defaulting officer."
-        ]
+        if is_urgent:
+            subject = f"*** URGENT FIRST APPEAL UNDER SECTION 19(1) READ WITH PROVISO TO SECTION 7(1) RTI ACT 2005 - 48-HOUR LIFE & LIBERTY EMERGENCY *** - AGAINST DEEMED REFUSAL BY PIO IN CASE {case_id}"
+            grounds = [
+                f"1. The Appellant submitted an Urgent RTI Application (Case ID: {case_id}, Ref: {ref_no}) on {sub_date} seeking critical public records concerning the LIFE OR LIBERTY of a person under the PROVISO TO SECTION 7(1) of the RTI Act 2005.",
+                f"2. More than 48 hours have elapsed since receipt, and the Designated PIO ({pio.get('pio_name', 'Public Information Officer')}) has failed to provide the requested information within the mandatory 48-hour statutory timeline.",
+                "3. Under Section 7(2) of the RTI Act 2005, the failure of the PIO to decide within 48 hours constitutes an immediate 'DEEMED REFUSAL' of the application.",
+                "4. Deprivation of this information creates an imminent threat of irreparable harm and violates the fundamental Right to Life under Article 21 of the Constitution of India.",
+                "5. Under Section 7(6) of the RTI Act 2005, the Appellant is now legally entitled to receive all requested certified information completely FREE OF COST.",
+                f"6. The defaulting PIO has incurred personal statutory penalty liability of Rs. 250 per day under Section 20(1) as affirmed in *Manohar v. State of Maharashtra AIR 2013 SC 681*."
+            ]
+            prayers = [
+                "a) Direct the Designated PIO to forthwith furnish certified copies of all requested emergency file records FREE OF CHARGE to the Appellant within 24 hours.",
+                "b) Conduct an immediate urgent personal hearing within 48 hours before the First Appellate Authority.",
+                "c) Recommend initiation of Section 20(1) penalty proceedings and Section 20(2) disciplinary action against the delinquent officer."
+            ]
+        else:
+            subject = f"FIRST APPEAL UNDER SECTION 19(1) OF RTI ACT 2005 AGAINST DEEMED REFUSAL / NON-RESPONSE BY PIO IN CASE {case_id}"
+            grounds = [
+                f"1. The Appellant submitted an initial RTI Application (Case ID: {case_id}, Ref: {ref_no}) on {sub_date} seeking certified public records under Section 6(1).",
+                f"2. More than 30 days have elapsed since filing, and the Designated PIO ({pio.get('pio_name', 'Public Information Officer')}) has failed to provide the requested information within statutory SLA under Section 7(1).",
+                "3. Under Section 7(2) of the RTI Act 2005, the failure of the PIO to give a decision within 30 days constitutes a 'DEEMED REFUSAL' of the application.",
+                "4. Under Section 7(6) of the RTI Act 2005, the Appellant is now legally entitled to receive all requested certified information FREE OF COST without any further documentation charges.",
+                f"5. The PIO has incurred personal statutory penalty liability of Rs. 250 per day under Section 20(1) as affirmed in *Manohar v. State of Maharashtra AIR 2013 SC 681*."
+            ]
+            prayers = [
+                "a) Direct the Designated PIO to forthwith furnish certified copies of all requested file records FREE OF CHARGE to the Appellant within 7 days.",
+                "b) Grant an opportunity of personal hearing to the Appellant before the First Appellate Authority.",
+                "c) Recommend initiation of departmental disciplinary proceedings and Section 20(1) penalty proceedings against the defaulting officer."
+            ]
 
         return {
-            "appeal_type": "FIRST APPEAL (SECTION 19(1) RTI ACT 2005)",
+            "appeal_type": "URGENT FIRST APPEAL (SECTION 19(1) & 7(1) PROVISO)" if is_urgent else "FIRST APPEAL (SECTION 19(1) RTI ACT 2005)",
             "appeal_id": f"APP-19-{case_id}",
             "appeal_date": today_date,
             "target_faa": faa,
             "subject": subject,
+            "is_life_liberty": is_urgent,
             "grounds_of_appeal": grounds,
             "prayers_sought": prayers,
-            "statutory_act": "Right to Information Act 2005 (Section 19(1) read with Section 7(1) & 7(6))"
+            "statutory_act": "Right to Information Act 2005 (Section 19(1) read with Proviso to Section 7(1) & Section 7(6))" if is_urgent else "Right to Information Act 2005 (Section 19(1) read with Section 7(1) & 7(6))"
         }
 
     def generate_legal_notice_draft(self, case: dict, legal_analysis: dict) -> dict:

@@ -270,3 +270,182 @@ def test_area_and_domain_pio_assignment(client):
     assert assign_res.status_code == 200
     reassigned_case = assign_res.get_json()["case"]
     assert reassigned_case["suggested_pio"]["pio_name"] == alt_pio["pio_name"]
+
+def test_48_hour_life_and_liberty_detection(client):
+    # Ingest a critical life & liberty grievance (hospital ICU oxygen failure & contaminated water)
+    payload = {
+        "complainant": {
+            "name": "Sunita Verma",
+            "contact": "+91-9988776655",
+            "address": "Sigra, Varanasi, Uttar Pradesh - 221010",
+            "language": "Hindi"
+        },
+        "raw_grievance": "EMERGENCY: Contaminated poisonous water in municipal line causing severe epidemic in Sigra. Multiple patients in hospital ICU on ventilator. Threat to life. Officer refusing inspection.",
+        "department": "Municipal Public Works & Drainage"
+    }
+    res = client.post("/api/v1/cases/intake", json=payload)
+    assert res.status_code == 201
+    case = res.get_json()["case"]
+    case_id = case["case_id"]
+
+    # Statutory 48-Hour SLA Assertion under Section 7(1) Proviso
+    assert case["is_life_liberty"] is True
+    assert case["statutory_sla_hours"] == 48
+    assert case["sla_days_remaining"] == 2
+    assert "PROVISO TO SECTION 7(1)" in case["draft_rti"]["application_subject"]
+    assert "MANDATORY STATUTORY DISCLOSURE WITHIN 48 HOURS" in case["draft_rti"]["questions"][0]
+
+    # Test First Appeal reflects 48-Hour Deemed Refusal & Article 21
+    appeal_res = client.get(f"/api/v1/cases/{case_id}/appeal")
+    assert appeal_res.status_code == 200
+    appeal = appeal_res.get_json()["appeal"]
+    assert appeal["is_life_liberty"] is True
+    assert "48-HOUR LIFE & LIBERTY EMERGENCY" in appeal["subject"]
+    assert any("Article 21" in g for g in appeal["grounds_of_appeal"])
+
+def test_toggle_urgency_endpoint(client):
+    # Intake standard case
+    payload = {
+        "complainant": {"name": "Rohan Gupta", "address": "Civil Lines, Prayagraj"},
+        "raw_grievance": "Delay in mutation of agricultural plot.",
+        "department": "Revenue & Land Records"
+    }
+    res = client.post("/api/v1/cases/intake", json=payload)
+    case_id = res.get_json()["case"]["case_id"]
+
+    # Toggle to urgent Life & Liberty
+    toggle_res = client.post(f"/api/v1/cases/{case_id}/toggle-urgency", json={"is_urgent": True, "reviewer": "Advocate Kalra"})
+    assert toggle_res.status_code == 200
+    data = toggle_res.get_json()
+    assert data["is_life_liberty"] is True
+    assert data["statutory_sla_hours"] == 48
+    assert data["sla_days_remaining"] == 2
+
+    # Toggle back to standard 30-day
+    toggle_res2 = client.post(f"/api/v1/cases/{case_id}/toggle-urgency", json={"is_urgent": False, "reviewer": "Advocate Kalra"})
+    assert toggle_res2.status_code == 200
+    data2 = toggle_res2.get_json()
+    assert data2["is_life_liberty"] is False
+    assert data2["statutory_sla_hours"] == 720
+    assert data2["sla_days_remaining"] == 30
+
+def test_section_8_shield_endpoint(client):
+    # Verify Section 8 Exemption Shield for police inaction case
+    res = client.post(f"/api/v1/cases/ARZ-1046/section8-shield", json={
+        "public_interest_reason": "Corruption and illegal extortion in public office"
+    })
+    assert res.status_code == 200
+    data = res.get_json()
+    shield = data["section_8_shield"]
+    assert shield["public_interest_override_applicable"] is True
+    assert len(shield["section_8_risks_identified"]) > 0
+    assert "STATUTORY REBUTTAL NOTICE" in shield["statutory_rebuttal_draft"]
+    assert "Section 8(2)" in shield["section_8_2_override_text"]
+
+def test_postal_slip_and_pdf(client):
+    # 1. Test Postal Slip metadata and SVG Barcode
+    res = client.get("/api/v1/cases/ARZ-1046/postal-slip")
+    assert res.status_code == 200
+    slip = res.get_json()["postal_slip"]
+    assert slip["consignment_number"].startswith("EM")
+    assert slip["consignment_number"].endswith("IN")
+    assert "<svg" in slip["barcode_svg"]
+    assert "Section 27 of the General Clauses Act" in slip["legal_notice"]
+
+    # 2. Test PDF generation for postal slip
+    pdf_res = client.get("/api/v1/cases/ARZ-1046/pdf?type=slip")
+    assert pdf_res.status_code == 200
+    assert pdf_res.headers["Content-Type"] == "application/pdf"
+    assert len(pdf_res.data) > 500
+
+def test_pincode_lookup_endpoint(client):
+    # 1. Karnataka Bangalore PIN 560001
+    res_blr = client.get("/api/v1/cases/pincode-lookup?pincode=560001")
+    assert res_blr.status_code == 200
+    data_blr = res_blr.get_json()
+    assert data_blr["status"] == "success"
+    assert data_blr["pincode"] == "560001"
+    assert "Karnataka" in data_blr["state"]
+    assert "Karnataka Land Revenue Act" in data_blr["land_codex"]["primary_land_act"]
+    assert "Bhoomi" in data_blr["land_codex"]["digital_land_portal"]
+    assert "Tahsildar" in data_blr["assigned_pio"]["designation"]
+
+    # 2. Maharashtra Mumbai PIN 400001
+    res_mum = client.get("/api/v1/cases/pincode-lookup?pincode=400001")
+    assert res_mum.status_code == 200
+    data_mum = res_mum.get_json()
+    assert "Maharashtra" in data_mum["state"]
+    assert "Maharashtra Land Revenue Code" in data_mum["land_codex"]["primary_land_act"]
+    assert "MahaBhulekh" in data_mum["land_codex"]["digital_land_portal"]
+
+    # 3. Rajasthan Jaipur PIN 302001
+    res_jpr = client.get("/api/v1/cases/pincode-lookup?pincode=302001")
+    assert res_jpr.status_code == 200
+    data_jpr = res_jpr.get_json()
+    assert "Rajasthan" in data_jpr["state"]
+    assert "Rajasthan Land Revenue Act" in data_jpr["land_codex"]["primary_land_act"]
+
+    # 4. Bihar Patna PIN 800001
+    res_pat = client.get("/api/v1/cases/pincode-lookup?pincode=800001")
+    assert res_pat.status_code == 200
+    data_pat = res_pat.get_json()
+    assert "Bihar" in data_pat["state"]
+    assert "Bihar Land Mutation Act" in data_pat["land_codex"]["primary_land_act"]
+    assert "Circle Officer" in data_pat["land_codex"]["pio_title"]
+
+    # 5. Invalid PIN validation
+    res_inv = client.get("/api/v1/cases/pincode-lookup?pincode=999")
+    assert res_inv.status_code == 400
+
+def test_all_india_land_intake_routing(client):
+    # Intake Karnataka Land Grievance with 560001 PIN
+    payload_karnataka = {
+        "complainant": {
+            "name": "Basavaraj Gowda",
+            "contact": "+91-9845012345",
+            "address": "Indiranagar, Bengaluru, Karnataka",
+            "pincode": "560001"
+        },
+        "raw_grievance": "My land mutation application for RTC Pahani extract transfer submitted 90 days ago is illegally held up at Tahsildar office Bangalore.",
+        "department": "Revenue & Land Records"
+    }
+    res_k = client.post("/api/v1/cases/intake", json=payload_karnataka)
+    assert res_k.status_code == 201
+    case_k = res_k.get_json()["case"]
+    
+    assert case_k["pincode"] == "560001"
+    assert "Karnataka" in case_k["state"]
+    assert "Karnataka Land Revenue Act" in case_k["statutory_jurisdiction"]["primary_land_act"]
+    assert "Tahsildar" in case_k["suggested_pio"]["designation"]
+    assert "Varanasi" not in case_k["suggested_pio"]["office_address"]
+    # Check that questions cite Karnataka Land Revenue Act and RTC/Pahani
+    q_joined = " ".join(case_k["draft_rti"]["questions"])
+    assert "Karnataka Land Revenue Act" in q_joined
+    assert "Section 128" in q_joined or "RTC" in q_joined
+
+    # Verify searchable by PIN in list_cases
+    search_res = client.get("/api/v1/cases?search=560001")
+    assert search_res.status_code == 200
+    found_cases = search_res.get_json()["cases"]
+    assert any(c["case_id"] == case_k["case_id"] for c in found_cases)
+
+    # Intake Maharashtra Land Grievance with 400001 PIN
+    payload_mh = {
+        "complainant": {
+            "name": "Sachin Deshmukh",
+            "contact": "+91-9820011223",
+            "address": "Dadar, Mumbai, Maharashtra - 400001"
+        },
+        "raw_grievance": "Ferfar mutation entry and Satbara 7/12 extract not updated after sale deed execution.",
+        "department": "Revenue & Land Records"
+    }
+    res_mh = client.post("/api/v1/cases/intake", json=payload_mh)
+    assert res_mh.status_code == 201
+    case_mh = res_mh.get_json()["case"]
+    assert case_mh["pincode"] == "400001"
+    assert "Maharashtra" in case_mh["state"]
+    assert "Maharashtra Land Revenue Code" in case_mh["statutory_jurisdiction"]["primary_land_act"]
+    q_mh_joined = " ".join(case_mh["draft_rti"]["questions"])
+    assert "Maharashtra Land Revenue Code" in q_mh_joined
+
+

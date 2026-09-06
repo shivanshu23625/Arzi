@@ -19,6 +19,8 @@ class RepoValidator:
         self.simulated_kill_switch = False
         self._last_status = True
         self._last_message = "Repository integrity verified active."
+        self._last_checked_at = 0.0
+        self._cache_ttl = 60.0 # 60-second cache to prevent GitHub rate-limiting (60 req/hr)
 
     def toggle_kill_switch(self, simulate_deleted: bool):
         self.simulated_kill_switch = simulate_deleted
@@ -30,7 +32,10 @@ class RepoValidator:
             self._last_message = "Repository integrity restored."
         return self.get_status()
 
-    def verify_liveness(self) -> tuple[bool, str]:
+    def verify_liveness(self, force: bool = False) -> tuple[bool, str]:
+        import time
+        now = time.time()
+
         if self.simulated_kill_switch:
             return False, "CRITICAL INTEGRITY BREACH: GitHub Repository deleted or binding revoked (HTTP 404 Not Found)."
         
@@ -38,7 +43,19 @@ class RepoValidator:
         if os.getenv("TESTING") == "true" or self.repo_url == "mock":
             return self._last_status, self._last_message
 
+        try:
+            from flask import current_app
+            if current_app and current_app.config.get("TESTING"):
+                return self._last_status, self._last_message
+        except Exception:
+            pass
+
+        # Use cached result if within TTL window
+        if not force and (now - self._last_checked_at) < self._cache_ttl:
+            return self._last_status, self._last_message
+
         if "github.com" in self.repo_url:
+            self._last_checked_at = now
             try:
                 req = urllib.request.Request(
                     self.repo_url,

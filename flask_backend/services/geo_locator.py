@@ -1,5 +1,6 @@
 import math
 import re
+from flask_backend.services.pincode_resolver import pincode_resolver
 
 # ==============================================================================
 # GEODETIC PUBLIC AUTHORITY DIRECTORY WITH GPS COORDINATES & FAA MAPPING
@@ -274,8 +275,9 @@ GEO_PUBLIC_AUTHORITIES = [
     }
 ]
 
-# Geocoding Dictionary for Locality Reference Points (Lat, Lon)
+# Geocoding Dictionary for Locality Reference Points (Lat, Lon) Across India
 LOCALITY_GEO_CENTROIDS = {
+    # Varanasi / Banaras
     "assi ghat": (25.2905, 82.9995),
     "sigra": (25.3180, 82.9910),
     "godowlia": (25.3090, 83.0060),
@@ -286,6 +288,7 @@ LOCALITY_GEO_CENTROIDS = {
     "kabir chaura": (25.3140, 83.0080),
     "bhu": (25.2677, 82.9913),
     "lanka": (25.2810, 82.9980),
+    # Delhi NCT
     "mehrauli": (28.5180, 77.1850),
     "rohini": (28.7490, 77.0680),
     "dwarka": (28.5920, 77.0460),
@@ -297,15 +300,45 @@ LOCALITY_GEO_CENTROIDS = {
     "janakpuri": (28.6219, 77.0878),
     "ward 4": (28.6750, 77.2250),
     "sector 12": (28.5920, 77.0460),
+    # Major Indian Metro & State Capital Hubs
+    "bengaluru": (12.9716, 77.5946),
+    "bangalore": (12.9716, 77.5946),
+    "mumbai": (18.9388, 72.8354),
+    "pune": (18.5204, 73.8567),
+    "nagpur": (21.1458, 79.0882),
+    "chennai": (13.0827, 80.2707),
+    "madurai": (9.9252, 78.1198),
+    "coimbatore": (11.0168, 76.9558),
+    "hyderabad": (17.3850, 78.4867),
+    "kolkata": (22.5726, 88.3639),
+    "howrah": (22.5958, 88.2636),
+    "siliguri": (26.7271, 88.3953),
+    "jaipur": (26.9124, 75.7873),
+    "jodhpur": (26.2389, 73.0243),
+    "udaipur": (24.5854, 73.7125),
+    "patna": (25.5941, 85.1376),
+    "gaya": (24.7914, 85.0002),
+    "muzaffarpur": (26.1209, 85.3647),
+    "ahmedabad": (23.0225, 72.5714),
+    "surat": (21.1702, 72.8311),
+    "rajkot": (22.3039, 70.8022),
     "lucknow": (26.8467, 80.9462),
     "gomti nagar": (26.8500, 81.0000),
     "prayagraj": (25.4358, 81.8463),
     "kanpur": (26.4499, 80.3319),
-    "mumbai": (19.0760, 72.8777),
-    "bengaluru": (12.9716, 77.5946),
-    "bangalore": (12.9716, 77.5946),
-    "jaipur": (26.9124, 75.7873),
-    "patna": (25.5941, 85.1376)
+    "agra": (27.1767, 78.0081),
+    "noida": (28.5355, 77.3910),
+    "bhopal": (23.2599, 77.4126),
+    "indore": (22.7196, 75.8577),
+    "chandigarh": (30.7333, 76.7794),
+    "ludhiana": (30.9010, 75.8573),
+    "dehradun": (30.3165, 78.0322),
+    "ranchi": (23.3441, 85.3096),
+    "bhubaneswar": (20.2961, 85.8245),
+    "cuttack": (20.4625, 85.8828),
+    "guwahati": (26.1445, 91.7362),
+    "kochi": (9.9816, 76.2999),
+    "thiruvananthapuram": (8.5241, 76.9366)
 }
 
 
@@ -313,7 +346,8 @@ class GeospatialLocator:
     """
     Geospatial Public Authority & PIO Routing Engine.
     Uses spherical trigonometry (Haversine formula) to locate the exact nearest PIO and FAA,
-    computes accurate straight-line distances (in KM), and assigns administrative nodal details.
+    computes accurate straight-line distances (in KM), and dynamically resolves all-India
+    public authorities by 6-digit Postal PIN codes.
     """
 
     def haversine_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -325,38 +359,82 @@ class GeospatialLocator:
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         return round(R * c, 2)
 
-    def geocode_location(self, address: str, narrative: str) -> tuple[float, float, str]:
-        """Geocodes citizen locality to Latitude, Longitude, and standard locality name."""
+    def geocode_location(self, address: str, narrative: str, pincode: str = None) -> tuple[float, float, str, dict]:
+        """
+        Geocodes citizen locality to Latitude, Longitude, standard locality name,
+        and resolved postal PIN code data if available.
+        """
         full_text = f"{address} {narrative}".lower()
 
+        # 1. Primary: Check for 6-Digit Indian Postal PIN Code
+        pin = pincode or pincode_resolver.extract_pincode(f"{address} {narrative}")
+        if pin:
+            resolved = pincode_resolver.resolve_pincode(pin)
+            if resolved:
+                loc_name = f"{resolved['district']}, {resolved['state']} ({resolved['pincode']})"
+                return resolved["latitude"], resolved["longitude"], loc_name, resolved
+
+        # 2. Secondary: Centroid dictionary keyword matching
         for loc_name, coords in LOCALITY_GEO_CENTROIDS.items():
             if re.search(r'\b' + re.escape(loc_name) + r'\b', full_text):
                 formatted_name = loc_name.title()
                 if loc_name in ("varanasi", "banaras", "kashi", "assi ghat", "sigra", "godowlia", "nadesar", "kabir chaura", "bhu"):
                     formatted_name = "Varanasi / Banaras"
-                return coords[0], coords[1], formatted_name
+                return coords[0], coords[1], formatted_name, None
 
-        # Default to Delhi Center
-        return 28.6139, 77.2090, "Central Division"
+        # 3. Default fallback
+        return 28.6139, 77.2090, "Central Division", None
 
-    def get_area_and_domain_pios(self, category: str, address: str, narrative: str = "") -> dict:
+    def get_area_and_domain_pios(self, category: str, address: str, narrative: str = "", pincode: str = None) -> dict:
         """
-        Geocodes citizen location, computes geodesic distances to ALL public authorities in the directory,
-        suggests all nearest PIO officers in that administrative area, and assigns the nearest PIO officer
-        matching the complaint's specific domain/department.
+        Geocodes citizen location (including Postal PIN code resolution), computes geodesic distances,
+        synthesizes/matches designated PIO officers for that specific administrative jurisdiction,
+        and assigns the nearest PIO officer matching the complaint's specific domain/department.
         """
-        user_lat, user_lon, locality_name = self.geocode_location(address, narrative)
+        user_lat, user_lon, locality_name, pin_resolved = self.geocode_location(address, narrative, pincode)
         
         all_candidates = []
         c_dept = (category or "").strip().lower()
 
-        for p in GEO_PUBLIC_AUTHORITIES:
-            dist = self.haversine_distance(user_lat, user_lon, p["latitude"], p["longitude"])
-            if dist < 1.0:
-                dist_str = f"{int(dist * 1000)} meters away"
-            else:
-                dist_str = f"{dist} km away"
+        # If a 6-digit Indian PIN code was resolved, build authentic district authorities
+        synthesized_ids = set()
+        if pin_resolved:
+            cluster = pincode_resolver.build_designated_pio_cluster(pin_resolved, target_domain=category)
+            for auth in cluster["all_nearby_authorities"]:
+                dist = self.haversine_distance(user_lat, user_lon, auth["latitude"], auth["longitude"])
+                dist_str = f"{int(dist * 1000)} meters away" if dist < 1.0 else f"{dist} km away"
+                p_dept = auth.get("department", "").strip().lower()
+                is_domain_match = bool(c_dept and ((p_dept == c_dept) or (c_dept in p_dept) or (p_dept in c_dept)))
 
+                item = {
+                    "id": auth["id"],
+                    "city": auth.get("city", locality_name),
+                    "district": auth.get("district", pin_resolved.get("district")),
+                    "state": auth.get("state", pin_resolved.get("state")),
+                    "department": auth.get("department"),
+                    "pio_name": auth.get("pio_name"),
+                    "designation": auth.get("designation"),
+                    "office_address": auth.get("office_address"),
+                    "room_no": auth.get("room_no", "Ground Floor RTI Desk"),
+                    "email": auth.get("email"),
+                    "phone": auth.get("phone"),
+                    "latitude": auth["latitude"],
+                    "longitude": auth["longitude"],
+                    "distance_km": dist,
+                    "distance_label": dist_str,
+                    "is_domain_match": is_domain_match,
+                    "faa": auth.get("faa", {}),
+                    "statutory_jurisdiction": auth.get("statutory_jurisdiction", {})
+                }
+                all_candidates.append(item)
+                synthesized_ids.add(auth["id"])
+
+        # Also add fixed regional directory public authorities
+        for p in GEO_PUBLIC_AUTHORITIES:
+            if p["id"] in synthesized_ids:
+                continue
+            dist = self.haversine_distance(user_lat, user_lon, p["latitude"], p["longitude"])
+            dist_str = f"{int(dist * 1000)} meters away" if dist < 1.0 else f"{dist} km away"
             p_dept = p.get("department", "").strip().lower()
             is_domain_match = bool(c_dept and ((p_dept == c_dept) or (c_dept in p_dept) or (p_dept in c_dept)))
 
@@ -377,7 +455,8 @@ class GeospatialLocator:
                 "distance_km": dist,
                 "distance_label": dist_str,
                 "is_domain_match": is_domain_match,
-                "faa": p.get("faa", {})
+                "faa": p.get("faa", {}),
+                "statutory_jurisdiction": {}
             }
             all_candidates.append(item)
 
@@ -423,6 +502,10 @@ class GeospatialLocator:
             "pio_coordinates": {"latitude": assigned_candidate["latitude"], "longitude": assigned_candidate["longitude"]},
             "matched_user_locality": locality_name,
             "faa": assigned_candidate.get("faa", {}),
+            "statutory_jurisdiction": assigned_candidate.get("statutory_jurisdiction", {}),
+            "pincode": pin_resolved.get("pincode") if pin_resolved else None,
+            "district": assigned_candidate.get("district"),
+            "state": assigned_candidate.get("state"),
             "jurisdiction_radius_km": 15.0,
             "is_domain_match": True,
             "is_assigned": True,
@@ -437,18 +520,21 @@ class GeospatialLocator:
             "matched_user_locality": locality_name,
             "target_domain": category,
             "distance_km": assigned_candidate["distance_km"],
-            "distance_label": assigned_candidate["distance_label"]
+            "distance_label": assigned_candidate["distance_label"],
+            "pincode_resolved": pin_resolved,
+            "statutory_jurisdiction": assigned_candidate.get("statutory_jurisdiction", {})
         }
 
-    def find_nearest_public_authority(self, category: str, address: str, narrative: str = "") -> dict:
+    def find_nearest_public_authority(self, category: str, address: str, narrative: str = "", pincode: str = None) -> dict:
         """
         Finds the closest designated PIO and First Appellate Authority (FAA) for a given department
         relative to the citizen's geocoded location, including all nearby area PIOs.
         """
-        geo_data = self.get_area_and_domain_pios(category, address, narrative)
+        geo_data = self.get_area_and_domain_pios(category, address, narrative, pincode)
         assigned = geo_data["assigned_pio"]
         assigned["nearby_area_pios"] = geo_data["nearby_area_pios"]
         return assigned
 
 
 geo_locator = GeospatialLocator()
+

@@ -3,8 +3,14 @@
 const API_BASE = "/api/v1";
 let currentCase = null;
 let activePersona = "law_firm"; // 'law_firm' or 'gov_desk'
-let currentDocTab = "rti"; // 'rti', 'appeal', 'notice', 'report'
+let currentDocTab = "rti"; // 'rti', 'appeal', 'notice', 'section8', 'slip', 'report'
 let radarAnimationId = null;
+
+// Leaflet Map & Speech Recognition Instances
+let leafletMap = null;
+let leafletMarkersLayer = null;
+let speechRecognizer = null;
+let isListeningVoice = false;
 
 function renderLucide() {
   if (window.lucide && typeof window.lucide.createIcons === "function") {
@@ -12,15 +18,23 @@ function renderLucide() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  setupNavigation();
-  loadCaseQueue();
-  loadRunLogs();
-  initRadarAnimation();
-  updatePioMapForCase();
-  loadCustomActs();
-  renderLucide();
-});
+function initApp() {
+  try { initTheme(); } catch (e) { console.warn("Theme init:", e); }
+  try { setupNavigation(); } catch (e) { console.warn("Nav init:", e); }
+  try { loadCaseQueue(); } catch (e) { console.warn("Queue init:", e); }
+  try { loadRunLogs(); } catch (e) { console.warn("RunLog init:", e); }
+  try { initLeafletPioMap(); } catch (e) { console.warn("Map init:", e); }
+  try { initRadarAnimation(); } catch (e) { console.warn("Radar init:", e); }
+  try { updatePioMapForCase(); } catch (e) { console.warn("PioMap init:", e); }
+  try { loadCustomActs(); } catch (e) { console.warn("Acts init:", e); }
+  try { renderLucide(); } catch (e) { console.warn("Lucide init:", e); }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}
 
 // Persona Switcher (Law Firm vs Gov Desk)
 function switchPersona(persona) {
@@ -102,7 +116,12 @@ function switchDashTab(tabId) {
 
   if (tabId === "casework") loadCaseQueue();
   if (tabId === "statutory") loadCustomActs();
-  if (tabId === "pio") updatePioMapForCase(currentCase);
+  if (tabId === "pio") {
+    updatePioMapForCase(currentCase);
+    if (leafletMap) {
+      setTimeout(() => leafletMap.invalidateSize(), 150);
+    }
+  }
 
   renderLucide();
 }
@@ -145,10 +164,10 @@ function setupNavigation() {
 // Document Sub-Tabs in Legal Workspace
 function switchDocTab(tabName) {
   currentDocTab = tabName;
-  document.querySelectorAll(".doc-tab-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".doc-draft-tab, .doc-tab-btn").forEach(b => b.classList.remove("active"));
   document.querySelectorAll("[id^='docPanel']").forEach(p => p.classList.add("hidden"));
 
-  const btn = Array.from(document.querySelectorAll(".doc-tab-btn")).find(b => 
+  const btn = Array.from(document.querySelectorAll(".doc-draft-tab, .doc-tab-btn")).find(b => 
     b.dataset.doctab === tabName || b.textContent.toLowerCase().includes(tabName)
   );
   if (btn) btn.classList.add("active");
@@ -157,38 +176,106 @@ function switchDocTab(tabName) {
     rti: "docPanelRti",
     appeal: "docPanelAppeal",
     notice: "docPanelNotice",
+    section8: "docPanelSection8",
+    slip: "docPanelSlip",
     report: "docPanelReport"
   };
 
   const panel = document.getElementById(panelMap[tabName]);
   if (panel) panel.classList.remove("hidden");
+
+  if (tabName === "section8") {
+    refreshSection8Shield();
+  } else if (tabName === "slip") {
+    renderTabPostalSlip();
+  }
+}
+
+// Postal PIN Code Jurisdiction Resolver Client
+let pincodeLookupTimeout = null;
+
+async function handlePincodeInput(val) {
+  const pin = (val || "").trim();
+  const badge = document.getElementById("pincodeJurisdictionBadge");
+  if (!badge) return;
+
+  if (pincodeLookupTimeout) clearTimeout(pincodeLookupTimeout);
+
+  if (pin.length !== 6 || !/^\d{6}$/.test(pin)) {
+    badge.style.display = "none";
+    badge.innerHTML = "";
+    return;
+  }
+
+  pincodeLookupTimeout = setTimeout(async () => {
+    badge.style.display = "block";
+    badge.innerHTML = `<span style="color: var(--gov-navy); font-weight: 600;">Resolving official postal jurisdiction for PIN <b>${pin}</b>...</span>`;
+    renderLucide();
+
+    try {
+      const res = await fetch(`${API_BASE}/cases/pincode-lookup?pincode=${pin}`);
+      const data = await res.json();
+      if (res.ok && data.status === "success") {
+        const codex = data.land_codex || {};
+        const pio = data.assigned_pio || {};
+        badge.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px;">
+            <div>
+              <b style="color: var(--gov-navy);">✓ Verified Administrative Jurisdiction:</b>
+              <span style="font-weight: 600; color: var(--ink-primary);">${data.district}, ${data.state} (${data.block || 'Taluk/Block'})</span>
+            </div>
+            <span style="font-size: 10px; color: var(--status-active); font-weight: 700;">Center: ${data.latitude?.toFixed(4)}, ${data.longitude?.toFixed(4)}</span>
+          </div>
+          <div style="margin-top: 3px; color: var(--ink-secondary); font-size: 10.5px;">
+            <b>Designated PIO:</b> ${pio.pio_name || 'Tahsildar / Nodal Officer'} &bull; <i>${pio.designation || 'PIO'}</i>
+          </div>
+          <div style="margin-top: 2px; color: var(--gov-copper); font-size: 10px; font-weight: 600;">
+            <b>State Land Law:</b> ${codex.primary_land_act || 'State Land Revenue Act'} &bull; <b>Portal:</b> ${codex.digital_land_portal || 'Digital Land Records'}
+          </div>
+        `;
+      } else {
+        badge.innerHTML = `<span style="color: #DC2626;">⚠ Could not resolve PIN ${pin}. Please verify the 6-digit postal code.</span>`;
+      }
+      renderLucide();
+    } catch (err) {
+      console.warn("Pincode lookup error:", err);
+      badge.style.display = "none";
+    }
+  }, 250);
 }
 
 // Submit Citizen / Advocate Intake
 async function submitIntake(event) {
   event.preventDefault();
 
+  const pincodeInput = document.getElementById("complainantPincode");
+  const pincode = pincodeInput ? pincodeInput.value.trim() : "";
+
   const complainant = {
     name: document.getElementById("complainantName").value.trim(),
     contact: document.getElementById("complainantContact").value.trim(),
     address: document.getElementById("complainantAddr").value.trim(),
+    pincode: pincode,
     language: document.getElementById("complainantLang").value
   };
 
   const raw_grievance = document.getElementById("rawGrievance").value.trim();
   const application_ref_no = document.getElementById("intakeRefNo").value.trim();
   const original_submission_date = document.getElementById("intakeSubDate").value.trim();
+  const is_urgent = document.getElementById("intakeUrgent") ? document.getElementById("intakeUrgent").checked : false;
 
   try {
     const res = await fetch(`${API_BASE}/cases/intake`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ complainant, raw_grievance, application_ref_no, original_submission_date })
+      body: JSON.stringify({ complainant, raw_grievance, application_ref_no, original_submission_date, is_urgent, pincode })
     });
 
     const data = await res.json();
     if (res.ok) {
       document.getElementById("intakeForm").reset();
+      const pBadge = document.getElementById("pincodeJurisdictionBadge");
+      if (pBadge) { pBadge.style.display = "none"; pBadge.innerHTML = ""; }
       currentCase = data.case;
       populateWorkspaceFields(data.case);
       
@@ -204,8 +291,9 @@ async function submitIntake(event) {
       const bannerText = document.getElementById("pioBannerText");
       if (banner && bannerText) {
         const pio = data.case.suggested_pio || {};
-        const nearbyCount = data.case.nearby_area_pios ? data.case.nearby_area_pios.length : 6;
-        bannerText.innerHTML = `✓ Complaint <b>${data.case.case_id}</b> Registered! Assigned nearest domain (<b>${data.case.department}</b>) PIO: <b>${pio.pio_name}</b> (${pio.distance_label}). All ${nearbyCount} nearest area PIO officers mapped below.`;
+        const nearbyCount = data.case.nearby_area_pios ? data.case.nearby_area_pios.length : 5;
+        const areaLabel = data.case.district ? `${data.case.district}, ${data.case.state} (${data.case.pincode || ''})` : (pio.matched_user_locality || 'Local Division');
+        bannerText.innerHTML = `✓ Docket <b>${data.case.case_id}</b> Registered in <b>${areaLabel}</b>! Assigned nearest domain (<b>${data.case.department}</b>) PIO: <b>${pio.pio_name}</b> (${pio.distance_label}). All ${nearbyCount} district/area public authorities mapped below.`;
         banner.style.display = "block";
       }
 
@@ -220,40 +308,102 @@ async function submitIntake(event) {
   }
 }
 
-// Golden Path Preset Loader
+// All-India Civic Presets Loader (28 States & 8 UTs)
 function loadPreset(num) {
   switchMainModule("casework");
   const c = document.getElementById("intakeFormContainer");
   if (c) c.style.display = "block";
 
+  const urgentCheckbox = document.getElementById("intakeUrgent");
+  if (urgentCheckbox) urgentCheckbox.checked = false;
+
+  let pinToResolve = "";
+
   if (num === 1) {
+    // 1. Delhi PDS Ration
     document.getElementById("complainantName").value = "Sunita Devi";
     document.getElementById("complainantContact").value = "+91-9876543210";
-    document.getElementById("complainantAddr").value = "House No. 45, BPL Cluster, Ward 4, New Delhi";
+    document.getElementById("complainantAddr").value = "House No. 45, BPL Cluster, Civil Lines, Delhi";
+    document.getElementById("complainantPincode").value = "110054";
     document.getElementById("intakeRefNo").value = "RC-88492";
     document.getElementById("intakeSubDate").value = "15-Feb-2026";
-    document.getElementById("rawGrievance").value = "My family's BPL ration card application (Ref No. RC-88492) was submitted on 15-Feb-2026 at Ward 4 supply office. We have not received the card or food grains. Staff refuses to disclose stock registers.";
+    document.getElementById("rawGrievance").value = "My family's BPL ration card application (Ref No. RC-88492) was submitted on 15-Feb-2026 at Civil Lines supply office. We have not received the card or food grains. Staff refuses to disclose stock registers.";
+    pinToResolve = "110054";
   } else if (num === 2) {
-    document.getElementById("complainantName").value = "Ramesh Chandra";
-    document.getElementById("complainantContact").value = "+91-9123456789";
-    document.getElementById("complainantAddr").value = "Street 7, Sector 12, Dwarka, New Delhi";
-    document.getElementById("intakeRefNo").value = "MW-77401";
-    document.getElementById("intakeSubDate").value = "3 weeks ago";
-    document.getElementById("rawGrievance").value = "Severe monsoon waterlogging and open storm drain behind Market Road Sector 12. Multiple complaints (Ack MW-77401) filed to MCD Zone 7 office without response.";
+    // 2. Karnataka Bhoomi Land Mutation (Bengaluru North)
+    document.getElementById("complainantName").value = "Basavaraj Gowda";
+    document.getElementById("complainantContact").value = "+91-9845012345";
+    document.getElementById("complainantAddr").value = "Indiranagar, Bengaluru North, Karnataka";
+    document.getElementById("complainantPincode").value = "560001";
+    document.getElementById("intakeRefNo").value = "BLR-MUT-7701";
+    document.getElementById("intakeSubDate").value = "18-Jan-2026";
+    document.getElementById("rawGrievance").value = "My application for land title mutation and RTC Pahani extract transfer on the Karnataka Bhoomi portal (Ref BLR-MUT-7701) was submitted on 18-Jan-2026. Tahsildar office Bangalore North has kept the file pending past 30 days without reasons. Revenue Inspector refuses inspection.";
+    pinToResolve = "560001";
   } else if (num === 3) {
-    document.getElementById("complainantName").value = "Shivanshu Pandey";
-    document.getElementById("complainantContact").value = "+91-9988776655";
-    document.getElementById("complainantAddr").value = "Sector 4, Mehrauli, New Delhi";
-    document.getElementById("intakeRefNo").value = "LND-88301";
-    document.getElementById("intakeSubDate").value = "10-Jan-2026";
-    document.getElementById("rawGrievance").value = "My land mutation khasra 45/12 application (Ref LND-88301) submitted on 10-Jan-2026 at Tehsil office Mehrauli is pending. Patwari is not updating land record registry.";
+    // 3. Maharashtra 7/12 Satbara Land Title (Mumbai)
+    document.getElementById("complainantName").value = "Sachin Deshmukh";
+    document.getElementById("complainantContact").value = "+91-9820011223";
+    document.getElementById("complainantAddr").value = "Fort, South Mumbai, Maharashtra";
+    document.getElementById("complainantPincode").value = "400001";
+    document.getElementById("intakeRefNo").value = "MH-FER-4521";
+    document.getElementById("intakeSubDate").value = "05-Jan-2026";
+    document.getElementById("rawGrievance").value = "Application for Ferfar mutation entry and Satbara 7/12 extract on MahaBhulekh portal (Ref MH-FER-4521) registered under Section 149 & 150 Maharashtra Land Revenue Code 1966. Talathi and Tahsildar have failed to issue certified extract or show cause notice.";
+    pinToResolve = "400001";
   } else if (num === 4) {
+    // 4. Rajasthan Land Demarcation (Jaipur)
+    document.getElementById("complainantName").value = "Kailash Choudhary";
+    document.getElementById("complainantContact").value = "+91-9414055667";
+    document.getElementById("complainantAddr").value = "C-Scheme, Jaipur, Rajasthan";
+    document.getElementById("complainantPincode").value = "302001";
+    document.getElementById("intakeRefNo").value = "RJ-JAM-9912";
+    document.getElementById("intakeSubDate").value = "12-Dec-2025";
+    document.getElementById("rawGrievance").value = "Application for land demarcation and Namantaran mutation under Section 133 & 135 Rajasthan Land Revenue Act 1956 and Apna Khata portal. Patwari is refusing field measurement and boundary verification despite receipt of demarcation fee.";
+    pinToResolve = "302001";
+  } else if (num === 5) {
+    // 5. Varanasi Land Khasra (Varanasi / Banaras)
     document.getElementById("complainantName").value = "Shivanshu Pandey";
     document.getElementById("complainantContact").value = "+91-9988776655";
-    document.getElementById("complainantAddr").value = "Assi Ghat, Varanasi / Banaras, Uttar Pradesh - 221005";
+    document.getElementById("complainantAddr").value = "Assi Ghat, Varanasi / Banaras, Uttar Pradesh";
+    document.getElementById("complainantPincode").value = "221005";
     document.getElementById("intakeRefNo").value = "VNS-99401";
     document.getElementById("intakeSubDate").value = "10-Jan-2026";
-    document.getElementById("rawGrievance").value = "My land mutation khasra 88/14 application (Ref VNS-99401) submitted on 10-Jan-2026 at Tehsil Kachehri Varanasi / Banaras is pending beyond the 30-day statutory limit. Patwari is refusing to update the revenue registry.";
+    document.getElementById("rawGrievance").value = "My land mutation khasra 88/14 application (Ref VNS-99401) submitted on 10-Jan-2026 at Tehsil Kachehri Varanasi under UP Revenue Code 2006 is pending beyond the 30-day statutory limit. Lekhpal is refusing to update the revenue registry on UP Bhulekh.";
+    pinToResolve = "221005";
+  } else if (num === 6) {
+    // 6. Bihar Land Mutation (Patna)
+    document.getElementById("complainantName").value = "Pradeep Kumar Yadav";
+    document.getElementById("complainantContact").value = "+91-9709012345";
+    document.getElementById("complainantAddr").value = "Kankarbagh, Patna, Bihar";
+    document.getElementById("complainantPincode").value = "800001";
+    document.getElementById("intakeRefNo").value = "BR-RTPS-6621";
+    document.getElementById("intakeSubDate").value = "20-Jan-2026";
+    document.getElementById("rawGrievance").value = "Dakhil Kharij mutation application under Section 6 & 9 of the Bihar Land Mutation Act 2011 and Bihar RTPS portal (Ref BR-RTPS-6621). Circle Officer (Anchal Adhikari) Patna has failed to dispose mutation petition within the prescribed statutory period.";
+    pinToResolve = "800001";
+  } else if (num === 7) {
+    // 7. 48h ICU Emergency (AIIMS Delhi)
+    document.getElementById("complainantName").value = "Dr. Anil Sharma";
+    document.getElementById("complainantContact").value = "+91-9811223344";
+    document.getElementById("complainantAddr").value = "Trauma Center, AIIMS, Ansari Nagar, New Delhi";
+    document.getElementById("complainantPincode").value = "110029";
+    document.getElementById("intakeRefNo").value = "MED-91142";
+    document.getElementById("intakeSubDate").value = "Today 08:00 AM";
+    document.getElementById("rawGrievance").value = "CRITICAL EMERGENCY: Catastrophic ventilator power failure and acute oxygen cylinder stock-out in ICU Ward 3B posing imminent threat to human life. Demanding immediate maintenance logbooks, cylinder delivery challans, and duty roasters under Section 7(1) Proviso (48-Hour SLA).";
+    if (urgentCheckbox) urgentCheckbox.checked = true;
+    pinToResolve = "110029";
+  } else if (num === 8) {
+    // 8. Police FIR Inaction (Prayagraj)
+    document.getElementById("complainantName").value = "Kavita Verma";
+    document.getElementById("complainantContact").value = "+91-9871100223";
+    document.getElementById("complainantAddr").value = "Civil Lines, Prayagraj, Uttar Pradesh";
+    document.getElementById("complainantPincode").value = "211001";
+    document.getElementById("intakeRefNo").value = "FIR-552";
+    document.getElementById("intakeSubDate").value = "02-Mar-2026";
+    document.getElementById("rawGrievance").value = "Police Station SHO refuses to register mandatory FIR under Section 173 BNSS (old Section 154 CrPC) regarding violent armed snatching incident at market junction. Sub-Inspector refuses to provide GD entry copy or acknowledge complaint.";
+    pinToResolve = "211001";
+  }
+
+  if (pinToResolve) {
+    handlePincodeInput(pinToResolve);
   }
 
   // Scroll to intake form smoothly
@@ -319,9 +469,10 @@ async function loadCaseQueue() {
       const legal = c.statutory_legal_analysis || {};
       const ipcBrief = legal.ipc_sections ? legal.ipc_sections[0] : "IPC Sec 420";
       const bnsBrief = legal.bns_sections ? legal.bns_sections[0] : "BNS Sec 318(4)";
+      const distLabel = pio.distance_label || (c.geospatial_meta ? c.geospatial_meta.distance_label : "1.5 km away");
       tr.innerHTML = `
         <td><b style="font-family: var(--font-mono); color: var(--gov-navy); font-size: 11.5px;">${c.case_id}</b></td>
-        <td><b>${c.complainant.name}</b><br/><span style="font-size: 10px; color: var(--ink-muted);">${c.complainant.address || 'Local'}</span></td>
+        <td><b>${c.complainant.name}</b><br/><span style="font-size: 10px; color: var(--ink-muted);">${c.complainant.address || 'Local'}${c.pincode ? ' (' + c.pincode + ')' : ''}</span></td>
         <td><b>${c.department}</b><br/><span style="font-size: 10px; color: var(--gov-copper);">${legal.statutory_infraction || 'Administrative Infraction'}</span></td>
         <td><span class="statutory-tag bns" style="font-size: 9.5px; padding: 1px 4px;">${bnsBrief}</span><br/><span class="statutory-tag ipc" style="font-size: 9.5px; padding: 1px 4px; margin-top: 2px;">${ipcBrief}</span></td>
         <td><b>${pio.pio_name || 'Designated PIO'}</b><br/><span style="font-size: 9.5px; color: var(--status-active); font-family: var(--font-mono);">${distLabel}</span></td>
@@ -374,12 +525,69 @@ function populateWorkspaceFields(c) {
   document.getElementById("viewComplainant").textContent = c.complainant.name;
   document.getElementById("viewRawGrievance").textContent = `"${c.raw_grievance}"`;
 
+  // Pan-India Jurisdiction & State Land Codex Banner
+  const jurisBanner = document.getElementById("viewJurisdictionBanner");
+  const jurisArea = document.getElementById("viewJurisdictionArea");
+  const portalLink = document.getElementById("viewDigitalPortalLink");
+  const landActEl = document.getElementById("viewPrimaryLandAct");
+
+  const pio = c.suggested_pio || {};
+  const faa = c.suggested_faa || pio.faa || {};
+  const juris = c.statutory_jurisdiction || pio.statutory_jurisdiction || {};
+  const district = c.district || pio.district;
+  const state = c.state || pio.state;
+  const pin = c.pincode || pio.pincode;
+
+  if (jurisBanner) {
+    if (district || state || pin || juris.primary_land_act || juris.substantive_act) {
+      jurisBanner.style.display = "block";
+      const areaParts = [];
+      if (district) areaParts.push(district);
+      if (state) areaParts.push(state);
+      const pinStr = pin ? ` [PIN: ${pin}]` : "";
+      if (jurisArea) jurisArea.textContent = `${areaParts.join(", ")}${pinStr}`;
+      
+      const portal = juris.digital_portal || juris.digital_land_portal;
+      const rtiPortal = juris.state_rti_portal || juris.rti_portal_url;
+      let portalTxt = "";
+      if (portal) portalTxt += `Portal: ${portal}`;
+      if (rtiPortal) portalTxt += `${portal ? ' • ' : ''}RTI: ${rtiPortal}`;
+      if (portalLink) portalLink.textContent = portalTxt || "State Civic Records";
+
+      const landAct = juris.primary_land_act || juris.substantive_act || "Citizen Charter & Public Service Guarantee Act";
+      if (landActEl) landActEl.textContent = landAct;
+    } else {
+      jurisBanner.style.display = "none";
+    }
+  }
+
   const legal = c.statutory_legal_analysis || {};
   document.getElementById("viewMeritBadge").textContent = `${legal.case_merit_score || 92}/100 Merit (${legal.win_probability || 'High'})`;
   
   const pen = legal.section_20_penalty_liability_inr || 0;
   document.getElementById("viewPenaltyBadge").textContent = `Section 20(1) Penalty Liability: ₹${pen} (Mandatory ₹250/day deduction applicable on delinquent PIO)`;
-  document.getElementById("viewSla").textContent = `${c.sla_days_remaining || 30} Days Remaining`;
+  
+  // 48-Hour Urgent Life & Liberty Status
+  const isUrgent = !!(c.is_life_liberty || c.is_urgent_48h);
+  const urgencyBadge = document.getElementById("viewUrgencyBadge");
+  const urgencyBtn = document.getElementById("dossierUrgencyToggleBtn");
+  const urgencyLabel = document.getElementById("dossierUrgencyLabel");
+  const dueDateEl = document.getElementById("viewDueDate");
+  const slaEl = document.getElementById("viewSla");
+
+  if (isUrgent) {
+    if (urgencyBadge) urgencyBadge.style.display = "inline-block";
+    if (urgencyBtn) urgencyBtn.classList.add("active");
+    if (urgencyLabel) urgencyLabel.textContent = "Fast-Track Active (48-Hr SLA)";
+    if (slaEl) slaEl.textContent = "🚨 48 Hours (URGENT LIFE & LIBERTY)";
+    if (dueDateEl) dueDateEl.textContent = `Statutory Deadline: ${c.statutory_deadline_date || c.calculated_due_date || "Within 48 Hours"} (Sec 7(1) Proviso)`;
+  } else {
+    if (urgencyBadge) urgencyBadge.style.display = "none";
+    if (urgencyBtn) urgencyBtn.classList.remove("active");
+    if (urgencyLabel) urgencyLabel.textContent = "Fast-Track (48-Hr Life & Liberty)";
+    if (slaEl) slaEl.textContent = `${c.sla_days_remaining || 30} Days Remaining`;
+    if (dueDateEl) dueDateEl.textContent = `Statutory Deadline: ${c.statutory_deadline_date || c.calculated_due_date || "30 Days"}`;
+  }
 
   document.getElementById("viewRefNo").textContent = c.application_ref_no || "Not Provided";
   document.getElementById("viewSubDate").textContent = c.original_submission_date || "Unconfirmed";
@@ -1098,6 +1306,9 @@ async function updatePioMapForCase(c) {
   // 2. Update Radar Telemetry
   updateRadarTelemetry(c);
 
+  // 2b. Update Interactive Leaflet OpenStreetMap
+  renderLeafletMapMarkers(c);
+
   // 3. Render Nearest Area PIOs in Directory List
   renderAreaPiosDirectory(c, currentPioFilter);
 
@@ -1424,5 +1635,578 @@ async function applyCustomActToActiveCase(actId) {
     console.error("Apply custom act error:", err);
   }
 }
+
+// ----------------------------------------------------
+// EXECUTIVE THEME CONTROLLER (DARK / LIGHT PARCHMENT)
+// ----------------------------------------------------
+
+function initTheme() {
+  const saved = localStorage.getItem("arzi_theme") || "light";
+  applyTheme(saved);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem("arzi_theme", theme);
+  const icon = document.getElementById("themeIcon");
+  const btn = document.getElementById("themeToggleBtn");
+  if (icon) {
+    if (theme === "dark") {
+      icon.setAttribute("data-lucide", "sun");
+      if (btn) btn.title = "Switch to Supreme Court Parchment Light Theme";
+    } else {
+      icon.setAttribute("data-lucide", "moon");
+      if (btn) btn.title = "Switch to Executive Dark Theme";
+    }
+    renderLucide();
+  }
+}
+
+function toggleExecutiveTheme() {
+  const current = document.documentElement.getAttribute("data-theme") || "light";
+  const next = current === "dark" ? "light" : "dark";
+  applyTheme(next);
+}
+
+// ----------------------------------------------------
+// WEB SPEECH API VOICE DICTATION
+// ----------------------------------------------------
+
+function toggleVoiceDictation() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById("btnVoiceDictate");
+  const status = document.getElementById("voiceStatusText");
+  const liveTranscript = document.getElementById("voiceLiveTranscript");
+  const textarea = document.getElementById("rawGrievance");
+
+  if (!SpeechRec) {
+    alert("Web Speech API is not supported in this browser. Please use Google Chrome, Microsoft Edge, or Safari to dictate grievances.");
+    return;
+  }
+
+  if (isListeningVoice) {
+    if (speechRecognizer) {
+      try { speechRecognizer.stop(); } catch (e) {}
+    }
+    isListeningVoice = false;
+    if (btn) btn.classList.remove("recording");
+    if (status) status.textContent = "Voice Dictation";
+    if (liveTranscript) liveTranscript.style.display = "none";
+    return;
+  }
+
+  try {
+    speechRecognizer = new SpeechRec();
+    speechRecognizer.continuous = true;
+    speechRecognizer.interimResults = true;
+    speechRecognizer.lang = "en-IN"; // Configured for Indian English / Hinglish speech cadence
+
+    speechRecognizer.onstart = () => {
+      isListeningVoice = true;
+      if (btn) btn.classList.add("recording");
+      if (status) status.textContent = "Listening (Speak)...";
+      if (liveTranscript) {
+        liveTranscript.style.display = "block";
+        liveTranscript.textContent = "Listening to microphone...";
+      }
+    };
+
+    speechRecognizer.onresult = (event) => {
+      let interim = "";
+      let final = "";
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+
+      if (final && textarea) {
+        const existing = textarea.value.trim();
+        textarea.value = existing ? `${existing} ${final.trim()}` : final.trim();
+      }
+      if (liveTranscript) {
+        liveTranscript.textContent = interim ? `Live: "${interim}"` : (final ? `Dictated: "${final}"` : "Listening...");
+      }
+    };
+
+    speechRecognizer.onerror = (event) => {
+      console.warn("Speech recognition error:", event.error);
+      isListeningVoice = false;
+      if (btn) btn.classList.remove("recording");
+      if (status) status.textContent = "Voice Dictation";
+      if (liveTranscript) {
+        liveTranscript.textContent = `Dictation ended (${event.error})`;
+        setTimeout(() => { if (liveTranscript) liveTranscript.style.display = "none"; }, 3000);
+      }
+    };
+
+    speechRecognizer.onend = () => {
+      isListeningVoice = false;
+      if (btn) btn.classList.remove("recording");
+      if (status) status.textContent = "Voice Dictation";
+      setTimeout(() => { if (liveTranscript) liveTranscript.style.display = "none"; }, 2500);
+    };
+
+    speechRecognizer.start();
+  } catch (err) {
+    console.error("Speech start error:", err);
+    alert("Could not access microphone for voice dictation.");
+    isListeningVoice = false;
+    if (btn) btn.classList.remove("recording");
+    if (status) status.textContent = "Voice Dictation";
+  }
+}
+
+// ----------------------------------------------------
+// 48-HOUR URGENT LIFE & LIBERTY TOGGLE CONTROLLER
+// ----------------------------------------------------
+
+async function toggleCurrentCaseUrgency() {
+  if (!currentCase) {
+    alert("Please select an active docket first.");
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/cases/${currentCase.case_id}/toggle-urgency`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+    const data = await res.json();
+    if (res.ok) {
+      currentCase = data.case;
+      populateWorkspaceFields(data.case);
+      loadCaseQueue();
+      loadRunLogs();
+      const statusMsg = data.is_life_liberty
+        ? "🚨 Case elevated to 48-Hour Urgent Life & Liberty Fast-Track under Section 7(1) Proviso!\n• Statutory SLA: Compressed to 48 Hours\n• Section 20(1) Penalty: Multiplied for acute life risk\n• Life & Liberty Red Banner stamped across PDF instruments."
+        : "✓ Case restored to standard 30-day statutory SLA.";
+      alert(statusMsg);
+    } else {
+      alert(`Error: ${data.message || "Failed to toggle urgency"}`);
+    }
+  } catch (err) {
+    console.error("Toggle urgency error:", err);
+    alert("Network error toggling urgency.");
+  }
+}
+
+// ----------------------------------------------------
+// SECTION 8 EXEMPTION SHIELD & NEUTRALIZER CONTROLLER
+// ----------------------------------------------------
+
+async function refreshSection8Shield() {
+  if (!currentCase) return;
+  const body = document.getElementById("section8ShieldBody");
+  if (!body) return;
+
+  body.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--ink-muted);">Auditing Section 8 exemptions & generating pre-emptive statutory shields...</div>`;
+
+  try {
+    const res = await fetch(`${API_BASE}/cases/${currentCase.case_id}/section8-shield`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      body.innerHTML = `<div style="color: var(--status-urgent); padding: 12px;">Failed to audit Section 8 exemptions.</div>`;
+      return;
+    }
+
+    const shield = data.section_8_shield || {};
+    const risks = shield.section_8_risks_identified || [];
+
+    let riskCards = risks.map(r => {
+      return `
+        <div style="border: 1px solid var(--border-medium); border-left: 3px solid #DC2626; padding: 10px; margin-bottom: 8px; background: var(--bg-surface); border-radius: 2px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <b style="color: var(--gov-navy); font-size: 11.5px;">${r.exemption_section}: ${r.clause_title}</b>
+            <span class="status-pill urgent" style="font-size: 9.5px;">POTENTIAL REFUSAL EXCUSE</span>
+          </div>
+          <div style="font-size: 10.5px; color: var(--ink-muted); margin-bottom: 4px; font-style: italic;">
+            <b>Delinquent PIO Claim:</b> "${r.delinquent_pio_excuse}"
+          </div>
+          <div style="font-size: 10.5px; color: var(--ink-secondary); margin-bottom: 4px;">
+            <b>Statutory Neutralizer:</b> ${r.statutory_neutralizer}
+          </div>
+          <div style="font-size: 10px; color: var(--gov-copper); font-style: italic; margin-bottom: 2px;">
+            <b>Judicial Authority:</b> ${r.landmark_precedent}
+          </div>
+          <div style="font-size: 10px; color: #15803D; font-weight: 600;">
+            <b>Legal Ground:</b> ${r.rebuttal_ground}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    body.innerHTML = `
+      <div style="margin-bottom: 10px; padding: 8px 10px; background: rgba(30, 58, 138, 0.05); border: 1px solid var(--border-medium); border-radius: 2px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 700; color: var(--gov-navy);">Section 8 Exemption Neutralizer Active</span>
+          <span class="status-pill approved" style="font-size: 9.5px;">${risks.length} Risk Clauses Audited</span>
+        </div>
+        <div style="font-size: 10px; color: var(--ink-secondary); margin-top: 4px;">
+          <b>${shield.section_8_2_override_text || "Section 8(2) Public Interest Override Active"}</b>
+        </div>
+        <div style="font-size: 10px; color: #15803D; margin-top: 2px;">
+          <b>${shield.section_8_1_j_proviso_text || "Proviso to Section 8(1)(j) Applied"}</b>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label class="form-label" style="font-size: 10px; margin-bottom: 2px;">Pre-emptive Statutory Rebuttal Notice</label>
+        <textarea id="section8RebuttalNotice" rows="5" style="width: 100%; font-family: var(--font-mono); font-size: 10px; background: var(--bg-subtle); padding: 6px;" readonly>${shield.statutory_rebuttal_draft || ""}</textarea>
+        <button class="btn-gov-outline" style="font-size: 9.5px; padding: 2px 8px; margin-top: 4px;" onclick="navigator.clipboard.writeText(document.getElementById('section8RebuttalNotice').value); alert('Rebuttal notice copied to clipboard!');">📋 Copy Rebuttal Notice</button>
+      </div>
+
+      <div>
+        <label class="form-label" style="font-size: 10px; margin-bottom: 4px;">Audited Exemption Clauses & Statutory Counter-Measures</label>
+        ${riskCards}
+      </div>
+    `;
+  } catch (e) {
+    console.error("Section 8 Shield error:", e);
+    body.innerHTML = `<div style="color: var(--status-urgent); padding: 12px;">Error contacting Section 8 auditor.</div>`;
+  }
+}
+
+// ----------------------------------------------------
+// INDIAN SPEED POST BARCODE SLIP CONTROLLERS
+// ----------------------------------------------------
+
+async function fetchPostalSlipData(caseId) {
+  try {
+    const res = await fetch(`${API_BASE}/cases/${caseId}/postal-slip`);
+    if (res.ok) {
+      const data = await res.json();
+      return data.postal_slip || data;
+    }
+  } catch (e) {
+    console.error("Error fetching postal slip:", e);
+  }
+  return null;
+}
+
+function buildPostalSlipHtml(slipData) {
+  const isUrgent = slipData.statutory_sla?.includes("48") || currentCase?.is_life_liberty;
+  const recipient = slipData.addressee || slipData.recipient || {};
+  const sender = slipData.sender || {};
+
+  return `
+    <div class="postal-slip-card" style="border: 2px solid #0F172A; padding: 16px; background: #FFFFFF; font-family: var(--font-mono); color: #0F172A;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0F172A; padding-bottom: 8px; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="background: #991B1B; color: #FFFFFF; font-weight: 800; font-size: 16px; padding: 3px 8px; border-radius: 2px;">
+            INDIA POST
+          </div>
+          <div>
+            <div style="font-weight: 700; font-size: 12.5px; letter-spacing: 0.5px;">SPEED POST & REGISTERED AD</div>
+            <div style="font-size: 9px; color: #475569;">DEPARTMENT OF POSTS, GOVT. OF INDIA</div>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 9.5px; font-weight: 700; color: #0F172A;">CONSIGNMENT NO:</div>
+          <div style="font-size: 13.5px; font-weight: 800; letter-spacing: 1px; color: #1E3A8A;">${slipData.consignment_number}</div>
+        </div>
+      </div>
+
+      ${isUrgent ? `
+        <div style="background: #FEE2E2; border: 2px dashed #DC2626; color: #991B1B; font-weight: 800; font-size: 10.5px; padding: 6px 10px; margin-bottom: 12px; text-align: center; text-transform: uppercase;">
+          🚨 URGENT: 48-HOUR STATUTORY LIFE & LIBERTY DISPATCH — SECTION 7(1) RTI ACT 2005 🚨
+        </div>
+      ` : ''}
+
+      <div style="text-align: center; margin: 10px 0; background: #FFFFFF; padding: 8px; border: 1px solid #E2E8F0;">
+        <div style="display: inline-block;">
+          ${slipData.barcode_svg}
+        </div>
+        <div style="font-size: 11.5px; font-weight: 700; letter-spacing: 2px; margin-top: 4px;">${slipData.consignment_number}</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border: 1px solid #CBD5E1; padding: 10px; margin-bottom: 12px;">
+        <div>
+          <div style="font-size: 9px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 3px;">TO (RECIPIENT PUBLIC AUTHORITY):</div>
+          <div style="font-size: 11px; font-weight: 700;">${recipient.name || recipient.pio_name || 'Designated PIO'} (${recipient.designation || 'PIO'})</div>
+          <div style="font-size: 10px; color: #1E293B;">Department: ${recipient.department || 'Public Authority'}</div>
+          <div style="font-size: 10px; color: #334155;">${recipient.office_address || recipient.address || 'N/A'}</div>
+          <div style="font-size: 9.5px; color: #334155;">Room: ${recipient.room_no || 'N/A'}</div>
+        </div>
+        <div>
+          <div style="font-size: 9px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 3px;">FROM (SENDER / CITIZEN / COUNSEL):</div>
+          <div style="font-size: 11px; font-weight: 700;">${sender.name || 'Citizen Applicant'}</div>
+          <div style="font-size: 10px; color: #334155;">${sender.address || 'N/A'}</div>
+          <div style="font-size: 10px; color: #334155;">Contact: ${sender.contact || 'N/A'}</div>
+          <div style="font-size: 9.5px; color: #334155;">Case Docket: <b>${slipData.case_id}</b></div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; border-top: 1px solid #CBD5E1; padding-top: 8px; font-size: 9px;">
+        <div><b>Booking Date:</b><br/>${slipData.booking_date}</div>
+        <div><b>Weight:</b><br/>${slipData.article_weight_grams || 45}g</div>
+        <div><b>Postage Tariff:</b><br/>₹${slipData.tariff_inr || 41.00}</div>
+        <div><b>Category:</b><br/>Speed Post + AD</div>
+      </div>
+
+      <div style="margin-top: 10px; padding-top: 6px; border-top: 1px dashed #94A3B8; font-size: 8px; color: #64748B; line-height: 1.3;">
+        <b>STATUTORY PROOF NOTICE:</b> ${slipData.legal_notice || 'Section 27 General Clauses Act presumption applies.'}
+      </div>
+    </div>
+  `;
+}
+
+async function openPostalSlipModal() {
+  if (!currentCase) {
+    alert("Please select a case first.");
+    return;
+  }
+  const modal = document.getElementById("postalSlipModal");
+  const content = document.getElementById("postalSlipModalContent");
+  if (!modal || !content) return;
+
+  content.innerHTML = `<div style="text-align: center; padding: 24px;">Generating Indian Speed Post Dispatch Slip with Code-128 Barcode...</div>`;
+  modal.classList.remove("hidden");
+
+  const slipData = await fetchPostalSlipData(currentCase.case_id);
+  if (slipData) {
+    content.innerHTML = buildPostalSlipHtml(slipData);
+  } else {
+    content.innerHTML = `<div style="color: var(--status-urgent); padding: 20px;">Could not generate Speed Post dispatch slip.</div>`;
+  }
+  renderLucide();
+}
+
+function closePostalSlipModal() {
+  const modal = document.getElementById("postalSlipModal");
+  if (modal) modal.classList.add("hidden");
+}
+
+function printPostalSlip() {
+  window.print();
+}
+
+function downloadSlipPdf() {
+  if (!currentCase) return;
+  window.open(`${API_BASE}/cases/${currentCase.case_id}/pdf?type=slip`, "_blank");
+}
+
+async function renderTabPostalSlip() {
+  if (!currentCase) return;
+  const container = document.getElementById("tabPostalSlipContainer");
+  if (!container) return;
+
+  container.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--ink-muted);">Loading Speed Post Dispatch Slip...</div>`;
+  const slipData = await fetchPostalSlipData(currentCase.case_id);
+  if (slipData) {
+    container.innerHTML = buildPostalSlipHtml(slipData);
+  } else {
+    container.innerHTML = `<div style="color: var(--status-urgent); padding: 12px;">Could not load Speed Post slip.</div>`;
+  }
+}
+
+// ----------------------------------------------------
+// LEAFLET.JS INTERACTIVE OPENSTREETMAP VISUALIZER
+// ----------------------------------------------------
+
+function initLeafletPioMap() {
+  const mapEl = document.getElementById("pioLeafletMap");
+  if (!mapEl || typeof L === "undefined") return;
+
+  if (leafletMap) {
+    try { leafletMap.remove(); } catch (e) {}
+    leafletMap = null;
+  }
+
+  try {
+    leafletMap = L.map("pioLeafletMap", {
+      center: [25.3176, 82.9739], // Default Varanasi
+      zoom: 13,
+      zoomControl: true
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+    }).addTo(leafletMap);
+
+    leafletMarkersLayer = L.layerGroup().addTo(leafletMap);
+  } catch (err) {
+    console.error("Leaflet init error:", err);
+  }
+}
+
+function renderLeafletMapMarkers(c) {
+  if (!leafletMap || !leafletMarkersLayer || typeof L === "undefined") return;
+
+  leafletMarkersLayer.clearLayers();
+
+  const citizenCoords = c?.geospatial_meta?.user_coords || c?.suggested_pio?.user_coordinates || { latitude: 25.2905, longitude: 82.9995 };
+  const assignedPio = c?.suggested_pio || {};
+  const pioCoords = c?.geospatial_meta?.pio_coords || assignedPio.pio_coordinates || { latitude: 25.3340, longitude: 82.9860 };
+  const areaPios = c?.nearby_area_pios || c?.geospatial_meta?.nearby_pios || [];
+
+  const bounds = [];
+
+  // 1. Citizen Complainant Marker (Orange CircleMarker)
+  if (citizenCoords.latitude && citizenCoords.longitude) {
+    const cPt = [citizenCoords.latitude, citizenCoords.longitude];
+    bounds.push(cPt);
+    const citizenMarker = L.circleMarker(cPt, {
+      radius: 9,
+      fillColor: "#D97706",
+      color: "#FFFFFF",
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.95
+    }).addTo(leafletMarkersLayer);
+
+    citizenMarker.bindPopup(`
+      <div style="font-family: var(--font-ui); font-size: 11px;">
+        <b style="color: #D97706;">Citizen Complainant Origin</b><br/>
+        <b>${c?.complainant?.name || "Complainant"}</b><br/>
+        <span style="font-size: 10px; color: #64748B;">${c?.complainant?.address || "Local Jurisdiction"}</span>
+      </div>
+    `);
+  }
+
+  // 2. Assigned PIO Marker (Royal Blue with Gold border)
+  if (pioCoords.latitude && pioCoords.longitude) {
+    const pPt = [pioCoords.latitude, pioCoords.longitude];
+    bounds.push(pPt);
+    const pioMarker = L.circleMarker(pPt, {
+      radius: 11,
+      fillColor: "#1D4ED8",
+      color: "#FEF08A",
+      weight: 3,
+      opacity: 1,
+      fillOpacity: 1
+    }).addTo(leafletMarkersLayer);
+
+    pioMarker.bindPopup(`
+      <div style="font-family: var(--font-ui); font-size: 11px;">
+        <b style="color: #1D4ED8;">★ ASSIGNED DOMAIN PIO</b><br/>
+        <b>${assignedPio.pio_name || "Designated PIO"}</b><br/>
+        <span style="font-size: 10px; color: #475569;">${assignedPio.designation || "PIO"} &bull; ${assignedPio.department || c?.department}</span><br/>
+        <span style="font-size: 10px; font-weight: 700; color: #15803D;">Distance: ${assignedPio.distance_label || "Nearest"}</span>
+      </div>
+    `);
+
+    // Draw dashed connecting path between citizen and assigned PIO
+    if (citizenCoords.latitude && citizenCoords.longitude) {
+      const poly = L.polyline([
+        [citizenCoords.latitude, citizenCoords.longitude],
+        [pioCoords.latitude, pioCoords.longitude]
+      ], {
+        color: "#1D4ED8",
+        weight: 2.5,
+        dashArray: "6, 6",
+        opacity: 0.8
+      }).addTo(leafletMarkersLayer);
+
+      poly.bindTooltip(`${assignedPio.distance_label || "Direct Line"}`, { permanent: false });
+    }
+  }
+
+  // 3. Other Area Authorities (Slate Markers)
+  areaPios.forEach(p => {
+    const isAssigned = p.is_assigned || (assignedPio.pio_name === p.pio_name);
+    if (isAssigned) return;
+    if (p.latitude && p.longitude) {
+      const pt = [p.latitude, p.longitude];
+      bounds.push(pt);
+      const m = L.circleMarker(pt, {
+        radius: 6,
+        fillColor: "#64748B",
+        color: "#FFFFFF",
+        weight: 1.5,
+        opacity: 0.9,
+        fillOpacity: 0.85
+      }).addTo(leafletMarkersLayer);
+
+      m.bindPopup(`
+        <div style="font-family: var(--font-ui); font-size: 10.5px;">
+          <b>${p.pio_name}</b><br/>
+          <span style="color: #64748B;">${p.department} &bull; ${p.distance_label}</span><br/>
+          <button style="margin-top: 4px; font-size: 9.5px; padding: 2px 6px; cursor: pointer;" onclick="assignPioFromMap('${p.id}')">Reassign Docket to this PIO</button>
+        </div>
+      `);
+    }
+  });
+
+  if (bounds.length > 0) {
+    try {
+      leafletMap.fitBounds(bounds, { padding: [35, 35], maxZoom: 15 });
+    } catch (e) {
+      console.warn("fitBounds failed:", e);
+    }
+  }
+}
+
+function switchGeoView(viewType) {
+  const mapContainer = document.getElementById("leafletMapContainer");
+  const radarContainer = document.getElementById("radarCanvasContainer");
+  const btnMap = document.getElementById("btnViewMap");
+  const btnRadar = document.getElementById("btnViewRadar");
+
+  if (viewType === "map") {
+    if (mapContainer) mapContainer.style.display = "block";
+    if (radarContainer) radarContainer.style.display = "none";
+    if (btnMap) btnMap.classList.add("active");
+    if (btnRadar) btnRadar.classList.remove("active");
+    if (leafletMap) {
+      setTimeout(() => leafletMap.invalidateSize(), 150);
+    }
+  } else {
+    if (mapContainer) mapContainer.style.display = "none";
+    if (radarContainer) radarContainer.style.display = "block";
+    if (btnRadar) btnRadar.classList.add("active");
+    if (btnMap) btnMap.classList.remove("active");
+  }
+}
+
+// ----------------------------------------------------
+// GLOBAL WINDOW SCOPE EXPOSURES FOR HTML ONCLICK BINDINGS
+// ----------------------------------------------------
+window.showPage = showPage;
+window.switchDashTab = switchDashTab;
+window.switchDocTab = switchDocTab;
+window.switchPersona = switchPersona;
+window.switchMainModule = switchMainModule;
+window.switchToTab = switchToTab;
+window.toggleExecutiveTheme = toggleExecutiveTheme;
+window.toggleIntakeForm = toggleIntakeForm;
+window.toggleVoiceDictation = toggleVoiceDictation;
+window.loadPreset = loadPreset;
+window.loadCaseQueue = loadCaseQueue;
+window.openCaseById = openCaseById;
+window.openCaseWorkspace = openCaseWorkspace;
+window.approveCurrentCase = approveCurrentCase;
+window.toggleCurrentCaseUrgency = toggleCurrentCaseUrgency;
+window.openTransferModal = openTransferModal;
+window.closeTransferModal = closeTransferModal;
+window.openTransferModalForDept = openTransferModalForDept;
+window.submitTransferSec6_3 = submitTransferSec6_3;
+window.openPostalSlipModal = openPostalSlipModal;
+window.closePostalSlipModal = closePostalSlipModal;
+window.printPostalSlip = printPostalSlip;
+window.downloadSlipPdf = downloadSlipPdf;
+window.viewPdf = viewPdf;
+window.refreshSection8Shield = refreshSection8Shield;
+window.switchGeoView = switchGeoView;
+window.filterRadarDirectory = filterRadarDirectory;
+window.loadCustomActs = loadCustomActs;
+window.loadRunLogs = loadRunLogs;
+window.clearRunLogSearch = clearRunLogSearch;
+window.setRunLogSearchQuery = setRunLogSearchQuery;
+window.handleRunLogSearch = handleRunLogSearch;
+window.inspectCaseFromRunLog = inspectCaseFromRunLog;
+window.submitIntake = submitIntake;
+window.submitCustomAct = submitCustomAct;
+window.handlePincodeInput = handlePincodeInput;
+window.assignPioFromMap = assignPioFromMap;
+window.deleteCustomAct = deleteCustomAct;
+window.applyCustomActToActiveCase = applyCustomActToActiveCase;
+window.switchPioMapCase = switchPioMapCase;
+
 
 

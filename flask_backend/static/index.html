@@ -9,10 +9,26 @@
   <meta name="keywords" content="RTI Act 2005, Bharatiya Nyaya Sanhita, BNS 2023, IPC 1860, Section 20 Penalty, Public Authority, PIO Directory, Railway, Supabase" />
   
   <!-- Institutional Google Fonts: Source Serif 4 & Inter & JetBrains Mono -->
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/style.css?v=20260906.2" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,600&display=swap" rel="stylesheet">
+
+  <!-- File protocol guard -->
+  <script>
+    if (window.location.protocol === "file:") {
+      window.addEventListener("DOMContentLoaded", function() {
+        var warn = document.createElement("div");
+        warn.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:999999;background:#DC2626;color:#FFF;padding:12px 20px;font-family:sans-serif;font-size:13px;font-weight:bold;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.3);";
+        warn.innerHTML = "⚠️ WARNING: You opened this file via file:// protocol. Buttons and API requests require the active HTTP server. Please open <a href='http://localhost:5000' style='color:#FEF08A;text-decoration:underline;'>http://localhost:5000</a> in your browser.";
+        document.body.prepend(warn);
+      });
+    }
+  </script>
+
+  <!-- Leaflet.js Interactive OpenStreetMap -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Lucide Line Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -69,6 +85,11 @@
           <button class="persona-toggle-btn active" id="btnPersonaLaw" onclick="switchPersona('law_firm')">Counsel</button>
           <button class="persona-toggle-btn" id="btnPersonaGov" onclick="switchPersona('gov_desk')">Gov Desk</button>
         </div>
+
+        <!-- Executive Theme Switcher (Dark / Light) -->
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleExecutiveTheme()" title="Switch Light / Dark Theme">
+          <i data-lucide="moon" id="themeIcon" style="width: 13px; height: 13px;"></i>
+        </button>
 
         <div class="system-status-indicator">
           <span class="status-dot"></span>
@@ -480,9 +501,34 @@
                     </div>
                   </div>
 
-                  <div style="margin-bottom: 8px;">
-                    <label class="form-label">Address / Pin Code (For PIO Routing) *</label>
-                    <input type="text" id="complainantAddr" placeholder="e.g. Assi Ghat, Varanasi / Banaras, UP - 221005" required />
+                  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 8px; margin-bottom: 8px;">
+                    <div>
+                      <label class="form-label">Address / Locality *</label>
+                      <input type="text" id="complainantAddr" placeholder="e.g. Indiranagar, Bengaluru / Assi Ghat, Varanasi" required />
+                    </div>
+                    <div>
+                      <label class="form-label">PIN Code (6-Digit) *</label>
+                      <input type="text" id="complainantPincode" placeholder="e.g. 560001" maxlength="6" pattern="[0-9]{6}" oninput="handlePincodeInput(this.value)" required />
+                    </div>
+                  </div>
+
+                  <!-- Dynamic All-India Jurisdiction & Land Codex Preview Badge -->
+                  <div id="pincodeJurisdictionBadge" style="display: none; margin-bottom: 8px; font-size: 11px; padding: 7px 10px; background: rgba(30, 77, 107, 0.08); border-left: 3px solid var(--gov-navy); border-radius: 4px; line-height: 1.4;">
+                    <!-- Populated dynamically via handlePincodeInput -->
+                  </div>
+
+                  <!-- 48-Hour Urgent Life & Liberty Fast-Track Banner -->
+                  <div class="urgent-toggle-banner">
+                    <label class="urgent-checkbox-label">
+                      <input type="checkbox" id="intakeUrgent" />
+                      <span class="urgent-indicator-badge">
+                        <i data-lucide="zap" style="width: 12px; height: 12px;"></i>
+                        <span>48-Hour Urgent Life & Liberty Fast-Track (Section 7(1) Proviso)</span>
+                      </span>
+                    </label>
+                    <div class="urgent-hint-text">
+                      Invokes 48-hour statutory deadline for ICU emergencies, water contamination, unlawful custody, or life threats.
+                    </div>
                   </div>
 
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
@@ -497,8 +543,15 @@
                   </div>
 
                   <div style="margin-bottom: 10px;">
-                    <label class="form-label">Statement of Facts & Grievance Narrative *</label>
-                    <textarea id="rawGrievance" rows="3" placeholder="Enter factual details regarding public record request, administrative delay, or refusal..." required></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <label class="form-label" style="margin-bottom: 0;">Statement of Facts & Grievance Narrative *</label>
+                      <button type="button" id="btnVoiceDictate" class="btn-voice-dictate" onclick="toggleVoiceDictation()" title="Click to speak (Hindi / English)">
+                        <i data-lucide="mic" style="width: 12px; height: 12px;"></i>
+                        <span id="voiceStatusText">Voice Dictation</span>
+                      </button>
+                    </div>
+                    <textarea id="rawGrievance" rows="3" placeholder="Enter or dictate factual details regarding public record request, administrative delay, or refusal..." required></textarea>
+                    <div id="voiceLiveTranscript" class="voice-live-transcript"></div>
                   </div>
 
                   <button type="submit" class="btn-gov-primary" style="width: 100%;">
@@ -507,14 +560,21 @@
                   </button>
                 </form>
 
-                <!-- Standard Presets Bar -->
+                <!-- 1-Click Civic Presets Bar -->
                 <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle);">
-                  <span style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Standard Test Precedents:</span>
-                  <div style="display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap;">
-                    <button class="btn-gov-outline" style="font-size: 10px; padding: 2px 6px;" onclick="loadPreset(4)">Varanasi Land (VNS-99401)</button>
-                    <button class="btn-gov-outline" style="font-size: 10px; padding: 2px 6px;" onclick="loadPreset(1)">PDS Ration (RC-88492)</button>
-                    <button class="btn-gov-outline" style="font-size: 10px; padding: 2px 6px;" onclick="loadPreset(3)">Delhi Mehrauli (LND-88301)</button>
-                    <button class="btn-gov-outline" style="font-size: 10px; padding: 2px 6px;" onclick="loadPreset(2)">Dwarka Sewer (MW-77401)</button>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">All-India Civic Presets (1-Click):</span>
+                    <span style="font-size: 9.5px; color: var(--gov-navy); font-weight: 600;">28 States & 8 UTs Supported</span>
+                  </div>
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(1)">🌾 PDS Ration: Delhi (110054)</button>
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(2)">🌾 Karnataka Bhoomi Mutation (560001)</button>
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(3)">🏢 Maharashtra 7/12 Title: Mumbai (400001)</button>
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(4)">📜 Rajasthan Land Demarcation (302001)</button>
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(5)">⚖️ Varanasi Land Khasra (221005)</button>
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(6)">🌾 Bihar Land Mutation: Patna (800001)</button>
+                    <button type="button" class="btn-gov-outline preset-pill urgent-preset" onclick="loadPreset(7)">🚨 48h ICU Emergency: AIIMS (110029)</button>
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(8)">👮 Police FIR Inaction (211001)</button>
                   </div>
                 </div>
               </div>
@@ -583,6 +643,17 @@
                     <h2 class="dossier-case-id" id="viewCaseId">ARZ-1046</h2>
                     <span class="status-pill under-review" id="viewCaseStatus">● UNDER REVIEW</span>
                     <span class="statutory-tag" id="viewMeritBadge">98/100 Merit</span>
+                    <span class="statutory-tag" id="viewUrgencyBadge" style="display:none; background:#FEE2E2; color:#991B1B; border:1px solid #DC2626; font-weight:700;">🚨 48-HR LIFE & LIBERTY</span>
+                  </div>
+                  <div style="display: flex; gap: 6px; margin-top: 6px; align-items: center;">
+                    <button class="btn-urgency-toggle" id="dossierUrgencyToggleBtn" onclick="toggleCurrentCaseUrgency()">
+                      <i data-lucide="zap" style="width: 12px; height: 12px;"></i>
+                      <span id="dossierUrgencyLabel">Fast-Track (48-Hr Life & Liberty)</span>
+                    </button>
+                    <button class="btn-gov-outline" style="padding: 2px 8px; font-size: 10px;" onclick="openPostalSlipModal()">
+                      <i data-lucide="barcode" style="width: 11px; height: 11px;"></i>
+                      <span>Speed Post Docket</span>
+                    </button>
                   </div>
                 </div>
                 <div style="text-align: right; font-size: 11px;">
@@ -590,11 +661,28 @@
                   <div style="color: var(--gov-copper); font-weight: 600; margin-top: 2px;">
                     SLA: <span id="viewSla">14 Days Remaining</span>
                   </div>
+                  <div id="viewDueDate" style="font-family: var(--font-mono); font-size: 9.5px; color: var(--ink-muted); margin-top: 2px;"></div>
                 </div>
               </div>
 
               <div class="dossier-body">
                 
+                <!-- 0. Pan-India Jurisdiction & State Land Codex Banner -->
+                <div id="viewJurisdictionBanner" style="display: none; margin-bottom: 12px; padding: 8px 12px; background: rgba(30, 77, 107, 0.06); border-left: 3px solid var(--gov-navy); border-radius: 4px; font-size: 11px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                    <div>
+                      <span style="font-weight: 700; color: var(--gov-navy);"><i data-lucide="map-pin" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle;"></i> Jurisdiction:</span>
+                      <span id="viewJurisdictionArea" style="font-weight: 600; color: var(--ink-primary);">National Administrative Circle</span>
+                    </div>
+                    <div id="viewDigitalPortalLink" style="font-size: 10.5px; font-weight: 600; color: var(--gov-copper);">
+                      <!-- Land Portal / RTI Portal link -->
+                    </div>
+                  </div>
+                  <div id="viewLandActRow" style="margin-top: 4px; font-size: 10.5px; color: var(--ink-secondary);">
+                    <b>Governing Law:</b> <span id="viewPrimaryLandAct">State Land Revenue Code</span>
+                  </div>
+                </div>
+
                 <!-- 1. Statement of Facts -->
                 <div style="margin-bottom: 12px;">
                   <label class="form-label">Complainant Narrative & Extracted Facts</label>
@@ -677,6 +765,8 @@
                       <button class="doc-draft-tab active" data-doctab="rti" onclick="switchDocTab('rti')">Form-A RTI (Sec 6)</button>
                       <button class="doc-draft-tab" data-doctab="appeal" onclick="switchDocTab('appeal')">First Appeal (Sec 19)</button>
                       <button class="doc-draft-tab" data-doctab="notice" onclick="switchDocTab('notice')">Sec 80 CPC Notice</button>
+                      <button class="doc-draft-tab" data-doctab="section8" onclick="switchDocTab('section8')">Section 8 Shield</button>
+                      <button class="doc-draft-tab" data-doctab="slip" onclick="switchDocTab('slip')">Speed Post Slip</button>
                       <button class="doc-draft-tab" data-doctab="report" onclick="switchDocTab('report')">ML Assessment Dossier</button>
                     </div>
 
@@ -714,6 +804,26 @@
                       <div id="docPanelNotice" class="hidden">
                         <label class="form-label" style="font-size: 10px;">Statutory Legal Notice (Section 80 CPC)</label>
                         <textarea id="viewLegalNoticeText" rows="8" style="font-family: var(--font-mono); font-size: 10.5px;" readonly></textarea>
+                      </div>
+
+                      <div id="docPanelSection8" class="hidden">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                          <label class="form-label" style="font-size: 10px; margin-bottom: 0;">Pre-emptive Section 8 Exemption Neutralizer & Public Interest Shield</label>
+                          <button class="btn-gov-outline" style="font-size: 10px; padding: 2px 6px;" onclick="refreshSection8Shield()">Audit Shield</button>
+                        </div>
+                        <div id="section8ShieldBody" style="font-size: 11px;">
+                          <!-- Populated dynamically -->
+                        </div>
+                      </div>
+
+                      <div id="docPanelSlip" class="hidden">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                          <label class="form-label" style="font-size: 10px; margin-bottom: 0;">Speed Post Registered Dispatch Docket & Barcode</label>
+                          <button class="btn-gov-outline" style="font-size: 10px; padding: 2px 6px;" onclick="downloadSlipPdf()">Print / Export Slip PDF</button>
+                        </div>
+                        <div id="tabPostalSlipContainer">
+                          <!-- Populated dynamically -->
+                        </div>
                       </div>
 
                       <div id="docPanelReport" class="hidden">
@@ -938,31 +1048,42 @@
         </div>
 
         <div class="desk-split-layout">
-          <!-- Radar Canvas -->
+          <!-- Geospatial Map & Radar Visualizer -->
           <div class="ops-panel">
             <div class="ops-panel-header">
-              <span class="ops-panel-title">Geospatial Proximity Radar</span>
-              <span class="status-pill approved" id="radarTelemetryStatus" style="font-size: 10px;">Great-Circle Active</span>
+              <span class="ops-panel-title">Geospatial Jurisdictional Visualizer</span>
+              <div style="display: flex; gap: 4px;">
+                <button type="button" class="btn-gov-outline active" id="btnViewMap" style="padding: 2px 8px; font-size: 10px;" onclick="switchGeoView('map')">🗺️ OpenStreetMap</button>
+                <button type="button" class="btn-gov-outline" id="btnViewRadar" style="padding: 2px 8px; font-size: 10px;" onclick="switchGeoView('radar')">📡 Telemetry Radar</button>
+              </div>
             </div>
-            <div style="padding: 16px; text-align: center;">
+            <div style="padding: 14px;">
               
-              <!-- Radar Legend -->
-              <div style="display: flex; justify-content: center; gap: 14px; margin-bottom: 10px; font-size: 10.5px; color: var(--ink-secondary);">
-                <div style="display: flex; align-items: center; gap: 4px;">
-                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #D97706;"></span>
-                  <span>Citizen Origin</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 4px;">
-                  <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #1D4ED8; border: 2px solid #93C5FD;"></span>
-                  <span style="font-weight: 700; color: #1D4ED8;">Assigned Domain PIO</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 4px;">
-                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #64748B;"></span>
-                  <span>Other Nearby Authorities</span>
-                </div>
+              <!-- OpenStreetMap Container (Leaflet.js) -->
+              <div id="leafletMapContainer">
+                <div id="pioLeafletMap" style="height: 380px; width: 100%; border-radius: 3px; border: 1px solid var(--border-medium); z-index: 1;"></div>
               </div>
 
-              <canvas id="radarCanvas" width="380" height="380"></canvas>
+              <!-- Radar Canvas Container (Toggleable) -->
+              <div id="radarCanvasContainer" style="display: none; text-align: center;">
+                <!-- Radar Legend -->
+                <div style="display: flex; justify-content: center; gap: 14px; margin-bottom: 10px; font-size: 10.5px; color: var(--ink-secondary);">
+                  <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #D97706;"></span>
+                    <span>Citizen Origin</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #1D4ED8; border: 2px solid #93C5FD;"></span>
+                    <span style="font-weight: 700; color: #1D4ED8;">Assigned Domain PIO</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #64748B;"></span>
+                    <span>Other Nearby Authorities</span>
+                  </div>
+                </div>
+
+                <canvas id="radarCanvas" width="380" height="380"></canvas>
+              </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; font-size: 11px; text-align: left;">
                 <div class="legal-basis-box" style="margin-bottom: 0; padding: 6px 10px;">
@@ -972,7 +1093,7 @@
                   Assigned PIO Office: <b id="radarPioCoords">25.3340° N, 82.9860° E</b>
                 </div>
               </div>
-              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--status-active); margin-top: 8px;">
+              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--status-active); margin-top: 8px; text-align: center;">
                 Proximity Telemetry: <b id="radarDistance">1.42 km away</b>
               </div>
             </div>
@@ -1145,6 +1266,32 @@
       </div>
     </div>
 
+    <!-- Speed Post Barcode Slip Modal -->
+    <div id="postalSlipModal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+      <div style="max-width: 680px; width: 92%; max-height: 90vh; overflow-y: auto; background: var(--bg-surface); border: 1px solid var(--border-medium); border-top: 4px solid var(--gov-copper); padding: 22px; box-shadow: var(--shadow-md); border-radius: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+          <div>
+            <div style="font-family: var(--font-serif); font-size: 16px; font-weight: 700; color: var(--gov-navy);">
+              INDIAN SPEED POST DISPATCH DOCKET & REGISTERED AD
+            </div>
+            <div style="font-size: 11px; color: var(--ink-muted);">
+              Department of Posts, India &bull; Statutory Proof of Dispatch under Section 27 General Clauses Act
+            </div>
+          </div>
+          <button class="btn-gov-outline" onclick="closePostalSlipModal()">✕ Close</button>
+        </div>
+
+        <div id="postalSlipModalContent">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+          <button class="btn-gov-outline" onclick="closePostalSlipModal()">Close</button>
+          <button class="btn-gov-primary" onclick="printPostalSlip()"><i data-lucide="printer" style="width: 13px; height: 13px;"></i> Print Dispatch Slip</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Institutional Footer -->
     <footer class="institutional-footer">
       <div>
@@ -1158,6 +1305,6 @@
     </footer>
   </div>
 
-  <script src="/app.js"></script>
+  <script src="/app.js?v=20260906.2"></script>
 </body>
 </html>

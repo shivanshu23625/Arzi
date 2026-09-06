@@ -175,10 +175,79 @@ class RTIPDFGenerator:
                       f"Date: {today_date}"
             elements.append(Paragraph(sig_box, signature_style))
 
+        elif doc_type == "slip":
+            # =================== SPEED POST DISPATCH SLIP & REGISTERED AD ===================
+            elements.append(Paragraph("INDIAN SPEED POST DISPATCH SLIP & REGISTERED AD ACKNOWLEDGEMENT", title_style))
+            elements.append(Paragraph(f"<b>DEPARTMENT OF POSTS, INDIA &nbsp;|&nbsp; STATUTORY DISPATCH DESK &nbsp;|&nbsp; CASE ID:</b> {case_id}", ParagraphStyle('SubHeader', parent=body_style, alignment=1)))
+            elements.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor("#D94E28"), spaceAfter=10))
+
+            tracking_code = case.get("postal_tracking_code") or f"EM{int(hashlib.md5(case_id.encode()).hexdigest()[:8], 16) % 900000000 + 100000000}IN"
+            
+            # Postal Article Summary Box
+            slip_meta = [
+                [Paragraph("<b>CONSIGNMENT NO:</b>", body_style), Paragraph(f"<font size=12><b>{tracking_code}</b></font> (Registered Post with AD)", body_style)],
+                [Paragraph("<b>SERVICE TYPE:</b>", body_style), Paragraph("DOMESTIC SPEED POST (SP_INLAND) - TIME-CRITICAL STATUTORY FILING", body_style)],
+                [Paragraph("<b>LEGAL PRESUMPTION:</b>", body_style), Paragraph("Presumption of Valid Service under Section 27 General Clauses Act 1897 & Section 114(e) Indian Evidence Act", body_style)],
+                [Paragraph("<b>DISPATCH DATE:</b>", body_style), Paragraph(f"{today_date} 10:30:00 IST", body_style)],
+                [Paragraph("<b>STATUTORY MANDATE:</b>", body_style), Paragraph("48-HOUR URGENT LIFE & LIBERTY SLA" if case.get("is_life_liberty") else "30-DAY STATUTORY RTI SLA", body_style)]
+            ]
+            t = Table(slip_meta, colWidths=[150, 360])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F8FAFC")),
+                ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#CBD5E1")),
+                ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor("#E2E8F0")),
+                ('TOPPADDING', (0,0), (-1,-1), 4),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+            ]))
+            elements.append(t)
+            elements.append(Spacer(1, 10))
+
+            # Addressee & Sender Blocks
+            elements.append(Paragraph("<b>ADDRESSEE (TO):</b>", heading_style))
+            addr_text = f"<b>THE DESIGNATED PUBLIC INFORMATION OFFICER (PIO)</b><br/>" \
+                        f"<b>Office:</b> {pio.get('office_address', 'Public Information Office')}<br/>" \
+                        f"<b>Department:</b> {pio.get('department', 'Public Authority')}<br/>" \
+                        f"<b>Officer:</b> {pio.get('pio_name', 'Public Information Officer')} ({pio.get('designation', 'PIO')})<br/>" \
+                        f"<b>Room / Desk:</b> {pio.get('room_no', 'Ground Floor RTI Counter')}"
+            elements.append(Paragraph(addr_text, body_style))
+            elements.append(Spacer(1, 6))
+
+            elements.append(Paragraph("<b>SENDER (FROM):</b>", heading_style))
+            sndr_text = f"<b>{complainant.get('name', 'Citizen Applicant')}</b> (Natural Person / Citizen of India)<br/>" \
+                        f"<b>Address:</b> {complainant.get('address', 'Residential Address')}<br/>" \
+                        f"<b>Contact:</b> {complainant.get('contact', 'N/A')}<br/>" \
+                        f"<b>Matter:</b> Grievance Ref: {ref_no} &nbsp;|&nbsp; Case ID: {case_id}"
+            elements.append(Paragraph(sndr_text, body_style))
+            elements.append(Spacer(1, 10))
+
+            # Postal Clerk & Dispatch Counter Seal
+            clerk_box = f"<b>POSTAL DESK OFFICIAL AUTHENTICATION</b><br/><br/>" \
+                        f"Counter Booking No: PO/VNS/SP-{tracking_code[2:7]} &nbsp;|&nbsp; Weight: 42g &nbsp;|&nbsp; Tariff: Rs. 41.00<br/>" \
+                        f"Registered A.D. Barcode Attached &bull; Return Receipt Docket: AD-{tracking_code[2:10]}<br/>" \
+                        f"____________________________________________<br/>" \
+                        f"Postal Booking Assistant / Speed Post Centre Signature"
+            elements.append(Paragraph(clerk_box, ParagraphStyle('PostalSign', parent=body_style, alignment=0)))
+
         else:
-            # =================== FORM 'A' RTI APPLICATION (STANDARD) ===================
+            # =================== FORM 'A' RTI APPLICATION (STANDARD OR URGENT) ===================
+            if case.get("is_life_liberty"):
+                urgent_banner = Paragraph(
+                    "<font color='#991B1B'><b>*** STATUTORY URGENCY NOTICE: 48-HOUR MANDATORY DISCLOSURE UNDER PROVISO TO SECTION 7(1) RTI ACT 2005 (LIFE & LIBERTY) ***</b></font>",
+                    ParagraphStyle('UrgentBanner', parent=body_style, alignment=1, fontSize=9.5)
+                )
+                ub_table = Table([[urgent_banner]], colWidths=[510])
+                ub_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FEE2E2")),
+                    ('BOX', (0,0), (-1,-1), 1.5, colors.HexColor("#DC2626")),
+                    ('TOPPADDING', (0,0), (-1,-1), 6),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+                ]))
+                elements.append(ub_table)
+                elements.append(Spacer(1, 6))
+
             elements.append(Paragraph("FORM 'A' - APPLICATION FOR INFORMATION UNDER SECTION 6(1) OF RTI ACT 2005", title_style))
-            elements.append(Paragraph(f"<b>CASE REF ID:</b> {case_id} &nbsp;|&nbsp; <b>DATE:</b> {today_date} &nbsp;|&nbsp; <b>STATUTORY SLA:</b> 30 DAYS (SECTION 7(1))", body_style))
+            sla_hdr = "48 HOURS (SECTION 7(1) PROVISO)" if case.get("is_life_liberty") else "30 DAYS (SECTION 7(1))"
+            elements.append(Paragraph(f"<b>CASE REF ID:</b> {case_id} &nbsp;|&nbsp; <b>DATE:</b> {today_date} &nbsp;|&nbsp; <b>STATUTORY SLA:</b> {sla_hdr}", body_style))
             elements.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor("#1E242B"), spaceAfter=10))
 
             # Recipient PIO Block with Nearest Geospatial Tag

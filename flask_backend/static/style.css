@@ -1108,3 +1108,366 @@ input[type="text"]:focus, select:focus, textarea:focus {
   background: #F8FAFC;
   box-shadow: 0 2px 8px rgba(11, 29, 58, 0.08);
 }
+
+/* ==========================================================================
+   EXECUTIVE DARK THEME DESIGN SYSTEM
+   ========================================================================== */
+[data-theme="dark"] {
+  --bg-page: #0B0F19;
+  --bg-surface: #111827;
+  --bg-subtle: #1E293B;
+  --bg-alt: #162032;
+  --bg-highlight: #2A2415;
+  
+  --ink-primary: #F8FAFC;
+  --ink-secondary: #CBD5E1;
+  --ink-muted: #94A3B8;
+  --ink-light: #64748B;
+  
+  --gov-navy: #3B82F6;
+  --gov-navy-hover: #60A5FA;
+  --gov-copper: #FB923C;
+  --gov-amber: #FBBF24;
+  --gov-slate: #94A3B8;
+  
+  --status-active: #34D399;
+  --status-active-bg: rgba(52, 211, 153, 0.15);
+  --status-review: #FBBF24;
+  --status-review-bg: rgba(251, 191, 36, 0.15);
+  --status-risk: #F87171;
+  --status-risk-bg: rgba(248, 113, 113, 0.15);
+  --status-neutral: #94A3B8;
+  --status-neutral-bg: rgba(148, 163, 184, 0.15);
+  
+  --border-subtle: #1E293B;
+  --border-medium: #334155;
+  --border-strong: #475569;
+  --border-navy: #3B82F6;
+  --border-copper: #FB923C;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .ops-panel {
+  background: #111827;
+  border-color: #1E293B;
+}
+
+[data-theme="dark"] .editorial-table thead th {
+  background: #1E293B;
+  color: #E2E8F0;
+  border-bottom-color: #334155;
+}
+
+[data-theme="dark"] .editorial-table tbody td {
+  border-bottom-color: #1E293B;
+  color: #CBD5E1;
+}
+
+[data-theme="dark"] .editorial-table tbody tr:hover td {
+  background: #1E293B;
+}
+
+[data-theme="dark"] input, 
+[data-theme="dark"] textarea, 
+[data-theme="dark"] select {
+  background: #162032;
+  color: #F8FAFC;
+  border-color: #334155;
+}
+
+[data-theme="dark"] input:focus, 
+[data-theme="dark"] textarea:focus, 
+[data-theme="dark"] select:focus {
+  border-color: #3B82F6;
+  background: #1E293B;
+}
+
+[data-theme="dark"] .legal-basis-box {
+  background: #162032;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .app-header {
+  background: #111827;
+  border-color: #1E293B;
+  border-top-color: #3B82F6;
+}
+
+[data-theme="dark"] .btn-gov-outline {
+  background: #162032;
+  border-color: #334155;
+  color: #CBD5E1;
+}
+
+[data-theme="dark"] .btn-gov-outline:hover {
+  background: #1E293B;
+  color: #FFFFFF;
+  border-color: #3B82F6;
+}
+
+[data-theme="dark"] .statutory-table th {
+  background: #1E293B;
+  color: #E2E8F0;
+}
+
+[data-theme="dark"] .statutory-table td {
+  background: #111827;
+  border-color: #1E293B;
+}
+
+[data-theme="dark"] .nearby-pio-card {
+  background: #111827;
+  border-color: #1E293B;
+}
+
+[data-theme="dark"] .nearby-pio-card.assigned-domain-pio {
+  background: #162032;
+  border-color: #3B82F6;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-medium);
+  color: var(--ink-secondary);
+  border-radius: 4px;
+  width: 32px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--gov-navy);
+  color: var(--gov-navy);
+  background: var(--bg-surface);
+}
+
+/* Voice Dictation Button & Pulse Animation */
+.btn-voice-dictate {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-medium);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-voice-dictate:hover {
+  border-color: var(--gov-navy);
+  color: var(--gov-navy);
+}
+
+.btn-voice-dictate.recording {
+  background: #FEE2E2;
+  border-color: #DC2626;
+  color: #DC2626;
+  animation: voicePulse 1.4s infinite ease-in-out;
+}
+
+@keyframes voicePulse {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.voice-live-transcript {
+  display: none;
+  font-size: 11px;
+  color: var(--gov-navy);
+  font-style: italic;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: var(--bg-subtle);
+  border-radius: 3px;
+  border-left: 3px solid var(--gov-navy);
+}
+
+/* 48-Hour Urgent Life & Liberty Fast-Track Banner */
+.urgent-toggle-banner {
+  margin-bottom: 10px;
+  background: rgba(220, 38, 38, 0.05);
+  border: 1px dashed #DC2626;
+  border-radius: 4px;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
+}
+
+.urgent-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #DC2626;
+}
+
+.urgent-checkbox-label input {
+  cursor: pointer;
+  width: 15px;
+  height: 15px;
+  accent-color: #DC2626;
+}
+
+.urgent-indicator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.urgent-hint-text {
+  font-size: 10.5px;
+  color: var(--ink-muted);
+  margin-top: 3px;
+  margin-left: 23px;
+}
+
+/* 1-Click Civic Presets */
+.preset-pill {
+  font-size: 10.5px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.preset-pill.urgent-preset {
+  border-color: #DC2626;
+  color: #DC2626;
+}
+
+.preset-pill.urgent-preset:hover {
+  background: #FEE2E2;
+}
+
+/* Dossier Urgency Toggle Button */
+.btn-urgency-toggle {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-medium);
+  border-radius: 3px;
+  padding: 3px 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-urgency-toggle:hover {
+  border-color: #DC2626;
+  color: #DC2626;
+}
+
+.btn-urgency-toggle.urgent-active {
+  background: #DC2626;
+  border-color: #B91C1C;
+  color: #FFFFFF;
+  animation: urgentGlow 2s infinite ease-in-out;
+}
+
+@keyframes urgentGlow {
+  0%, 100% { box-shadow: 0 0 4px rgba(220, 38, 38, 0.4); }
+  50% { box-shadow: 0 0 10px rgba(220, 38, 38, 0.8); }
+}
+
+/* Leaflet Map Styling */
+#pioLeafletMap {
+  background: #F1F5F9;
+  z-index: 1;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 4px;
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-ui);
+  font-size: 12px;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px;
+  line-height: 1.4;
+}
+
+/* Speed Post Postal Docket Card */
+.postal-slip-card {
+  background: #FFFFFF;
+  border: 2px solid #0F172A;
+  border-radius: 4px;
+  padding: 16px;
+  font-family: var(--font-ui);
+  color: #0F172A;
+}
+
+.postal-slip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #0F172A;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.postal-barcode-box {
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 4px;
+  padding: 8px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* Section 8 Shield Cards */
+.shield-risk-card {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-medium);
+  border-left: 3px solid var(--gov-copper);
+  border-radius: 3px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.shield-risk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  color: var(--gov-navy);
+  margin-bottom: 4px;
+}
+
+/* Print Rules for Dispatch Slip */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #postalSlipModal, #postalSlipModal * {
+    visibility: visible;
+  }
+  #postalSlipModal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    background: #FFFFFF !important;
+  }
+  #postalSlipModal button {
+    display: none !important;
+  }
+}
+

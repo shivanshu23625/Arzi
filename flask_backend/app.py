@@ -60,7 +60,14 @@ def create_app():
     def index():
         if os.path.exists(os.path.join(app.static_folder, "index.html")):
             return send_from_directory(app.static_folder, "index.html")
-        return jsonify({"message": "ARZI Civic RTI Desk Flask API Server Online", "docs": "/api/v1/cases"})
+    # Prevent aggressive browser caching of frontend static assets
+    @app.after_request
+    def add_no_cache_header(response):
+        if request.path.endswith((".js", ".css", ".html")) or request.path == "/":
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
 
     return app
 
