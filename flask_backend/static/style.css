@@ -1014,6 +1014,19 @@ input[type="text"]:focus, select:focus, textarea:focus {
   border: 1px solid #BFDBFE;
 }
 
+.status-pill.merged,
+.status-pill.neutral {
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #CBD5E1;
+}
+
+.status-pill.needs-review {
+  background: var(--status-review-bg);
+  color: var(--status-review);
+  border: 1px solid #FDE68A;
+}
+
 /* Tables */
 .editorial-table {
   width: 100%;

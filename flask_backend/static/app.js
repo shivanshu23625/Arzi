@@ -1182,6 +1182,19 @@ function inspectCaseFromRunLog(caseId) {
   openCaseDetailView(caseId);
 }
 
+function getStatusClass(status) {
+  if (!status) return "under-review";
+  const s = String(status).toUpperCase();
+  if (s === "APPROVED") return "approved";
+  if (s === "TRANSFERRED_SEC_6_3" || s === "TRANSFERRED") return "transferred";
+  if (s === "MERGED_DUPLICATE" || s === "MERGED") return "merged";
+  if (s === "NEEDS_REVIEW" || s === "UNDER_REVIEW") return "under-review";
+  if (s.includes("APPROV")) return "approved";
+  if (s.includes("TRANSF")) return "transferred";
+  if (s.includes("MERG")) return "merged";
+  return "under-review";
+}
+
 async function openCaseDetailView(caseId) {
   try {
     let caseData = (typeof allCasesCache !== "undefined" ? allCasesCache : []).find(c => c.case_id === caseId);
@@ -2816,6 +2829,7 @@ window.submitCaseMergeFromDetail = submitCaseMergeFromDetail;
 window.refreshActiveCaseDetailTimeline = refreshActiveCaseDetailTimeline;
 window.populateMergeDuplicateSelect = populateMergeDuplicateSelect;
 window.triggerLiveMlPrediction = triggerLiveMlPrediction;
+window.getStatusClass = getStatusClass;
 
 
 
