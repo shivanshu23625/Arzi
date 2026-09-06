@@ -9,7 +9,7 @@
   <meta name="keywords" content="RTI Act 2005, Bharatiya Nyaya Sanhita, BNS 2023, IPC 1860, Section 20 Penalty, Public Authority, PIO Directory, Railway, Supabase" />
   
   <!-- Institutional Google Fonts: Source Serif 4 & Inter & JetBrains Mono -->
-  <link rel="stylesheet" href="/style.css?v=20260906.5" />
+  <link rel="stylesheet" href="/style.css?v=20260906.6" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,600&display=swap" rel="stylesheet">
@@ -614,7 +614,7 @@
               </div>
 
               <!-- Table -->
-              <div style="max-height: 480px; overflow-y: auto;">
+              <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
                 <table class="editorial-table">
                   <thead>
                     <tr>
@@ -1328,7 +1328,7 @@
               <span class="statutory-tag" id="detailPincodeBadge">PIN: &mdash;</span>
             </div>
             <div class="ops-panel-body" style="padding: 12px 14px;">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="detail-parties-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <!-- Complainant box -->
                 <div style="background: var(--bg-alt); border: 1px solid var(--border-subtle); padding: 10px; border-radius: 2px;">
                   <div style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 4px;">Citizen Applicant</div>
@@ -1550,7 +1550,7 @@
 
     <!-- Transfer Modal -->
     <div id="transferModal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
-      <div style="max-width: 500px; width: 90%; background: var(--bg-surface); border: 1px solid var(--border-medium); border-top: 3px solid var(--gov-navy); padding: 20px; box-shadow: var(--shadow-md);">
+      <div class="gov-modal-card" style="max-width: 500px; width: 90%; background: var(--bg-surface); border: 1px solid var(--border-medium); border-top: 3px solid var(--gov-navy); padding: 20px; box-shadow: var(--shadow-md);">
         <div style="font-family: var(--font-serif); font-size: 15px; font-weight: 700; color: var(--gov-navy); margin-bottom: 8px;">
           SECTION 6(3) 5-DAY MANDATORY TRANSFER
         </div>
@@ -1589,7 +1589,7 @@
 
     <!-- Speed Post Barcode Slip Modal -->
     <div id="postalSlipModal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); z-index: 9999; display: flex; align-items: center; justify-content: center;">
-      <div style="max-width: 680px; width: 92%; max-height: 90vh; overflow-y: auto; background: var(--bg-surface); border: 1px solid var(--border-medium); border-top: 4px solid var(--gov-copper); padding: 22px; box-shadow: var(--shadow-md); border-radius: 4px;">
+      <div class="gov-modal-card" style="max-width: 680px; width: 92%; max-height: 90vh; overflow-y: auto; background: var(--bg-surface); border: 1px solid var(--border-medium); border-top: 4px solid var(--gov-copper); padding: 22px; box-shadow: var(--shadow-md); border-radius: 4px;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
           <div>
             <div style="font-family: var(--font-serif); font-size: 16px; font-weight: 700; color: var(--gov-navy);">
@@ -1626,6 +1626,6 @@
     </footer>
   </div>
 
-  <script src="/app.js?v=20260906.5"></script>
+  <script src="/app.js?v=20260906.6"></script>
 </body>
 </html>
