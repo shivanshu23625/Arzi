@@ -111,35 +111,32 @@ class RTIEngine:
     def predict_department_and_pio(self, grievance_text: str, user_locality: str) -> tuple[dict, int, str]:
         """
         ML Classification Engine: Predicts target department and PIO jurisdiction 
-        from raw citizen narrative without requiring user selection.
+        from raw citizen narrative using TF-IDF n-gram classification across 11 public sectors.
         """
-        text_lower = grievance_text.lower()
+        from flask_backend.services.domain_classifier import domain_classifier
+
+        classification = domain_classifier.classify_grievance(grievance_text, user_locality)
+        predicted_domain = classification["domain"]
+        confidence_pct = classification["confidence"]
+        ml_reason = classification["reason"]
+
         matched_pio_base = None
-        highest_score = 0
-        matching_reason = "General Public Grievance"
-
         for pio in db_store.pio_directory:
-            score = 0
-            matched_keywords = []
-            for keyword in pio.get("jurisdiction_keywords", []):
-                kw_lower = keyword.lower()
-                if re.search(r'\b' + re.escape(kw_lower) + r'\b', text_lower):
-                    score += 35
-                    matched_keywords.append(keyword)
-                elif kw_lower in text_lower:
-                    score += 20
-                    matched_keywords.append(keyword)
-
-            if score > highest_score:
-                highest_score = score
+            if pio.get("department", "").lower() == predicted_domain.lower():
                 matched_pio_base = pio
-                matching_reason = f"ML intent matched keywords: {', '.join(list(set(matched_keywords)))}"
+                break
 
         if not matched_pio_base:
-            matched_pio_base = db_store.pio_directory[0] # Default: Revenue & Land Records
-            matching_reason = "Defaulted to Revenue & Land Records based on public administration classification"
+            for pio in db_store.pio_directory:
+                dept = pio.get("department", "").lower()
+                if any(word.strip() in dept for word in predicted_domain.lower().split("&")):
+                    matched_pio_base = pio
+                    break
 
-        return matched_pio_base, highest_score, matching_reason
+        if not matched_pio_base:
+            matched_pio_base = db_store.pio_directory[0]
+
+        return matched_pio_base, confidence_pct, ml_reason
 
     def detect_life_and_liberty(self, text: str, context: dict = None) -> dict:
         """

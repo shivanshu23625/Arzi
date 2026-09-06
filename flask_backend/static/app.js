@@ -77,7 +77,7 @@ function showPage(pageId) {
   const pageEl = document.getElementById(`page-${pageId}`);
 
   if (navBtn) navBtn.classList.add("active");
-  if (pageId === "dashboard" && navDashBtn) navDashBtn.classList.add("active");
+  if ((pageId === "dashboard" || pageId === "case-detail") && navDashBtn) navDashBtn.classList.add("active");
   if (pageEl) {
     pageEl.classList.add("active");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1040,9 +1040,476 @@ function handleRunLogSearch(rawQuery) {
   renderLucide();
 }
 
+// ==========================================================================
+// DEDICATED CASE DOSSIER, AUDIT & TIMELINE VIEW (OPENED FROM AUDIT RUN LOG)
+// ==========================================================================
+let activeDetailCase = null;
+
 function inspectCaseFromRunLog(caseId) {
-  openCaseById(caseId);
-  switchDashTab("casework");
+  openCaseDetailView(caseId);
+}
+
+async function openCaseDetailView(caseId) {
+  try {
+    let caseData = (typeof allCasesCache !== "undefined" ? allCasesCache : []).find(c => c.case_id === caseId);
+    if (!caseData) {
+      const res = await fetch(`${API_BASE}/cases/${encodeURIComponent(caseId)}`);
+      if (res.ok) {
+        const json = await res.json();
+        caseData = json.case;
+      }
+    }
+    if (!caseData) {
+      alert(`Could not find case docket ${caseId}.`);
+      return;
+    }
+    activeDetailCase = caseData;
+
+    // 1. Header & Summary Banner
+    const docketIdEl = document.getElementById("detailDocketId");
+    if (docketIdEl) docketIdEl.textContent = caseData.case_id;
+    const breadcrumbEl = document.getElementById("detailCaseBreadcrumb");
+    if (breadcrumbEl) breadcrumbEl.textContent = `${caseData.case_id} Dossier`;
+    const subjectEl = document.getElementById("detailDocketSubject");
+    if (subjectEl) subjectEl.textContent = caseData.draft_rti?.application_subject || "Right to Information Application";
+    const dateEl = document.getElementById("detailDocketDate");
+    if (dateEl) dateEl.textContent = caseData.original_submission_date || caseData.created_at || "—";
+    const refEl = document.getElementById("detailDocketRef");
+    if (refEl) refEl.textContent = caseData.application_ref_no || "Standard Filing";
+    const deptEl = document.getElementById("detailDocketDept");
+    if (deptEl) deptEl.textContent = caseData.department || "Revenue & Land Records";
+    const compNameEl = document.getElementById("detailDocketComplainantName");
+    if (compNameEl) compNameEl.textContent = caseData.complainant?.name || "Citizen Applicant";
+    const locEl = document.getElementById("detailDocketLocation");
+    if (locEl) locEl.textContent = caseData.district ? `${caseData.district}, ${caseData.state || ''}` : (caseData.confidence?.user_locality || "Local Jurisdiction");
+    const pinEl = document.getElementById("detailPincodeBadge");
+    if (pinEl) pinEl.textContent = `PIN: ${caseData.pincode || caseData.complainant?.pincode || '—'}`;
+
+    // Status & SLA
+    const statusPill = document.getElementById("detailDocketStatusPill");
+    if (statusPill) {
+      statusPill.textContent = caseData.status;
+      statusPill.className = `status-pill ${getStatusClass(caseData.status)}`;
+    }
+    const slaBadge = document.getElementById("detailDocketSlaBadge");
+    const urgentBadge = document.getElementById("detailDocketUrgentBadge");
+    const isUrgent = Boolean(caseData.is_life_liberty);
+    if (urgentBadge) urgentBadge.style.display = isUrgent ? "inline-block" : "none";
+    if (slaBadge) slaBadge.textContent = isUrgent ? "48-Hour Urgent SLA" : "30-Day Standard SLA";
+
+    const daysRemaining = caseData.sla_days_remaining !== undefined ? caseData.sla_days_remaining : 30;
+    const slaCountdown = document.getElementById("detailDocketSlaCountdown");
+    if (slaCountdown) {
+      slaCountdown.textContent = isUrgent ? "48 Hours" : `${daysRemaining} Days`;
+      slaCountdown.style.color = daysRemaining <= 5 ? "var(--status-risk)" : "var(--gov-navy)";
+    }
+    const dueDateEl = document.getElementById("detailDocketDueDate");
+    if (dueDateEl) dueDateEl.textContent = `Due: ${caseData.due_date || 'Within Statutory Period'}`;
+
+    // 2. Complainant & PIO Details
+    const cName = document.getElementById("detailCompName");
+    if (cName) cName.textContent = caseData.complainant?.name || "—";
+    const cContact = document.getElementById("detailCompContact");
+    if (cContact) cContact.textContent = caseData.complainant?.contact || "Contact not specified";
+    const cAddress = document.getElementById("detailCompAddress");
+    if (cAddress) cAddress.textContent = caseData.complainant?.address || "Address not provided";
+
+    const pio = caseData.suggested_pio || caseData.assigned_pio || {};
+    const pioName = document.getElementById("detailPioName");
+    if (pioName) pioName.textContent = pio.pio_name || "Designated PIO Officer";
+    const pioDept = document.getElementById("detailPioDept");
+    if (pioDept) pioDept.textContent = pio.department || caseData.department || "Public Authority";
+    const pioAddress = document.getElementById("detailPioAddress");
+    if (pioAddress) pioAddress.textContent = pio.office_address || "Tehsil / District Collectorate Complex";
+    const pioDist = document.getElementById("detailPioDistance");
+    if (pioDist) pioDist.textContent = pio.distance_label ? `📍 ${pio.distance_label}` : "📍 1.2 km away (Haversine jurisdiction)";
+
+    // 3. Grievance & Questions
+    const grievanceText = document.getElementById("detailGrievanceText");
+    if (grievanceText) grievanceText.textContent = caseData.raw_grievance || "No grievance narrative recorded.";
+    const questionsList = document.getElementById("detailQuestionsList");
+    if (questionsList) {
+      const qArr = caseData.draft_rti?.questions || [];
+      if (qArr.length > 0) {
+        questionsList.innerHTML = qArr.map(q => `<li style="margin-bottom: 6px;">${q}</li>`).join("");
+      } else {
+        questionsList.innerHTML = `<li style="color: var(--ink-muted);">Standard certified inspection and dispatch status questions drafted.</li>`;
+      }
+    }
+
+    // 4. ML Domain Classification Intelligence
+    const mlConf = caseData.confidence?.overall || 95;
+    const mlConfBadge = document.getElementById("detailMlConfidenceBadge");
+    if (mlConfBadge) {
+      mlConfBadge.textContent = `${mlConf}% ML Confidence`;
+      mlConfBadge.className = `status-pill ${mlConf >= 80 ? "approved" : "under-review"}`;
+    }
+    const domainTitle = document.getElementById("detailMlDomainTitle");
+    if (domainTitle) domainTitle.textContent = caseData.department || "Revenue & Land Records";
+    const mlReason = document.getElementById("detailMlReason");
+    if (mlReason) mlReason.textContent = caseData.confidence?.ml_prediction_reason || "Classified via multi-gram TF-IDF domain scoring with authentic statutory keyword triggers.";
+
+    const triggersEl = document.getElementById("detailMlTriggers");
+    if (triggersEl) {
+      const keywords = (caseData.statutory_legal_analysis?.matched_keywords || ["RTI 2005", caseData.department]).slice(0, 4);
+      triggersEl.innerHTML = keywords.map(kw => `<span class="statutory-tag" style="font-size: 10px;">${kw}</span>`).join("");
+    }
+
+    const bnsMapping = document.getElementById("detailBnsMapping");
+    if (bnsMapping) {
+      const primaryStatute = caseData.statutory_legal_analysis?.primary_bns_statute;
+      bnsMapping.textContent = primaryStatute ? `${primaryStatute.ipc_section} → ${primaryStatute.bns_section}` : "Section 6(1) RTI Act 2005";
+    }
+
+    const penaltyEl = document.getElementById("detailSec20Penalty");
+    if (penaltyEl) {
+      const pen = caseData.statutory_legal_analysis?.section_20_penalty_liability_inr || 0;
+      penaltyEl.textContent = `₹${pen.toLocaleString('en-IN')}`;
+    }
+
+    // 5. Initialize Timestamp input to live local ISO
+    const timestampInput = document.getElementById("updateTimestampInput");
+    if (timestampInput) {
+      const now = new Date();
+      const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      timestampInput.value = localIso;
+    }
+
+    // 6. Populate Deduplication Select Options
+    populateMergeDuplicateSelect(caseData.case_id);
+
+    // 7. Render Previously Merged Dockets
+    renderPreviouslyMergedList(caseData);
+
+    // 8. Render Chronological Timeline Ledger
+    renderCaseDetailTimeline(caseData);
+
+    // 9. Navigate to page
+    showPage("case-detail");
+    renderLucide();
+  } catch (err) {
+    console.error("Error opening case details view:", err);
+    alert("Could not load case details: " + err.message);
+  }
+}
+
+function populateMergeDuplicateSelect(currentCaseId) {
+  const select = document.getElementById("mergeDuplicateSelect");
+  if (!select) return;
+  select.innerHTML = '<option value="">-- Choose a duplicate case to consolidate --</option>';
+
+  const cache = typeof allCasesCache !== "undefined" ? allCasesCache : [];
+  const candidates = cache.filter(c => c.case_id !== currentCaseId && c.status !== "MERGED_DUPLICATE");
+  if (candidates.length === 0) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.disabled = true;
+    opt.textContent = "No other active dockets available for merging";
+    select.appendChild(opt);
+    return;
+  }
+
+  candidates.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.case_id;
+    const name = c.complainant?.name || "Applicant";
+    const dept = c.department || "Civic";
+    const ref = c.application_ref_no ? `(Ref: ${c.application_ref_no})` : "";
+    opt.textContent = `${c.case_id} — ${name} — ${dept} ${ref} [${c.status}]`;
+    select.appendChild(opt);
+  });
+}
+
+function renderPreviouslyMergedList(caseData) {
+  const section = document.getElementById("previouslyMergedSection");
+  const list = document.getElementById("previouslyMergedList");
+  if (!section || !list) return;
+
+  const mergedIds = caseData.merged_duplicate_cases || [];
+  const cache = typeof allCasesCache !== "undefined" ? allCasesCache : [];
+  const otherMerged = cache.filter(c => c.merged_into_case_id === caseData.case_id).map(c => c.case_id);
+  const allMerged = Array.from(new Set([...mergedIds, ...otherMerged]));
+
+  if (allMerged.length === 0) {
+    section.style.display = "none";
+    list.innerHTML = "";
+    return;
+  }
+
+  section.style.display = "block";
+  list.innerHTML = allMerged.map(id => `
+    <span class="statutory-tag" style="background: #FEE2E2; color: #991B1B; border-color: #FCA5A5; font-size: 11px;">
+      <b>${id}</b> (Merged Duplicate)
+    </span>
+  `).join("");
+}
+
+function renderCaseDetailTimeline(caseData) {
+  const container = document.getElementById("detailTimelineContainer");
+  const countEl = document.getElementById("detailTimelineCount");
+  if (!container) return;
+
+  const history = caseData.update_history || [];
+  if (countEl) countEl.textContent = history.length;
+
+  if (history.length === 0) {
+    container.innerHTML = `
+      <div style="color: var(--ink-muted); font-size: 12px; padding: 12px 0;">
+        No historical update logs found on this docket. Initializing audit trail...
+      </div>
+    `;
+    return;
+  }
+
+  // Render in reverse chronological order (newest first)
+  const sorted = [...history].reverse();
+  container.innerHTML = sorted.map((entry, idx) => {
+    const isNewest = idx === 0;
+    const uType = (entry.update_type || "").toUpperCase();
+    const borderCol = uType.includes("MERGE") ? "var(--gov-copper)" :
+                      uType.includes("HEARING") ? "var(--gov-navy)" :
+                      uType.includes("TRANSFER") ? "var(--gov-amber)" :
+                      "var(--status-active)";
+
+    return `
+      <div class="audit-timeline-entry" style="margin-bottom: 12px;">
+        <div class="timeline-entry-card" style="${isNewest ? 'border-left: 3px solid ' + borderCol + ';' : ''}">
+          <div class="timeline-meta-row">
+            <span style="font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-muted); font-weight: 600;">
+              ${entry.timestamp || 'Recorded'}
+            </span>
+            <span class="statutory-tag" style="font-size: 9.5px; text-transform: uppercase;">
+              ${entry.update_type || 'CASE_UPDATE'}
+            </span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="font-weight: 700; font-size: 11.5px; color: var(--gov-navy);">
+              ${entry.actor || 'Legal Desk Officer'}
+            </span>
+            ${entry.field_changed ? `<span style="font-size: 10px; color: var(--ink-muted);">${entry.field_changed}</span>` : ''}
+          </div>
+          <div style="font-size: 11.5px; color: var(--ink-secondary); line-height: 1.5; white-space: pre-wrap;">
+            ${entry.remarks || 'Status / information updated.'}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function submitCaseUpdateFromDetail(event) {
+  event.preventDefault();
+  if (!activeDetailCase) {
+    alert("No active case selected.");
+    return;
+  }
+
+  const updateType = document.getElementById("updateTypeSelect").value;
+  const actor = (document.getElementById("updateActorInput")?.value || "").trim() || "Adv. S. Kalra (Legal Counsel)";
+  const rawTime = document.getElementById("updateTimestampInput")?.value;
+  const newStatus = document.getElementById("updateStatusSelect")?.value;
+  const remarks = (document.getElementById("updateRemarksTextarea")?.value || "").trim();
+  const statusMsg = document.getElementById("updateFormStatusMsg");
+  const submitBtn = document.getElementById("btnSubmitCaseUpdate");
+
+  if (!remarks) {
+    alert("Please enter remarks / hearing minutes for this case update.");
+    return;
+  }
+
+  const formattedTime = rawTime ? rawTime.replace("T", " ") + ":00" : undefined;
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "<span>Recording Update...</span>";
+  }
+  if (statusMsg) {
+    statusMsg.style.color = "var(--ink-muted)";
+    statusMsg.textContent = "Recording update to case docket...";
+  }
+
+  try {
+    const payload = {
+      update_type: updateType,
+      actor: actor,
+      timestamp: formattedTime,
+      new_status: newStatus || undefined,
+      remarks: remarks
+    };
+
+    const res = await fetch(`${API_BASE}/cases/${encodeURIComponent(activeDetailCase.case_id)}/updates`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to record case update");
+    }
+
+    // Success! Update active case
+    activeDetailCase = data.case;
+    if (typeof allCasesCache !== "undefined") {
+      const idx = allCasesCache.findIndex(c => c.case_id === activeDetailCase.case_id);
+      if (idx !== -1) allCasesCache[idx] = data.case;
+    }
+
+    // Refresh timeline & status
+    renderCaseDetailTimeline(activeDetailCase);
+    if (newStatus) {
+      const statusPill = document.getElementById("detailDocketStatusPill");
+      if (statusPill) {
+        statusPill.textContent = newStatus;
+        statusPill.className = `status-pill ${getStatusClass(newStatus)}`;
+      }
+    }
+
+    // Clear textarea
+    const remarksEl = document.getElementById("updateRemarksTextarea");
+    if (remarksEl) remarksEl.value = "";
+    const statusSel = document.getElementById("updateStatusSelect");
+    if (statusSel) statusSel.value = "";
+
+    // Show feedback
+    if (statusMsg) {
+      statusMsg.style.color = "var(--status-active)";
+      statusMsg.textContent = "✓ Timestamped update recorded successfully!";
+      setTimeout(() => { if (statusMsg) statusMsg.textContent = ""; }, 4000);
+    }
+
+    // Refresh run logs & cases list in background
+    loadRunLogs();
+    loadCaseQueue();
+  } catch (err) {
+    console.error("Error submitting case update:", err);
+    if (statusMsg) {
+      statusMsg.style.color = "var(--status-risk)";
+      statusMsg.textContent = `Error: ${err.message}`;
+    }
+    alert(`Could not record case update: ${err.message}`);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<i data-lucide="plus-circle" style="width: 13px; height: 13px;"></i><span>Record Timestamped Update</span>`;
+    }
+    renderLucide();
+  }
+}
+
+async function submitCaseMergeFromDetail(event) {
+  event.preventDefault();
+  if (!activeDetailCase) {
+    alert("No active case selected.");
+    return;
+  }
+
+  const dupSelect = document.getElementById("mergeDuplicateSelect");
+  const duplicateId = dupSelect ? dupSelect.value : "";
+  const remarks = (document.getElementById("mergeRemarksInput")?.value || "").trim();
+  const statusMsg = document.getElementById("mergeStatusMsg");
+
+  if (!duplicateId) {
+    alert("Please select a duplicate case to consolidate into this docket.");
+    return;
+  }
+
+  if (!confirm(`Are you sure you want to merge duplicate case ${duplicateId} into Master Docket ${activeDetailCase.case_id}?\n\nThis will mark ${duplicateId} as MERGED_DUPLICATE and consolidate all facts.`)) {
+    return;
+  }
+
+  if (statusMsg) {
+    statusMsg.style.color = "var(--ink-muted)";
+    statusMsg.textContent = "Executing deduplication merge...";
+  }
+
+  try {
+    const actorName = (typeof currentPersona !== "undefined" && currentPersona === "counsel") ? "Adv. S. Kalra (Legal NGO)" : "Designated PIO Desk Officer";
+    const payload = {
+      master_case_id: activeDetailCase.case_id,
+      duplicate_case_id: duplicateId,
+      actor: actorName,
+      remarks: remarks || "Consolidated duplicate docket to eliminate deduplicacy."
+    };
+
+    const res = await fetch(`${API_BASE}/cases/merge-duplicates`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to merge cases");
+    }
+
+    // Success! Update active case
+    activeDetailCase = data.master_case;
+
+    if (typeof allCasesCache !== "undefined") {
+      const mIdx = allCasesCache.findIndex(c => c.case_id === activeDetailCase.case_id);
+      if (mIdx !== -1) allCasesCache[mIdx] = data.master_case;
+      const dIdx = allCasesCache.findIndex(c => c.case_id === duplicateId);
+      if (dIdx !== -1) allCasesCache[dIdx] = data.duplicate_case;
+    }
+
+    // Re-populate merge select and previously merged list
+    populateMergeDuplicateSelect(activeDetailCase.case_id);
+    renderPreviouslyMergedList(activeDetailCase);
+
+    // Refresh timeline
+    renderCaseDetailTimeline(activeDetailCase);
+
+    // Clear remarks input
+    const remarksInput = document.getElementById("mergeRemarksInput");
+    if (remarksInput) remarksInput.value = "";
+
+    if (statusMsg) {
+      statusMsg.style.color = "var(--status-active)";
+      statusMsg.textContent = `✓ Successfully merged ${duplicateId} into ${activeDetailCase.case_id}!`;
+      setTimeout(() => { if (statusMsg) statusMsg.textContent = ""; }, 5000);
+    }
+
+    // Refresh background data
+    loadRunLogs();
+    loadCaseQueue();
+  } catch (err) {
+    console.error("Error executing case merge:", err);
+    if (statusMsg) {
+      statusMsg.style.color = "var(--status-risk)";
+      statusMsg.textContent = `Error: ${err.message}`;
+    }
+    alert(`Could not merge cases: ${err.message}`);
+  } finally {
+    renderLucide();
+  }
+}
+
+function returnToAuditRunLog() {
+  showPage("dashboard");
+  switchDashTab("runlog");
+}
+
+function openCaseInCaseworkDesk() {
+  if (activeDetailCase) {
+    openCaseById(activeDetailCase.case_id);
+    showPage("dashboard");
+    switchDashTab("casework");
+  }
+}
+
+function downloadActiveCasePdf() {
+  if (activeDetailCase) {
+    window.open(`${API_BASE}/cases/${encodeURIComponent(activeDetailCase.case_id)}/pdf?type=rti`, "_blank");
+  } else if (typeof currentCase !== "undefined" && currentCase) {
+    viewPdf("rti");
+  }
+}
+
+function refreshActiveCaseDetailTimeline() {
+  if (activeDetailCase) {
+    openCaseDetailView(activeDetailCase.case_id);
+  }
 }
 
 function clearRunLogSearch() {
@@ -2207,6 +2674,14 @@ window.assignPioFromMap = assignPioFromMap;
 window.deleteCustomAct = deleteCustomAct;
 window.applyCustomActToActiveCase = applyCustomActToActiveCase;
 window.switchPioMapCase = switchPioMapCase;
+window.openCaseDetailView = openCaseDetailView;
+window.returnToAuditRunLog = returnToAuditRunLog;
+window.openCaseInCaseworkDesk = openCaseInCaseworkDesk;
+window.downloadActiveCasePdf = downloadActiveCasePdf;
+window.submitCaseUpdateFromDetail = submitCaseUpdateFromDetail;
+window.submitCaseMergeFromDetail = submitCaseMergeFromDetail;
+window.refreshActiveCaseDetailTimeline = refreshActiveCaseDetailTimeline;
+window.populateMergeDuplicateSelect = populateMergeDuplicateSelect;
 
 
 

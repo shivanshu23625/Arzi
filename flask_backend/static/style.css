@@ -1471,3 +1471,36 @@ input[type="text"]:focus, select:focus, textarea:focus {
   }
 }
 
+/* ==========================================================================
+   CASE DOSSIER & DEDICATED AUDIT DETAILS VIEW
+   ========================================================================== */
+@media (max-width: 992px) {
+  .case-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.timeline-entry-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 2px;
+  padding: 8px 12px;
+  margin-top: 4px;
+  transition: all 0.15s ease;
+}
+
+.timeline-entry-card:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-sm);
+}
+
+.timeline-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+

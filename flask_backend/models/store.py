@@ -97,7 +97,87 @@ class DataStore:
                 "longitude": 77.2420,
                 "jurisdiction_keywords": [
                     "health", "hospital", "doctor", "medicine", "dawa", "ilaj", 
-                    "cmo", "dispensary", "medical", "treatment", "swasthya", "aspatal"
+                    "cmo", "dispensary", "medical", "treatment", "swasthya", "aspatal",
+                    "icu", "ventilator", "oxygen cylinder", "ambulance", "phc"
+                ]
+            },
+            {
+                "department": "Water Supply & Jal Board",
+                "pio_name": "Er. R. V. Singhal",
+                "designation": "Chief Engineer (Water Distribution) & Designated PIO",
+                "office_address": "Delhi Jal Board Headquarters, Varunalaya Phase II, Jhandewalan, New Delhi - 110005",
+                "email": "pio.water@delhijalboard.nic.in",
+                "phone": "+91-11-23512211",
+                "latitude": 28.6485,
+                "longitude": 77.2020,
+                "jurisdiction_keywords": [
+                    "drinking water", "water supply", "pipeline leak", "contaminated water",
+                    "dirty water", "tap connection", "water tanker", "jal board", "jal sansthan",
+                    "water pressure", "overhead tank", "borewell", "tube well", "canal water",
+                    "irrigation water", "potable water", "foul smell in water", "water meter", "jal nigam"
+                ]
+            },
+            {
+                "department": "Electricity & Power Discom",
+                "pio_name": "Er. M. P. Saxena",
+                "designation": "Superintending Engineer (Billing & Metering) & Nodal PIO",
+                "office_address": "State Power Distribution Corporation, Shakti Bhawan, Nehru Place, New Delhi - 110019",
+                "email": "pio.power@discom.delhi.gov.in",
+                "phone": "+91-11-26418833",
+                "latitude": 28.5490,
+                "longitude": 77.2520,
+                "jurisdiction_keywords": [
+                    "electricity", "power cut", "load shedding", "electric meter", "faulty meter",
+                    "high electricity bill", "exorbitant bill", "transformer", "transformer burn",
+                    "voltage fluctuation", "power supply", "discom", "power theft", "electric pole",
+                    "hanging wire", "high tension wire", "electricity connection", "bijli", "bijli vibhag"
+                ]
+            },
+            {
+                "department": "Transport, Highways & Motor Vehicles / RTO",
+                "pio_name": "Shri K. S. Tomar",
+                "designation": "Regional Transport Officer (RTO) & Designated PIO",
+                "office_address": "Transport Department, Regional Office Complex, Sarai Kale Khan, New Delhi - 110013",
+                "email": "pio.transport@delhigov.nic.in",
+                "phone": "+91-11-24356701",
+                "latitude": 28.5880,
+                "longitude": 77.2560,
+                "jurisdiction_keywords": [
+                    "transport", "rto", "driving license", "dl renewal", "learner license",
+                    "rc", "registration certificate", "vehicle registration", "commercial permit",
+                    "traffic challan", "fitness certificate", "state transport", "bus route",
+                    "national highway", "hsrp", "pollution certificate", "pucc"
+                ]
+            },
+            {
+                "department": "Labour, Employment, Pension & Social Security",
+                "pio_name": "Smt. Neelam Chawla",
+                "designation": "Assistant P.F. Commissioner & Nodal PIO (Social Security)",
+                "office_address": "Employees Provident Fund Organisation, Regional Office, Wazirpur, New Delhi - 110052",
+                "email": "pio.pension@epfindia.gov.in",
+                "phone": "+91-11-27374020",
+                "latitude": 28.6980,
+                "longitude": 77.1680,
+                "jurisdiction_keywords": [
+                    "pension", "retirement pension", "ppo", "gratuity", "provident fund", "epf",
+                    "epfo", "esic", "unorganized worker", "labour card", "minimum wage", "salary not paid",
+                    "unpaid wages", "pension payment order", "widow pension", "old age pension", "mgnrega wages"
+                ]
+            },
+            {
+                "department": "Environment & Pollution Control",
+                "pio_name": "Dr. Pradeep Mishra",
+                "designation": "Senior Environmental Engineer & PIO",
+                "office_address": "State Pollution Control Committee, Parivesh Bhawan, East Arjun Nagar, Delhi - 110032",
+                "email": "pio.pollution@dpcc.delhigov.in",
+                "phone": "+91-11-22305792",
+                "latitude": 28.6540,
+                "longitude": 77.2940,
+                "jurisdiction_keywords": [
+                    "pollution", "environment", "industrial waste", "chemical effluent", "factory smoke",
+                    "air pollution", "aqi", "water pollution", "tree felling", "illegal cutting of trees",
+                    "noise pollution", "hazardous waste", "chemical plant", "industrial effluent",
+                    "effluent discharge", "toxic waste", "groundwater contamination"
                 ]
             }
         ]

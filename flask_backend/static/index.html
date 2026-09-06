@@ -1234,6 +1234,301 @@
 
     </section>
 
+    <!-- ================================================================= -->
+    <!-- PAGE 5: DEDICATED CASE DOSSIER, AUDIT & TIMELINE DESK -->
+    <!-- ================================================================= -->
+    <section id="page-case-detail" class="site-page">
+      <!-- Case Detail Navigation & Action Header -->
+      <div class="case-detail-top-nav" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+          <button class="btn-gov-outline" onclick="returnToAuditRunLog()" style="padding: 6px 14px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+            <i data-lucide="arrow-left" style="width: 13px; height: 13px;"></i>
+            <span>&larr; Return to Audit Run Log</span>
+          </button>
+          <span style="color: var(--border-strong);">&bull;</span>
+          <span style="color: var(--ink-muted); font-size: 11.5px;">Audit Trail</span>
+          <span style="color: var(--border-strong);">&bull;</span>
+          <span id="detailCaseBreadcrumb" style="font-family: var(--font-mono); font-weight: 700; color: var(--gov-navy); font-size: 12px;">Case Dossier</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <button class="btn-gov-outline" style="padding: 6px 12px; font-size: 11.5px; display: inline-flex; align-items: center; gap: 5px;" onclick="openCaseInCaseworkDesk()">
+            <i data-lucide="folder-kanban" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
+            <span>Open in Casework Workspace</span>
+          </button>
+          <button class="btn-gov-primary" style="padding: 6px 14px; font-size: 11.5px; display: inline-flex; align-items: center; gap: 5px;" onclick="downloadActiveCasePdf()">
+            <i data-lucide="download" style="width: 13px; height: 13px;"></i>
+            <span>Download Form-A PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Docket Summary Banner -->
+      <div class="ops-panel" style="margin-bottom: 16px; border-top: 3px solid var(--gov-navy);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 14px 18px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 280px;">
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
+              <h2 id="detailDocketId" style="font-family: var(--font-serif); font-size: 22px; font-weight: 700; color: var(--gov-navy); margin: 0;">ARZ-XXXX</h2>
+              <span id="detailDocketStatusPill" class="status-pill needs-review">NEEDS REVIEW</span>
+              <span id="detailDocketSlaBadge" class="status-pill sla-standard">30-Day SLA</span>
+              <span id="detailDocketUrgentBadge" class="status-pill" style="display: none; background: #FEF2F2; color: #B91C1C; border-color: #FECACA;">48H Life &amp; Liberty</span>
+            </div>
+            <div id="detailDocketSubject" style="font-size: 13.5px; font-weight: 600; color: var(--ink-secondary); margin-bottom: 8px;">
+              Right to Information Application
+            </div>
+            <div style="display: flex; gap: 8px; font-size: 11.5px; color: var(--ink-secondary); flex-wrap: wrap; align-items: center;">
+              <span><b>Filing Date:</b> <span id="detailDocketDate">&mdash;</span></span>
+              <span style="color: var(--ink-muted);">&bull;</span>
+              <span><b>Ref No:</b> <span id="detailDocketRef" style="font-family: var(--font-mono); font-weight: 600;">&mdash;</span></span>
+              <span style="color: var(--ink-muted);">&bull;</span>
+              <span><b>Department:</b> <span id="detailDocketDept" class="statutory-tag">&mdash;</span></span>
+              <span style="color: var(--ink-muted);">&bull;</span>
+              <span><b>Complainant:</b> <span id="detailDocketComplainantName" style="font-weight: 600;">&mdash;</span></span>
+              <span style="color: var(--ink-muted);">&bull;</span>
+              <span><b>Jurisdiction:</b> <span id="detailDocketLocation">&mdash;</span></span>
+            </div>
+          </div>
+          <div style="background: var(--bg-alt); border: 1px solid var(--border-subtle); padding: 10px 16px; border-radius: 2px; text-align: center; min-width: 140px;">
+            <div style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.5px;">Statutory SLA Window</div>
+            <div id="detailDocketSlaCountdown" style="font-size: 20px; font-weight: 700; font-family: var(--font-mono); color: var(--gov-navy); margin: 4px 0;">30 Days</div>
+            <div id="detailDocketDueDate" style="font-size: 10.5px; color: var(--ink-muted);">Due: &mdash;</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main 2-Column Split Layout for Case Details -->
+      <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 16px;" class="case-detail-grid">
+        <!-- Left Column: Dossier, Grievance, ML Intelligence & Merge Deduplication -->
+        <div>
+          <!-- 1. Complainant & Designated Public Authority -->
+          <div class="ops-panel" style="margin-bottom: 16px;">
+            <div class="ops-panel-header">
+              <span class="ops-panel-title">
+                <i data-lucide="user-check" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
+                <span>Citizen Complainant &amp; Designated Public Authority</span>
+              </span>
+              <span class="statutory-tag" id="detailPincodeBadge">PIN: &mdash;</span>
+            </div>
+            <div class="ops-panel-body" style="padding: 12px 14px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <!-- Complainant box -->
+                <div style="background: var(--bg-alt); border: 1px solid var(--border-subtle); padding: 10px; border-radius: 2px;">
+                  <div style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 4px;">Citizen Applicant</div>
+                  <div id="detailCompName" style="font-weight: 700; font-size: 13px; color: var(--ink-primary);">&mdash;</div>
+                  <div id="detailCompContact" style="font-size: 11.5px; color: var(--ink-secondary); margin-top: 2px;">&mdash;</div>
+                  <div id="detailCompAddress" style="font-size: 11px; color: var(--ink-muted); margin-top: 4px; line-height: 1.4;">&mdash;</div>
+                </div>
+                <!-- PIO box -->
+                <div style="background: var(--bg-alt); border: 1px solid var(--border-subtle); padding: 10px; border-radius: 2px;">
+                  <div style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 4px;">Designated PIO &amp; Authority</div>
+                  <div id="detailPioName" style="font-weight: 700; font-size: 13px; color: var(--gov-navy);">&mdash;</div>
+                  <div id="detailPioDept" style="font-size: 11.5px; color: var(--gov-copper); font-weight: 600;">&mdash;</div>
+                  <div id="detailPioAddress" style="font-size: 11px; color: var(--ink-muted); margin-top: 4px; line-height: 1.4;">&mdash;</div>
+                  <div id="detailPioDistance" style="font-size: 10.5px; color: var(--status-active); font-weight: 600; margin-top: 4px;">&mdash;</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Grievance Narrative & RTI Questions -->
+          <div class="ops-panel" style="margin-bottom: 16px;">
+            <div class="ops-panel-header">
+              <span class="ops-panel-title">
+                <i data-lucide="file-text" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
+                <span>Citizen Grievance &amp; Structured Questions</span>
+              </span>
+            </div>
+            <div class="ops-panel-body" style="padding: 12px 14px;">
+              <div style="margin-bottom: 12px;">
+                <label class="form-label" style="font-size: 10.5px; text-transform: uppercase; color: var(--ink-muted);">Raw Grievance Narrative</label>
+                <div id="detailGrievanceText" style="font-size: 12px; color: var(--ink-secondary); line-height: 1.6; background: var(--bg-subtle); padding: 10px; border: 1px solid var(--border-subtle); border-radius: 2px; max-height: 150px; overflow-y: auto; white-space: pre-wrap;">&mdash;</div>
+              </div>
+              <div>
+                <label class="form-label" style="font-size: 10.5px; text-transform: uppercase; color: var(--ink-muted);">Drafted RTI Form-A Questions</label>
+                <ol id="detailQuestionsList" style="font-size: 11.5px; color: var(--ink-secondary); line-height: 1.5; padding-left: 18px; margin: 0;">
+                  <!-- Dynamically populated numbered questions -->
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Machine Learning Domain Classification Intelligence -->
+          <div class="ops-panel" style="margin-bottom: 16px;">
+            <div class="ops-panel-header">
+              <span class="ops-panel-title">
+                <i data-lucide="brain-circuit" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
+                <span>ML Domain Classification Intelligence</span>
+              </span>
+              <span id="detailMlConfidenceBadge" class="status-pill approved">98% Confidence</span>
+            </div>
+            <div class="ops-panel-body" style="padding: 12px 14px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                <div>
+                  <span style="font-size: 11px; color: var(--ink-muted);">Designated Civic Sector (11-Domain Classifier):</span>
+                  <div id="detailMlDomainTitle" style="font-size: 14px; font-weight: 700; color: var(--gov-navy);">Revenue &amp; Land Records</div>
+                </div>
+                <div id="detailMlTriggers" style="display: flex; gap: 4px; flex-wrap: wrap;">
+                  <!-- Trigger tokens -->
+                </div>
+              </div>
+              <div id="detailMlReason" style="font-size: 11.5px; color: var(--ink-secondary); line-height: 1.5; background: #F8FAFC; border-left: 3px solid var(--gov-navy); padding: 6px 10px; margin-bottom: 8px;">
+                Intent classified via multi-gram TF-IDF analysis.
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+                <div style="background: var(--bg-alt); padding: 6px 8px; border: 1px solid var(--border-subtle); border-radius: 2px;">
+                  <b>IPC &rarr; BNS Mapping:</b> <span id="detailBnsMapping">&mdash;</span>
+                </div>
+                <div style="background: var(--bg-alt); padding: 6px 8px; border: 1px solid var(--border-subtle); border-radius: 2px;">
+                  <b>Section 20 Penalty Risk:</b> <span id="detailSec20Penalty" style="color: var(--gov-copper); font-weight: 700;">₹0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Deduplication & Docket Consolidation Panel -->
+          <div class="ops-panel" style="margin-bottom: 16px; border: 1px solid #FED7AA; background: #FFFDF9;">
+            <div class="ops-panel-header" style="background: #FFF7ED; border-bottom: 1px solid #FED7AA;">
+              <span class="ops-panel-title" style="color: var(--gov-copper);">
+                <i data-lucide="merge" style="width: 13px; height: 13px; color: var(--gov-copper);"></i>
+                <span>Case Deduplication &amp; Docket Consolidation</span>
+              </span>
+              <span class="statutory-tag" style="background: #FFEDD5; color: var(--gov-copper); border-color: #FDBA74;">Deduplication Engine</span>
+            </div>
+            <div class="ops-panel-body" style="padding: 12px 14px;">
+              <p style="font-size: 11.5px; color: var(--ink-secondary); margin-bottom: 10px; line-height: 1.5;">
+                Merge duplicate or repetitive dockets filed for the same grievance into this master docket.
+                The duplicate will be marked as <code style="font-size: 11px; background: #FEE2E2; color: #991B1B; padding: 1px 4px; border-radius: 2px;">MERGED_DUPLICATE</code>,
+                facts consolidated, and a verified audit run log entry recorded on both dockets.
+              </p>
+
+              <form id="mergeCaseForm" onsubmit="submitCaseMergeFromDetail(event)">
+                <div style="margin-bottom: 10px;">
+                  <label class="form-label" style="font-size: 11px; font-weight: 600;">Select Duplicate Case to Merge into this Master Docket:</label>
+                  <select id="mergeDuplicateSelect" required style="width: 100%; font-size: 12px; padding: 6px 8px; border: 1px solid var(--border-medium); background: #FFFFFF; border-radius: 2px;">
+                    <option value="">-- Choose a duplicate case to consolidate --</option>
+                  </select>
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                  <label class="form-label" style="font-size: 11px; font-weight: 600;">Consolidation Remarks / Legal Justification:</label>
+                  <input type="text" id="mergeRemarksInput" placeholder="e.g. Duplicate filing by same complainant for identical delay" style="width: 100%; font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--border-medium); border-radius: 2px;" />
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                  <span id="mergeStatusMsg" style="font-size: 11px; color: var(--status-active); font-weight: 600;"></span>
+                  <button type="submit" class="btn-gov-primary" style="background: var(--gov-copper); border-color: var(--gov-copper); padding: 6px 14px; font-size: 11.5px; display: inline-flex; align-items: center; gap: 6px;">
+                    <i data-lucide="copy-check" style="width: 13px; height: 13px;"></i>
+                    <span>Merge &amp; Deduplicate Docket</span>
+                  </button>
+                </div>
+              </form>
+
+              <!-- List of Previously Merged Cases -->
+              <div id="previouslyMergedSection" style="margin-top: 12px; padding-top: 8px; border-top: 1px dashed #FDBA74; display: none;">
+                <span style="font-size: 10.5px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Consolidated Duplicate Cases:</span>
+                <div id="previouslyMergedList" style="display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Interactive Timestamped Update Form & Chronological Timeline Ledger -->
+        <div>
+          <!-- 5. Form: Add Timestamped Case Update -->
+          <div class="ops-panel" style="margin-bottom: 16px; border-top: 3px solid var(--status-active);">
+            <div class="ops-panel-header">
+              <span class="ops-panel-title">
+                <i data-lucide="clock" style="width: 13px; height: 13px; color: var(--status-active);"></i>
+                <span>Log Official Case Update with Timestamp</span>
+              </span>
+              <span class="status-pill approved" style="font-size: 10px;">Audit-Verified Ledger</span>
+            </div>
+            <div class="ops-panel-body" style="padding: 14px;">
+              <p style="font-size: 11.5px; color: var(--ink-secondary); margin-bottom: 12px;">
+                Record official hearings, notice dispatches, citizen evidence submissions, PIO responses, or status transitions. All entries are cryptographically stamped into the immutable audit run log.
+              </p>
+
+              <form id="caseUpdateForm" onsubmit="submitCaseUpdateFromDetail(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                  <div>
+                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Update Category</label>
+                    <select id="updateTypeSelect" required style="width: 100%; font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--border-medium); background: #FFFFFF; border-radius: 2px;">
+                      <option value="HEARING_NOTE">Hearing Note / Appearance</option>
+                      <option value="PIO_RESPONSE_RECEIVED">PIO Response / Records Received</option>
+                      <option value="EVIDENCE_COLLECTED">Evidence / Documents Collected</option>
+                      <option value="FIRST_APPEAL_FILED">First Appeal Filed (Sec 19)</option>
+                      <option value="STATUTORY_NOTICE_ISSUED">Statutory Notice Issued (Sec 80 CPC)</option>
+                      <option value="REBUTTAL_SUBMITTED">Section 8 Rebuttal Submitted</option>
+                      <option value="STATUS_TRANSITION">Docket Status Transition</option>
+                      <option value="CASE_PROGRESS_NOTE" selected>General Case Progress Note</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Actor / Officer</label>
+                    <input type="text" id="updateActorInput" value="Adv. S. Kalra (Legal Counsel)" required style="width: 100%; font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--border-medium); background: #FFFFFF; border-radius: 2px;" />
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                  <div>
+                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Official Timestamp</label>
+                    <input type="datetime-local" id="updateTimestampInput" required style="width: 100%; font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--border-medium); background: #FFFFFF; font-family: var(--font-mono); border-radius: 2px;" />
+                    <span style="font-size: 9.5px; color: var(--ink-muted); display: block; margin-top: 2px;">Defaults to live time; editable for backdated events</span>
+                  </div>
+
+                  <div>
+                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Status Transition (Optional)</label>
+                    <select id="updateStatusSelect" style="width: 100%; font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--border-medium); background: #FFFFFF; border-radius: 2px;">
+                      <option value="">-- Keep Current Status --</option>
+                      <option value="NEEDS_REVIEW">NEEDS_REVIEW</option>
+                      <option value="UNDER_REVIEW">UNDER_REVIEW</option>
+                      <option value="APPROVED">APPROVED</option>
+                      <option value="DISPATCHED">DISPATCHED</option>
+                      <option value="APPEAL_FILED">APPEAL_FILED</option>
+                      <option value="DISPOSED">DISPOSED</option>
+                      <option value="CLOSED">CLOSED</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                  <label class="form-label" style="font-size: 11px; font-weight: 600;">Detailed Remarks / Hearing Minutes / Progress Narrative</label>
+                  <textarea id="updateRemarksTextarea" rows="3" required placeholder="Enter proceeding details, documents submitted, officer response, or evidentiary notes..." style="width: 100%; font-size: 12px; padding: 8px; border: 1px solid var(--border-medium); font-family: var(--font-ui); border-radius: 2px;"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                  <span id="updateFormStatusMsg" style="font-size: 11px; color: var(--status-active); font-weight: 600;"></span>
+                  <button type="submit" class="btn-gov-primary" id="btnSubmitCaseUpdate" style="padding: 7px 18px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+                    <i data-lucide="plus-circle" style="width: 13px; height: 13px;"></i>
+                    <span>Record Timestamped Update</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 6. Chronological Case Timeline & Historical Ledger -->
+          <div class="ops-panel">
+            <div class="ops-panel-header">
+              <span class="ops-panel-title">
+                <i data-lucide="history" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
+                <span>Chronological Case Timeline &amp; Ledger (<span id="detailTimelineCount">0</span>)</span>
+              </span>
+              <button class="btn-gov-outline" style="padding: 2px 8px; font-size: 10.5px; display: inline-flex; align-items: center; gap: 4px;" onclick="refreshActiveCaseDetailTimeline()">
+                <i data-lucide="refresh-cw" style="width: 11px; height: 11px;"></i>
+                <span>Refresh</span>
+              </button>
+            </div>
+            <div class="ops-panel-body" style="padding: 14px;">
+              <div id="detailTimelineContainer" class="audit-timeline" style="margin: 0; padding-left: 16px;">
+                <!-- Dynamically populated chronological entries -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Transfer Modal -->
     <div id="transferModal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
       <div style="max-width: 500px; width: 90%; background: var(--bg-surface); border: 1px solid var(--border-medium); border-top: 3px solid var(--gov-navy); padding: 20px; box-shadow: var(--shadow-md);">
@@ -1305,6 +1600,6 @@
     </footer>
   </div>
 
-  <script src="/app.js?v=20260906.2"></script>
+  <script src="/app.js?v=20260906.3"></script>
 </body>
 </html>

@@ -272,6 +272,116 @@ GEO_PUBLIC_AUTHORITIES = [
             "email": "dghs.delhi@gov.in",
             "phone": "+91-11-22307100"
         }
+    },
+    {
+        "id": "DEL-WAT-01",
+        "city": "New Delhi",
+        "district": "Central Delhi",
+        "state": "Delhi",
+        "department": "Water Supply & Jal Board",
+        "pio_name": "Er. R. V. Singhal",
+        "designation": "Chief Engineer (Water Distribution) & Designated PIO",
+        "office_address": "Delhi Jal Board Headquarters, Varunalaya Phase II, Jhandewalan, New Delhi - 110005",
+        "room_no": "Room 302, Water Distribution Block",
+        "email": "pio.water@delhijalboard.nic.in",
+        "phone": "+91-11-23512211",
+        "latitude": 28.6485,
+        "longitude": 77.2020,
+        "faa": {
+            "faa_name": "Member (Water Supply), DJB",
+            "designation": "First Appellate Authority",
+            "office_address": "Varunalaya Phase II, Jhandewalan, New Delhi - 110005",
+            "email": "member.water@delhijalboard.nic.in",
+            "phone": "+91-11-23512212"
+        }
+    },
+    {
+        "id": "DEL-PWR-01",
+        "city": "New Delhi",
+        "district": "South Delhi",
+        "state": "Delhi",
+        "department": "Electricity & Power Discom",
+        "pio_name": "Er. M. P. Saxena",
+        "designation": "Superintending Engineer (Billing & Metering) & Nodal PIO",
+        "office_address": "State Power Distribution Corporation, Shakti Bhawan, Nehru Place, New Delhi - 110019",
+        "room_no": "Room 105, Consumer Redressal Wing",
+        "email": "pio.power@discom.delhi.gov.in",
+        "phone": "+91-11-26418833",
+        "latitude": 28.5490,
+        "longitude": 77.2520,
+        "faa": {
+            "faa_name": "Chief General Manager (Commercial)",
+            "designation": "First Appellate Authority (Power)",
+            "office_address": "Shakti Bhawan, Nehru Place, New Delhi - 110019",
+            "email": "cgm.power@discom.delhi.gov.in",
+            "phone": "+91-11-26418834"
+        }
+    },
+    {
+        "id": "DEL-TRN-01",
+        "city": "New Delhi",
+        "district": "South East Delhi",
+        "state": "Delhi",
+        "department": "Transport, Highways & Motor Vehicles / RTO",
+        "pio_name": "Shri K. S. Tomar",
+        "designation": "Regional Transport Officer (RTO) & Designated PIO",
+        "office_address": "Transport Department, Regional Office Complex, Sarai Kale Khan, New Delhi - 110013",
+        "room_no": "Room 12, Driving License & RC Cell",
+        "email": "pio.transport@delhigov.nic.in",
+        "phone": "+91-11-24356701",
+        "latitude": 28.5880,
+        "longitude": 77.2560,
+        "faa": {
+            "faa_name": "Special Commissioner (Transport)",
+            "designation": "First Appellate Authority (Transport)",
+            "office_address": "5/9 Under Hill Road, Civil Lines, Delhi - 110054",
+            "email": "comm.transport@delhi.gov.in",
+            "phone": "+91-11-24356702"
+        }
+    },
+    {
+        "id": "DEL-PEN-01",
+        "city": "New Delhi",
+        "district": "North West Delhi",
+        "state": "Delhi",
+        "department": "Labour, Employment, Pension & Social Security",
+        "pio_name": "Smt. Neelam Chawla",
+        "designation": "Assistant P.F. Commissioner & Nodal PIO (Social Security)",
+        "office_address": "Employees Provident Fund Organisation, Regional Office, Wazirpur, New Delhi - 110052",
+        "room_no": "PPO & Gratuity Cell, 2nd Floor",
+        "email": "pio.pension@epfindia.gov.in",
+        "phone": "+91-11-27374020",
+        "latitude": 28.6980,
+        "longitude": 77.1680,
+        "faa": {
+            "faa_name": "Regional P.F. Commissioner-I",
+            "designation": "First Appellate Authority (EPFO)",
+            "office_address": "Bhavishya Nidhi Bhawan, 14 Bhikaji Cama Place, New Delhi - 110066",
+            "email": "rpfc.delhi@epfindia.gov.in",
+            "phone": "+91-11-27374021"
+        }
+    },
+    {
+        "id": "DEL-ENV-01",
+        "city": "New Delhi",
+        "district": "East Delhi",
+        "state": "Delhi",
+        "department": "Environment & Pollution Control",
+        "pio_name": "Dr. Pradeep Mishra",
+        "designation": "Senior Environmental Engineer & PIO",
+        "office_address": "State Pollution Control Committee, Parivesh Bhawan, East Arjun Nagar, Delhi - 110032",
+        "room_no": "Room 401, Air & Effluent Quality Lab",
+        "email": "pio.pollution@dpcc.delhigov.in",
+        "phone": "+91-11-22305792",
+        "latitude": 28.6540,
+        "longitude": 77.2940,
+        "faa": {
+            "faa_name": "Member Secretary, DPCC",
+            "designation": "First Appellate Authority (Pollution Control)",
+            "office_address": "4th Floor, ISBT Building, Kashmere Gate, Delhi - 110006",
+            "email": "ms.dpcc@delhi.gov.in",
+            "phone": "+91-11-22305793"
+        }
     }
 ]
 
@@ -478,7 +588,41 @@ class GeospatialLocator:
         if domain_matches:
             assigned_candidate = domain_matches[0]
         else:
-            assigned_candidate = nearby_area_candidates[0] if nearby_area_candidates else all_candidates[0]
+            assigned_candidate = None
+            try:
+                from flask_backend.models.store import db_store
+                for p in db_store.pio_directory:
+                    p_dept = p.get("department", "").strip().lower()
+                    if (p_dept == c_dept) or (c_dept in p_dept) or (p_dept in c_dept):
+                        dist = self.haversine_distance(user_lat, user_lon, p["latitude"], p["longitude"])
+                        dist_str = f"{int(dist * 1000)} meters away" if dist < 1.0 else f"{dist} km away"
+                        assigned_candidate = {
+                            "id": f"PIO-GEN-{abs(hash(p['department'])) % 100000}",
+                            "city": locality_name,
+                            "district": pin_resolved.get("district", locality_name) if pin_resolved else locality_name,
+                            "state": pin_resolved.get("state", "Delhi") if pin_resolved else "Delhi",
+                            "department": p["department"],
+                            "pio_name": p["pio_name"],
+                            "designation": p["designation"],
+                            "office_address": p["office_address"],
+                            "room_no": "Ground Floor RTI Desk",
+                            "email": p["email"],
+                            "phone": p["phone"],
+                            "latitude": p["latitude"],
+                            "longitude": p["longitude"],
+                            "distance_km": dist,
+                            "distance_label": dist_str,
+                            "is_domain_match": True,
+                            "faa": p.get("faa", {}),
+                            "statutory_jurisdiction": {}
+                        }
+                        all_candidates.insert(0, assigned_candidate)
+                        nearby_area_candidates.insert(0, assigned_candidate)
+                        break
+            except Exception:
+                pass
+            if not assigned_candidate:
+                assigned_candidate = nearby_area_candidates[0] if nearby_area_candidates else all_candidates[0]
 
         # Tag is_assigned flag
         assigned_id = assigned_candidate.get("id")

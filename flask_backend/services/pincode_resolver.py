@@ -680,13 +680,162 @@ class PincodeJurisdictionResolver:
             }
         }
 
-        all_authorities = [land_authority, food_authority, municipal_authority, police_authority, health_authority]
+        # 6. Water Supply & Jal Board Authority
+        water_authority = {
+            "id": f"IN-WAT-{pincode}",
+            "city": district,
+            "district": district,
+            "state": state,
+            "department": "Water Supply & Jal Board",
+            "pio_name": "Executive Engineer (Water Distribution)",
+            "designation": "Executive Engineer & Designated PIO (Jal Sansthan / Water Works)",
+            "office_address": f"Jal Board / Jal Sansthan Division Office, Water Supply Complex, {district}, {state} - {pincode}",
+            "room_no": "Room 07, Pipeline & Consumer Desk",
+            "email": f"ee.water.{dist_clean.lower()}@jalboard.gov.in",
+            "phone": "+91-500-200600",
+            "latitude": round(lat + 0.014, 4),
+            "longitude": round(lon + 0.019, 4),
+            "faa": {
+                "faa_name": "Chief Engineer (Water Supply)",
+                "designation": "First Appellate Authority (State Jal Nigam)",
+                "office_address": f"State Jal Nigam Headquarters, {district}",
+                "email": f"ce.water.{dist_clean.lower()}@jalboard.gov.in",
+                "phone": "+91-500-200601"
+            }
+        }
+
+        # 7. Electricity & Power Discom Authority
+        power_authority = {
+            "id": f"IN-PWR-{pincode}",
+            "city": district,
+            "district": district,
+            "state": state,
+            "department": "Electricity & Power Discom",
+            "pio_name": "Superintending Engineer (Distribution & Metering)",
+            "designation": "Superintending Engineer & Nodal PIO (State Power Discom)",
+            "office_address": f"Electricity Distribution Division, Shakti Bhawan Complex, {district}, {state} - {pincode}",
+            "room_no": "Consumer Redressal & RTI Cell",
+            "email": f"se.power.{dist_clean.lower()}@discom.gov.in",
+            "phone": "+91-500-200700",
+            "latitude": round(lat - 0.011, 4),
+            "longitude": round(lon - 0.018, 4),
+            "faa": {
+                "faa_name": "Chief Engineer (Commercial & Billing)",
+                "designation": "First Appellate Authority (Power Distribution)",
+                "office_address": f"Discom Zonal Headquarters, {district}",
+                "email": f"ce.power.{dist_clean.lower()}@discom.gov.in",
+                "phone": "+91-500-200701"
+            }
+        }
+
+        # 8. Transport, Highways & Motor Vehicles / RTO Authority
+        transport_authority = {
+            "id": f"IN-TRN-{pincode}",
+            "city": district,
+            "district": district,
+            "state": state,
+            "department": "Transport, Highways & Motor Vehicles / RTO",
+            "pio_name": "Regional Transport Officer (RTO)",
+            "designation": "Regional Transport Officer & Designated PIO",
+            "office_address": f"Regional Transport Office (RTO), Motor Vehicle Complex, {district}, {state} - {pincode}",
+            "room_no": "RTI & Vehicle Records Wing",
+            "email": f"rto.{dist_clean.lower()}@transport.gov.in",
+            "phone": "+91-500-200800",
+            "latitude": round(lat + 0.018, 4),
+            "longitude": round(lon + 0.005, 4),
+            "faa": {
+                "faa_name": "Deputy Transport Commissioner",
+                "designation": "First Appellate Authority (State Transport Department)",
+                "office_address": f"Transport Commissionerate, {state}",
+                "email": f"dtc.transport.{dist_clean.lower()}@transport.gov.in",
+                "phone": "+91-500-200801"
+            }
+        }
+
+        # 9. Labour, Employment, Pension & Social Security Authority
+        pension_authority = {
+            "id": f"IN-PEN-{pincode}",
+            "city": district,
+            "district": district,
+            "state": state,
+            "department": "Labour, Employment, Pension & Social Security",
+            "pio_name": "Assistant P.F. Commissioner / Labour Officer",
+            "designation": "Assistant Commissioner & Designated PIO (Social Security)",
+            "office_address": f"Employees Provident Fund & Pension Office, Shramik Kalyan Bhawan, {district}, {state} - {pincode}",
+            "room_no": "Pension Grievance & PPO Cell",
+            "email": f"pension.{dist_clean.lower()}@epfindia.gov.in",
+            "phone": "+91-500-200900",
+            "latitude": round(lat - 0.008, 4),
+            "longitude": round(lon + 0.024, 4),
+            "faa": {
+                "faa_name": "Regional P.F. Commissioner-I",
+                "designation": "First Appellate Authority (EPFO / Labour)",
+                "office_address": f"Regional EPFO Headquarters, {district}",
+                "email": f"rpfc.pension.{dist_clean.lower()}@epfindia.gov.in",
+                "phone": "+91-500-200901"
+            }
+        }
+
+        # 10. Environment & Pollution Control Authority
+        environment_authority = {
+            "id": f"IN-ENV-{pincode}",
+            "city": district,
+            "district": district,
+            "state": state,
+            "department": "Environment & Pollution Control",
+            "pio_name": "Regional Officer & Environmental Engineer",
+            "designation": "Regional Officer & Designated PIO (Pollution Control)",
+            "office_address": f"State Pollution Control Board, Regional Office, Paryavaran Bhawan, {district}, {state} - {pincode}",
+            "room_no": "Air & Water Quality Monitoring Cell",
+            "email": f"ro.pollution.{dist_clean.lower()}@pcb.gov.in",
+            "phone": "+91-500-201000",
+            "latitude": round(lat + 0.025, 4),
+            "longitude": round(lon - 0.007, 4),
+            "faa": {
+                "faa_name": "Member Secretary (State PCB)",
+                "designation": "First Appellate Authority (Pollution Control Board)",
+                "office_address": f"Central PCB Bhawan, {state}",
+                "email": f"ms.pollution.{dist_clean.lower()}@pcb.gov.in",
+                "phone": "+91-500-201001"
+            }
+        }
+
+        # 11. Higher Education & Student Welfare Authority
+        education_authority = {
+            "id": f"IN-EDU-{pincode}",
+            "city": district,
+            "district": district,
+            "state": state,
+            "department": "Higher Education & Student Welfare",
+            "pio_name": "District Education Officer / Registrar",
+            "designation": "Deputy Registrar & Designated PIO (Higher Education)",
+            "office_address": f"District Higher Education Directorate, Shiksha Bhawan, {district}, {state} - {pincode}",
+            "room_no": "Scholarships & Degree Verification Cell",
+            "email": f"edu.{dist_clean.lower()}@education.gov.in",
+            "phone": "+91-500-201100",
+            "latitude": round(lat - 0.005, 4),
+            "longitude": round(lon - 0.021, 4),
+            "faa": {
+                "faa_name": "Director of Higher Education",
+                "designation": "First Appellate Authority (Higher Education)",
+                "office_address": f"State Higher Education Council, {state}",
+                "email": f"director.edu.{dist_clean.lower()}@education.gov.in",
+                "phone": "+91-500-201101"
+            }
+        }
+
+        all_authorities = [
+            land_authority, food_authority, municipal_authority, police_authority,
+            health_authority, water_authority, power_authority, transport_authority,
+            pension_authority, environment_authority, education_authority
+        ]
 
         # Select target domain PIO
         matched = land_authority
         target_lower = (target_domain or "").lower()
         for a in all_authorities:
-            if a["department"].lower() in target_lower or target_lower in a["department"].lower():
+            a_dept = a["department"].lower()
+            if a_dept == target_lower or a_dept in target_lower or target_lower in a_dept:
                 matched = a
                 break
 

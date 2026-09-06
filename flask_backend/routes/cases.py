@@ -403,24 +403,114 @@ def update_complainant_in_place(case_id):
 
     return jsonify({"status": "updated", "message": f"Case {case_id} updated in-place.", "case": updated}), 200
 
+@cases_bp.route("/<case_id>/updates", methods=["POST"])
+def add_case_update_endpoint(case_id):
+    """
+    Appends an official timestamped update / progress note to the case docket timeline.
+    Optionally updates case status and records an immutable event in the run log audit trail.
+    """
+    case = db_store.get_case(case_id)
+    if not case:
+        return jsonify({"error": "Not Found", "message": f"Case {case_id} not found"}), 404
+
+    data = request.get_json() or {}
+    update_type = (data.get("update_type") or "CASE_PROGRESS_UPDATE").strip().upper().replace(" ", "_")
+    remarks = data.get("remarks", "").strip()
+    actor = (data.get("actor") or "Adv. S. Kalra (Legal Counsel)").strip()
+    custom_time = data.get("timestamp")
+    new_status = data.get("new_status")
+    field_changed = data.get("field_changed", "Case Progress Note")
+
+    if not remarks:
+        return jsonify({"error": "Bad Request", "message": "remarks narrative is required"}), 400
+
+    now_str = custom_time if custom_time else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    old_status = case.get("status", "NEEDS_REVIEW")
+    if new_status and new_status.upper() != old_status:
+        case["status"] = new_status.upper()
+        field_changed = f"{field_changed} & Status ({old_status} -> {new_status.upper()})"
+
+    audit_entry = {
+        "timestamp": now_str,
+        "update_type": update_type,
+        "actor": actor,
+        "field_changed": field_changed,
+        "old_value": old_status if new_status else "Previous Note",
+        "new_value": new_status.upper() if new_status else "Progress Update Logged",
+        "remarks": remarks
+    }
+
+    case.setdefault("update_history", []).append(audit_entry)
+    case["updated_at"] = now_str[:19]
+
+    corr_id = f"CORR-UPD-{hashlib.md5((case_id + now_str).encode()).hexdigest()[:8].upper()}"
+    db_store.add_run_log(
+        event_type="CASE_TIMELINE_UPDATED",
+        case_id=case_id,
+        actor=actor,
+        source="Case Dossier Audit Desk",
+        action=f"Logged [{update_type}]: {remarks[:80]}",
+        result="SUCCESS_RECORDED",
+        correlation_id=corr_id
+    )
+
+    return jsonify({
+        "status": "updated",
+        "message": f"Timestamped update successfully recorded on case {case_id}.",
+        "case": case,
+        "new_update": audit_entry
+    }), 200
+
 @cases_bp.route("/merge-duplicates", methods=["POST"])
 def merge_duplicate_cases():
+    """
+    Merges duplicate dockets to remove redundancy.
+    Consolidates facts, update logs, marks duplicate as MERGED_DUPLICATE,
+    and updates both master and duplicate timelines with timestamps.
+    """
     data = request.get_json() or {}
     master_id = data.get("master_case_id")
     duplicate_id = data.get("duplicate_case_id")
     actor = data.get("reviewer", "Adv. S. Kalra (Legal NGO)")
+    remarks = data.get("remarks", "")
 
     if not master_id or not duplicate_id:
         return jsonify({"error": "Bad Request", "message": "master_case_id and duplicate_case_id required"}), 400
 
-    master = db_store.merge_cases(master_id, duplicate_id, actor=actor)
-    if not master:
+    if master_id == duplicate_id:
+        return jsonify({"error": "Bad Request", "message": "Cannot merge a case into itself"}), 400
+
+    master = db_store.get_case(master_id)
+    duplicate = db_store.get_case(duplicate_id)
+    if not master or not duplicate:
         return jsonify({"error": "Not Found", "message": "One or both case IDs not found"}), 404
+
+    merged_master = db_store.merge_cases(master_id, duplicate_id, actor=actor)
+
+    # Consolidate grievance facts from duplicate into master narrative
+    dup_text = duplicate.get("raw_grievance", "")
+    if dup_text and dup_text not in master.get("raw_grievance", ""):
+        master["raw_grievance"] = f"{master.get('raw_grievance', '')}\n\n[Supplementary Facts from Merged Docket {duplicate_id}]: {dup_text}"
+
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    merge_entry = {
+        "timestamp": now_str,
+        "update_type": "DOCKET_DEDUPLICATED",
+        "actor": actor,
+        "field_changed": "Deduplication & Case Consolidation",
+        "old_value": f"Duplicate Docket {duplicate_id} Active",
+        "new_value": f"Merged into Master {master_id}",
+        "remarks": remarks or f"Consolidated duplicate docket {duplicate_id} into Master {master_id} to remove deduplicacy."
+    }
+    master.setdefault("update_history", []).append(merge_entry)
+    master.setdefault("merged_duplicate_cases", []).append(duplicate_id)
 
     return jsonify({
         "status": "merged",
-        "message": f"Successfully merged duplicate case {duplicate_id} into Master Case {master_id}.",
-        "master_case": master
+        "message": f"Successfully merged duplicate case {duplicate_id} into Master Case {master_id}. Deduplication complete.",
+        "master_case": master,
+        "duplicate_case": duplicate
     }), 200
 
 @cases_bp.route("/<case_id>/override", methods=["POST"])
