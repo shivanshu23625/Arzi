@@ -1825,7 +1825,429 @@ button {
   .urgent-hint-text {
     margin-left: 0;
   }
+
+  .ops-panel > div[style*="padding: 16px"],
+  .ops-panel > div[style*="padding: 18px"],
+  .ops-panel > div[style*="padding: 14px"] {
+    padding: 10px 8px !important;
+  }
 }
 
+/* ================================================================= */
+/* 5. WORKFLOW PIPELINE & QUICK TRIAGE LAUNCHPAD (PAGE 1)            */
+/* ================================================================= */
+.workflow-pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
 
+.pipeline-step-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 14px;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
 
+.pipeline-step-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.pipeline-step-card .step-num {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--gov-navy);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.pipeline-step-card .step-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background: rgba(30, 58, 138, 0.08);
+  color: var(--gov-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.pipeline-step-card h4 {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  margin-bottom: 6px;
+  line-height: 1.35;
+}
+
+.pipeline-step-card p {
+  font-size: 11px;
+  color: var(--ink-secondary);
+  line-height: 1.5;
+  margin: 0;
+  word-break: break-word;
+}
+
+.quick-triage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.quick-triage-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 48px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.quick-triage-card:hover {
+  border-color: var(--gov-navy);
+  background: rgba(30, 58, 138, 0.03);
+  transform: translateY(-1px);
+}
+
+.quick-triage-card .triage-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.quick-triage-card .triage-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.quick-triage-card .triage-info b {
+  font-size: 12px;
+  color: var(--ink-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+.quick-triage-card .triage-info span {
+  font-size: 10.5px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* ================================================================= */
+/* 6. ABOUT PAGE MULTI-STAKEHOLDER CARDS (PAGE 2)                    */
+/* ================================================================= */
+.stakeholder-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.stakeholder-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 14px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.stakeholder-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+}
+
+.stakeholder-card p {
+  font-size: 11.5px;
+  color: var(--ink-secondary);
+  line-height: 1.5;
+  margin: 0;
+  word-break: break-word;
+}
+
+/* ================================================================= */
+/* 7. STATUTORY CODEX & ESCALATION LADDER (PAGE 3)                   */
+/* ================================================================= */
+.escalation-ladder-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.ladder-step-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 12px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.ladder-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #FFFFFF;
+  background: var(--gov-navy);
+  padding: 2px 7px;
+  border-radius: 2px;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.ladder-step-card h4 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  margin-bottom: 4px;
+}
+
+.ladder-step-card p {
+  font-size: 11px;
+  color: var(--ink-secondary);
+  line-height: 1.45;
+  margin: 0;
+  word-break: break-word;
+}
+
+.precedents-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.precedent-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--gov-navy);
+  border-radius: 4px;
+  padding: 12px 14px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.precedent-citation {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--gov-copper);
+  margin-bottom: 4px;
+  font-style: italic;
+}
+
+.precedent-card h4 {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  margin-bottom: 4px;
+}
+
+.precedent-card p {
+  font-size: 11.5px;
+  color: var(--ink-secondary);
+  line-height: 1.5;
+  margin: 0;
+  word-break: break-word;
+}
+
+/* ================================================================= */
+/* 8. INTERACTIVE SECTION 20 PENALTY CALCULATOR (DASHBOARD TAB 4)    */
+/* ================================================================= */
+.sla-calculator-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sla-inputs-card,
+.sla-results-card {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 16px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sla-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sla-metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sla-metric-cell {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sla-metric-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.sla-metric-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.sla-metric-sub {
+  font-size: 9.5px;
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+
+/* ================================================================= */
+/* 9. RESPONSIVE BREAKPOINT OVERRIDES FOR NEW COMPONENTS             */
+/* ================================================================= */
+@media (max-width: 1024px) {
+  .workflow-pipeline-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quick-triage-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .escalation-ladder-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .stakeholder-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-three-col-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-two-col-grid,
+  .pillars-four-grid,
+  .precedents-grid,
+  .sla-calculator-grid,
+  .compliance-benchmarks-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .quick-triage-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .escalation-ladder-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stakeholder-grid,
+  .about-three-col-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .workflow-pipeline-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .escalation-ladder-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sla-metrics-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-triage-card {
+    padding: 8px 10px;
+  }
+}

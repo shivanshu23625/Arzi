@@ -116,6 +116,7 @@ function switchDashTab(tabId) {
 
   if (tabId === "casework") loadCaseQueue();
   if (tabId === "statutory") loadCustomActs();
+  if (tabId === "compliance") initSlaPenaltyCalculator();
   if (tabId === "pio") {
     updatePioMapForCase(currentCase);
     if (leafletMap) {
@@ -2831,5 +2832,188 @@ window.populateMergeDuplicateSelect = populateMergeDuplicateSelect;
 window.triggerLiveMlPrediction = triggerLiveMlPrediction;
 window.getStatusClass = getStatusClass;
 
+// ----------------------------------------------------
+// SECTION 20(1) STATUTORY SLA & PENALTY CLOCK CALCULATOR
+// ----------------------------------------------------
+function initSlaPenaltyCalculator() {
+  const filingInput = document.getElementById("slaFilingDate");
+  if (!filingInput) return;
+  if (!filingInput.value) {
+    // Default to 35 days ago to demonstrate overdue penalty calculations immediately
+    const d = new Date();
+    d.setDate(d.getDate() - 35);
+    filingInput.value = d.toISOString().split("T")[0];
+  }
+  calculateSlaPenalty();
+}
 
+function resetSlaCalculator() {
+  const filingInput = document.getElementById("slaFilingDate");
+  const provSelect = document.getElementById("slaProvisionType");
+  const respInput = document.getElementById("slaResponseDate");
+  const deptInput = document.getElementById("slaPioDepartment");
+  
+  if (filingInput) {
+    const d = new Date();
+    d.setDate(d.getDate() - 35);
+    filingInput.value = d.toISOString().split("T")[0];
+  }
+  if (provSelect) provSelect.value = "30";
+  if (respInput) respInput.value = "";
+  if (deptInput) deptInput.value = "Delhi Jal Board / BSES Power Discom";
+  calculateSlaPenalty();
+}
 
+function calculateSlaPenalty() {
+  const filingVal = document.getElementById("slaFilingDate")?.value;
+  if (!filingVal) return;
+  
+  const filingDate = new Date(filingVal);
+  const provVal = document.getElementById("slaProvisionType")?.value || "30";
+  let slaDays = 30;
+  if (provVal === "2") slaDays = 2;
+  else if (provVal === "35_apio" || provVal === "35_transfer") slaDays = 35;
+  else if (provVal === "45") slaDays = 45;
+
+  const deadlineDate = new Date(filingDate);
+  deadlineDate.setDate(deadlineDate.getDate() + slaDays);
+  
+  const respVal = document.getElementById("slaResponseDate")?.value;
+  const endDate = respVal ? new Date(respVal) : new Date();
+  
+  const diffTime = endDate.getTime() - filingDate.getTime();
+  const elapsedDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+  
+  const overdueDays = Math.max(0, elapsedDays - slaDays);
+  const penaltyAmount = Math.min(25000, overdueDays * 250);
+  
+  const fmtOpts = { day: "2-digit", month: "short", year: "numeric" };
+  const deadlineStr = deadlineDate.toLocaleDateString("en-IN", fmtOpts);
+  const filingStr = filingDate.toLocaleDateString("en-IN", fmtOpts);
+  const targetDept = document.getElementById("slaPioDepartment")?.value || "Public Authority";
+
+  const elDeadline = document.getElementById("slaDeadlineDisplay");
+  const elElapsed = document.getElementById("slaElapsedDaysDisplay");
+  const elOverdue = document.getElementById("slaOverdueDaysDisplay");
+  const elPenalty = document.getElementById("slaPenaltyAmountDisplay");
+  const elPill = document.getElementById("slaClockStatusPill");
+  const elGuidanceBox = document.getElementById("slaGuidanceBox");
+  const elGuidanceTitle = document.getElementById("slaGuidanceTitle");
+  const elGuidanceText = document.getElementById("slaGuidanceText");
+  const elClause = document.getElementById("slaGeneratedClause");
+
+  if (elDeadline) elDeadline.textContent = deadlineStr;
+  if (elElapsed) elElapsed.textContent = `${elapsedDays} Days`;
+  if (elOverdue) {
+    elOverdue.textContent = `${overdueDays} Days`;
+    elOverdue.style.color = overdueDays > 0 ? "var(--status-review)" : "var(--status-active)";
+  }
+  if (elPenalty) {
+    elPenalty.textContent = `₹${penaltyAmount.toLocaleString("en-IN")}`;
+    elPenalty.style.color = overdueDays > 0 ? "var(--status-review)" : "var(--status-active)";
+  }
+
+  if (elPill) {
+    elPill.className = "status-pill";
+    if (overdueDays > 0) {
+      elPill.classList.add("needs-review");
+      elPill.textContent = `Statutory Overdue (₹${penaltyAmount.toLocaleString("en-IN")})`;
+    } else if (elapsedDays >= slaDays - 5) {
+      elPill.classList.add("under-review");
+      elPill.textContent = "Approaching Deadline";
+    } else {
+      elPill.classList.add("approved");
+      elPill.textContent = "Within Statutory Window";
+    }
+  }
+
+  if (elGuidanceBox && elGuidanceTitle && elGuidanceText) {
+    if (overdueDays > 0) {
+      elGuidanceBox.style.borderLeftColor = "var(--status-review)";
+      elGuidanceTitle.style.color = "var(--status-review)";
+      elGuidanceTitle.textContent = `⚠️ Statutory Default: Personal Salary Deduction Triggered (${overdueDays} Days Overdue)`;
+      elGuidanceText.innerHTML = `The Designated Public Information Officer at <b>${escapeHtml(targetDept)}</b> has exceeded the statutory deadline by <b>${overdueDays} days</b> without lawful order. Under Section 20(1) of the RTI Act 2005 and Supreme Court precedent <i>Manohar Anchule (2013)</i>, a mandatory penalty of ₹250/day (Total: <b>₹${penaltyAmount.toLocaleString("en-IN")}</b>) has accrued and is deductible directly from the officer's salary. Recommended action: Immediately file First Appeal under Section 19(1) or penalty complaint under Section 18.`;
+    } else {
+      elGuidanceBox.style.borderLeftColor = "var(--status-active)";
+      elGuidanceTitle.style.color = "var(--status-active)";
+      elGuidanceTitle.textContent = "✓ Application Within Lawful SLA Window";
+      elGuidanceText.innerHTML = `Application filed on <b>${filingStr}</b> is currently within the lawful ${slaDays}-day SLA window. The PIO has until <b>${deadlineStr}</b> to furnish the certified information or issue a Section 6(3) transfer notice.`;
+    }
+  }
+
+  if (elClause) {
+    if (overdueDays > 0) {
+      elClause.value = `TAKE NOTICE that the Applicant submitted RTI Application dated ${filingStr} before the Designated PIO, ${targetDept}. In terms of Section 7(1) of the RTI Act 2005, the statutory 30-day window expired on ${deadlineStr}. The PIO has defaulted for ${overdueDays} days without reasonable cause. Under Section 20(1) and the law declared in Manohar s/o Manikrao Anchule v. State of Maharashtra (AIR 2013 SC 681), the PIO is personally liable for a penalty of ₹250 per day amounting to ₹${penaltyAmount.toLocaleString("en-IN")}, deductible directly from the officer's personal salary.`;
+    } else {
+      elClause.value = `IN RE: RTI Application dated ${filingStr} submitted before Designated PIO, ${targetDept}. Statutory compliance deadline under Section 7(1) of RTI Act 2005 expires on ${deadlineStr}.`;
+    }
+  }
+}
+
+function copySlaNoticeClause() {
+  const elClause = document.getElementById("slaGeneratedClause");
+  const btnText = document.getElementById("copyClauseBtnText");
+  if (!elClause) return;
+  
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(elClause.value).then(() => {
+      if (btnText) {
+        const orig = btnText.textContent;
+        btnText.textContent = "Copied!";
+        setTimeout(() => { btnText.textContent = orig; }, 2000);
+      }
+    }).catch(() => {
+      fallbackCopy(elClause, btnText);
+    });
+  } else {
+    fallbackCopy(elClause, btnText);
+  }
+}
+
+function fallbackCopy(elClause, btnText) {
+  elClause.select();
+  document.execCommand("copy");
+  if (btnText) {
+    const orig = btnText.textContent;
+    btnText.textContent = "Copied!";
+    setTimeout(() => { btnText.textContent = orig; }, 2000);
+  }
+}
+
+// ----------------------------------------------------
+// STATUTORY CODEX REAL-TIME MATRIX FILTER (PAGE 3)
+// ----------------------------------------------------
+function filterStatutoryMatrix() {
+  const query = (document.getElementById("statutorySearchInput")?.value || "").toLowerCase().trim();
+  const table = document.getElementById("statutoryCodexTable");
+  if (!table) return;
+  const rows = table.querySelectorAll("tbody tr");
+  let matchCount = 0;
+  
+  rows.forEach(r => {
+    const text = r.textContent.toLowerCase();
+    if (!query || text.includes(query)) {
+      r.style.display = "";
+      matchCount++;
+    } else {
+      r.style.display = "none";
+    }
+  });
+  
+  const countEl = document.getElementById("statutoryFilterCount");
+  if (countEl) {
+    countEl.textContent = `${matchCount} Provision${matchCount === 1 ? "" : "s"} Active`;
+  }
+}
+
+// Window bindings
+window.initSlaPenaltyCalculator = initSlaPenaltyCalculator;
+window.resetSlaCalculator = resetSlaCalculator;
+window.calculateSlaPenalty = calculateSlaPenalty;
+window.copySlaNoticeClause = copySlaNoticeClause;
+window.filterStatutoryMatrix = filterStatutoryMatrix;
+
+// Auto-initialize calculator on DOM load
+document.addEventListener("DOMContentLoaded", () => {
+  initSlaPenaltyCalculator();
+});

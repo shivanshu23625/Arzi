@@ -9,7 +9,7 @@
   <meta name="keywords" content="RTI Act 2005, Bharatiya Nyaya Sanhita, BNS 2023, IPC 1860, Section 20 Penalty, Public Authority, PIO Directory, Railway, Supabase" />
   
   <!-- Institutional Google Fonts: Source Serif 4 & Inter & JetBrains Mono -->
-  <link rel="stylesheet" href="/style.css?v=20260906.6" />
+  <link rel="stylesheet" href="/style.css?v=20260907.1" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,600&display=swap" rel="stylesheet">
@@ -102,6 +102,9 @@
     <!-- ================================================================= -->
     <!-- PAGE 1: HOME OVERVIEW PAGE -->
     <!-- ================================================================= -->
+    <!-- ================================================================= -->
+    <!-- PAGE 1: HOME OVERVIEW & EXECUTIVE COMMAND CENTER -->
+    <!-- ================================================================= -->
     <section id="page-home" class="site-page active">
       
       <!-- Institutional Editorial Hero Section -->
@@ -174,22 +177,105 @@
         </div>
       </div>
 
-      <!-- 3 Concise Core Capabilities -->
-      <div class="pillars-editorial-grid" style="margin-bottom: 24px;">
-        <div class="pillar-item-card">
-          <i data-lucide="scale" style="width: 22px; height: 22px; color: var(--gov-navy);"></i>
-          <h3>Statutory IPC & BNS Cross-Mapping</h3>
-          <p>Analyzes citizen statements into structured legal questions under Section 2(f) and maps historical IPC 1860 clauses to active Bharatiya Nyaya Sanhita (BNS 2023) provisions.</p>
+      <!-- 4-Stage Autonomous Workflow Pipeline -->
+      <div class="ops-panel" style="margin-bottom: 24px;">
+        <div class="ops-panel-header">
+          <span class="ops-panel-title">
+            <i data-lucide="git-branch" style="width: 14px; height: 14px; color: var(--gov-navy);"></i>
+            <span>Autonomous Grievance-to-Enforcement Pipeline</span>
+          </span>
+          <span class="status-pill approved">Deterministic SLA</span>
         </div>
-        <div class="pillar-item-card">
-          <i data-lucide="map-pin" style="width: 22px; height: 22px; color: var(--gov-copper);"></i>
-          <h3>Geodesic PIO & FAA Discovery</h3>
-          <p>Calculates spherical coordinates using Haversine geodesy to designate the competent Public Information Officer and First Appellate Authority across districts.</p>
+        <div style="padding: 18px;">
+          <div class="workflow-pipeline-grid">
+            <div class="pipeline-step-card">
+              <div class="step-num">01</div>
+              <div class="step-icon"><i data-lucide="file-text" style="width: 18px; height: 18px;"></i></div>
+              <h4>Ingest & Structured Parsing</h4>
+              <p>Translates colloquial citizen grievances into legally enforceable questions admissible under Section 2(f) of the RTI Act.</p>
+            </div>
+            <div class="pipeline-step-card">
+              <div class="step-num">02</div>
+              <div class="step-icon"><i data-lucide="cpu" style="width: 18px; height: 18px;"></i></div>
+              <h4>11-Domain ML Classification</h4>
+              <p>Identifies the competent public sector (Power, Water, Transport, Revenue, Labour, Environment) with confidence scoring.</p>
+            </div>
+            <div class="pipeline-step-card">
+              <div class="step-num">03</div>
+              <div class="step-icon"><i data-lucide="map-pin" style="width: 18px; height: 18px;"></i></div>
+              <h4>Geodesic PIO Discovery</h4>
+              <p>Applies Haversine spherical geodesy to map pincodes and coordinates to the verified nodal Public Information Officer.</p>
+            </div>
+            <div class="pipeline-step-card">
+              <div class="step-num">04</div>
+              <div class="step-icon"><i data-lucide="shield-check" style="width: 18px; height: 18px;"></i></div>
+              <h4>Enforceable Instrument & Log</h4>
+              <p>Compiles court-admissible Form-A PDFs with SHA-256 digital seals and records state updates to the immutable audit run log.</p>
+            </div>
+          </div>
         </div>
-        <div class="pillar-item-card">
-          <i data-lucide="shield-check" style="width: 22px; height: 22px; color: var(--status-active);"></i>
-          <h3>Enforceable Instruments & Audit Trail</h3>
-          <p>Generates court-ready Form-A RTI and First Appeal PDFs with SHA-256 digital seals while recording every action in an immutable execution audit log.</p>
+      </div>
+
+      <!-- Quick Civic Triage Launchpad -->
+      <div class="ops-panel" style="margin-bottom: 24px;">
+        <div class="ops-panel-header">
+          <span class="ops-panel-title">
+            <i data-lucide="zap" style="width: 14px; height: 14px; color: var(--gov-copper);"></i>
+            <span>Instant Civic Sector Triage Launchpad (1-Click Load into Casework)</span>
+          </span>
+          <span class="status-pill neutral">11 Public Domains</span>
+        </div>
+        <div style="padding: 16px;">
+          <div class="quick-triage-grid">
+            <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(9);">
+              <div class="triage-icon" style="background: rgba(234, 88, 12, 0.1); color: #ea580c;">⚡</div>
+              <div class="triage-info">
+                <b>Electricity & Power Discom</b>
+                <span>Transformer burnout & blackout &bull; BSES Delhi (110019)</span>
+              </div>
+              <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
+            </div>
+            <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(10);">
+              <div class="triage-icon" style="background: rgba(14, 165, 233, 0.1); color: #0284c7;">💧</div>
+              <div class="triage-info">
+                <b>Drinking Water Supply & Jal Board</b>
+                <span>Sewage line contamination &bull; Jal Sansthan Varanasi (221010)</span>
+              </div>
+              <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
+            </div>
+            <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(11);">
+              <div class="triage-icon" style="background: rgba(16, 185, 129, 0.1); color: #059669;">🚗</div>
+              <div class="triage-info">
+                <b>Transport & RTO Motor Vehicles</b>
+                <span>Driving license renewal delay &bull; Sarai Kale Khan RTO (110013)</span>
+              </div>
+              <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
+            </div>
+            <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(12);">
+              <div class="triage-icon" style="background: rgba(99, 102, 241, 0.1); color: #4f46e5;">💼</div>
+              <div class="triage-info">
+                <b>Labour, Pension & Social Security</b>
+                <span>EPS-95 monthly pension settlement &bull; EPFO Delhi (110052)</span>
+              </div>
+              <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
+            </div>
+            <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(13);">
+              <div class="triage-icon" style="background: rgba(220, 38, 38, 0.1); color: #dc2626;">🏭</div>
+              <div class="triage-info">
+                <b>Environment & Pollution Control</b>
+                <span>Illegal industrial toxic effluent &bull; DPCC Delhi (110032)</span>
+              </div>
+              <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
+            </div>
+            <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(1);">
+              <div class="triage-icon" style="background: rgba(217, 119, 6, 0.1); color: #d97706;">📜</div>
+              <div class="triage-info">
+                <b>Revenue & Land Records</b>
+                <span>Mutation & Khasra delay &bull; Sadar Tehsil Varanasi (221002)</span>
+              </div>
+              <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -202,92 +288,89 @@
       <div class="editorial-hero">
         <div class="hero-tagline">
           <i data-lucide="book-open" style="width: 12px; height: 12px;"></i>
-          <span>ABOUT ARZI &middot; CIVIC ACCOUNTABILITY & STATUTORY MANDATE</span>
+          <span>ABOUT ARZI &middot; CIVIC ACCOUNTABILITY & INSTITUTIONAL MANDATE</span>
         </div>
-        <h1>Eliminating Administrative Silence and <br/><span style="color: var(--gov-navy);">Public Authority Opacity across India</span></h1>
+        <h1>Dismantling Administrative Silence <br/><span style="color: var(--gov-navy);">Through Autonomous Legal Engineering</span></h1>
         <p class="hero-lead-text">
-          An autonomous statutory engine and human-operable operations desk that advocates, citizens, and public officials can run seamlessly.
+          ARZI was engineered to solve the systemic failure of bureaucratic opacity in India. By bridging colloquial citizen complaints with formal public law, ARZI creates legally enforceable accountability backed by financial penalties under Section 20 of the RTI Act.
         </p>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+      <!-- Problem vs Solution Matrix -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;" class="about-two-col-grid">
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">The Civic Problem in India</span>
+            <span class="ops-panel-title">The Administrative Silence Crisis in India</span>
+            <span class="status-pill needs-review">Systemic Inertia</span>
           </div>
-          <div style="padding: 16px; font-size: 12.5px; color: var(--ink-secondary); line-height: 1.6;">
-            <p style="margin-bottom: 10px;">
-              Every college, club, shop, and small agency in India has jobs redone by hand every week. Requests dying in WhatsApp groups. PDS ration card applications delayed for 6 months. Land mutation records withheld by local patwaris.
+          <div style="padding: 18px; font-size: 13px; color: var(--ink-secondary); line-height: 1.65;">
+            <p style="margin-bottom: 12px;">
+              Across municipal corporations, tehsils, and statutory boards, millions of legitimate citizen requests languish unanswered. Public authorities exploit procedural friction, confusing departmental boundaries, and citizen unfamiliarity with statutory provisions to maintain administrative silence.
             </p>
             <p>
-              <b>ARZI kills this job properly.</b> We leave behind an autonomous Python engine plus an intuitive operations workspace backed by Supabase that advocates and public authorities can run seamlessly.
+              When grievances remain informal—conveyed via verbal complaints, letters without statutory citations, or unverified WhatsApp forwards—officers face zero legal accountability. Bureaucratic delays become the default operating procedure.
             </p>
           </div>
         </div>
 
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">Architectural Foundation</span>
+            <span class="ops-panel-title">The ARZI Operational Intervention</span>
+            <span class="status-pill approved">Statutory Enforcement</span>
           </div>
-          <div style="padding: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 10px;">
-            <div class="legal-basis-box" style="margin-bottom: 0; border-left-color: var(--gov-navy);">
-              <b style="color: var(--gov-navy);">1. Autonomous Python Engine:</b>
-              <div style="color: var(--ink-secondary); margin-top: 2px;">Python Flask handles AI statutory reasoning, Haversine geospatial calculations, and signed PDF dispatch.</div>
-            </div>
-            <div class="legal-basis-box" style="margin-bottom: 0; border-left-color: var(--gov-copper);">
-              <b style="color: var(--gov-copper);">2. Persistent Supabase Backend:</b>
-              <div style="color: var(--ink-secondary); margin-top: 2px;">High-scale PostgreSQL database with pgvector embeddings for precedents, knowledge, and casework.</div>
-            </div>
-            <div class="legal-basis-box" style="margin-bottom: 0; border-left-color: var(--status-active);">
-              <b style="color: var(--status-active);">3. Immutable Audit Proof:</b>
-              <div style="color: var(--ink-secondary); margin-top: 2px;">Every state transition writes an immutable row with verified timestamps into the Run Log.</div>
-            </div>
+          <div style="padding: 18px; font-size: 13px; color: var(--ink-secondary); line-height: 1.65;">
+            <p style="margin-bottom: 12px;">
+              <b>ARZI transforms the balance of power.</b> It automates the exact legal conversion required by courts: translating ambiguous grievances into precise questions under Section 2(f), identifying the exact nodal PIO via geodesy, and establishing the strict 30-day statutory clock.
+            </p>
+            <p>
+              By activating the ₹250/day personal salary deduction mandate under Section 20(1), ARZI replaces bureaucratic discretion with enforceable personal legal liability.
+            </p>
           </div>
         </div>
       </div>
 
+      <!-- Multi-Stakeholder Utility Ecosystem -->
       <div class="ops-panel" style="margin-bottom: 20px;">
         <div class="ops-panel-header">
-          <span class="ops-panel-title">Constitutional & Statutory Foundation</span>
+          <span class="ops-panel-title">Multi-Stakeholder Operational Utility</span>
+          <span class="status-pill neutral">3 Operating Personas</span>
         </div>
-        <div style="padding: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 12px;">
-          <div class="legal-basis-box" style="margin-bottom: 0;">
-            <b style="color: var(--gov-navy);">Article 19(1)(a) Constitution of India</b>
-            <p style="color: var(--ink-secondary); margin-top: 4px;">Fundamental Right to Information recognized by Supreme Court in <i>State of UP v. Raj Narain</i>.</p>
-          </div>
-          <div class="legal-basis-box" style="margin-bottom: 0;">
-            <b style="color: var(--gov-navy);">RTI Act, 2005 (Act 22 of 2005)</b>
-            <p style="color: var(--ink-secondary); margin-top: 4px;">Sections 2(f), 6(1), 6(3), 7(1), 19(1), and Section 20(1) imposing ₹250/day personal penalty on delinquent PIOs.</p>
-          </div>
-          <div class="legal-basis-box" style="margin-bottom: 0;">
-            <b style="color: var(--gov-navy);">Bharatiya Nyaya Sanhita, 2023</b>
-            <p style="color: var(--ink-secondary); margin-top: 4px;">Sections 318(4) (Cheating), 316(5) (Public Servant Breach), 231 (Falsifying Record), 199 (Disobedience).</p>
+        <div style="padding: 18px;">
+          <div class="stakeholder-grid">
+            <div class="stakeholder-card">
+              <div class="stakeholder-badge" style="background: rgba(30, 58, 138, 0.1); color: var(--gov-navy);"><i data-lucide="user" style="width: 18px; height: 18px;"></i> Citizen Complainants</div>
+              <p>File clear, structured RTI questions in under 2 minutes without needing expensive legal representation. Track statutory countdowns and receive alerts when authorities fail to comply.</p>
+            </div>
+            <div class="stakeholder-card">
+              <div class="stakeholder-badge" style="background: rgba(180, 83, 9, 0.1); color: var(--gov-copper);"><i data-lucide="briefcase" style="width: 18px; height: 18px;"></i> Legal Counsel & Advocates</div>
+              <p>Manage high-volume civic casework with automated IPC ↔ BNS concordance, rapid Section 19(1) First Appeal generation, and verifiable SHA-256 court docket seals.</p>
+            </div>
+            <div class="stakeholder-card">
+              <div class="stakeholder-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--status-active);"><i data-lucide="building-2" style="width: 18px; height: 18px;"></i> Public Grievance Desks</div>
+              <p>Nodal public authorities can identify jurisdictional overlap, execute Section 6(3) 5-day inter-departmental transfers seamlessly, and avoid personal Section 20 penalty liabilities.</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Technical Architecture Breakdown -->
+      <!-- Engineering & Cryptographic Security Blueprint -->
       <div class="ops-panel">
         <div class="ops-panel-header">
-          <span class="ops-panel-title">Technical Architecture & Stack Verification</span>
+          <span class="ops-panel-title">Engineering Rigor & Cryptographic Verifiability</span>
         </div>
-        <div style="padding: 16px; font-size: 12px; color: var(--ink-secondary); line-height: 1.6;">
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
-            <div class="case-study-card">
-              <h4>Core Engine</h4>
-              <p>Pure Python 3.13 + Flask REST API with deterministic statutory regex parsing and zero hallucination risk.</p>
+        <div style="padding: 18px; font-size: 12.5px; color: var(--ink-secondary); line-height: 1.6;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;" class="about-three-col-grid">
+            <div class="legal-basis-box" style="margin-bottom: 0; border-left-color: var(--gov-navy);">
+              <b style="color: var(--gov-navy); font-size: 13px;">Deterministic Legal Reasoning</b>
+              <p style="margin-top: 6px;">Zero hallucination risk. Statutory questions, time limits, and fee clauses are compiled via deterministic statutory rule engines verified against official Indian Gazettes.</p>
             </div>
-            <div class="case-study-card">
-              <h4>Geodesy Module</h4>
-              <p>Haversine great-circle trigonometric formula computing distance across verified district administrative hubs.</p>
+            <div class="legal-basis-box" style="margin-bottom: 0; border-left-color: var(--gov-copper);">
+              <b style="color: var(--gov-copper); font-size: 13px;">SHA-256 Digital Sealing</b>
+              <p style="margin-top: 6px;">Every generated Form-A and First Appeal PDF embeds an immutable SHA-256 cryptographic hash guaranteeing tamper-evident authenticity in judicial proceedings.</p>
             </div>
-            <div class="case-study-card">
-              <h4>Document Engine</h4>
-              <p>Deterministic PDF generator with SHA-256 digital seals for Form-A RTI, First Appeal, and Legal Notices.</p>
-            </div>
-            <div class="case-study-card">
-              <h4>Supabase Database</h4>
-              <p>PostgreSQL with pgvector embeddings for precedents, knowledge, and casework persistence.</p>
+            <div class="legal-basis-box" style="margin-bottom: 0; border-left-color: var(--status-active);">
+              <b style="color: var(--status-active); font-size: 13px;">Immutable Audit Ledger</b>
+              <p style="margin-top: 6px;">Every intake, classification, transfer, and case update is permanently journaled with microsecond ISO timestamps, creating an indisputable timeline for Information Commissions.</p>
             </div>
           </div>
         </div>
@@ -305,11 +388,51 @@
         </div>
         <h1>Authoritative Statutory Provisions & <br/><span style="color: var(--gov-navy);">Judicial Enforcement Standards</span></h1>
         <p class="hero-lead-text">
-          Comprehensive reference guide on Section 20 penalty enforcement, Bharatiya Nyaya Sanhita criminal law transition, and great-circle geodesic routing.
+          Comprehensive reference guide on Section 20 penalty enforcement, Bharatiya Nyaya Sanhita criminal law transition, statutory escalation ladders, and landmark Supreme Court jurisprudence.
         </p>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+      <!-- Statutory Escalation Timeline -->
+      <div class="ops-panel" style="margin-bottom: 20px;">
+        <div class="ops-panel-header">
+          <span class="ops-panel-title">
+            <i data-lucide="clock" style="width: 14px; height: 14px; color: var(--gov-navy);"></i>
+            <span>Statutory Escalation Ladder & Mandatory Time Limits</span>
+          </span>
+          <span class="status-pill approved">Enforceable Milestones</span>
+        </div>
+        <div style="padding: 18px;">
+          <div class="escalation-ladder-grid">
+            <div class="ladder-step-card">
+              <span class="ladder-badge">Day 0</span>
+              <h4>Filing & Fee</h4>
+              <p>Form-A submission with ₹10 court fee / postal order. Receipt acknowledgment legally mandatory.</p>
+            </div>
+            <div class="ladder-step-card">
+              <span class="ladder-badge">Day 5</span>
+              <h4>Sec 6(3) Transfer</h4>
+              <p>If info held by another public authority, transfer within 5 days with written notice to citizen.</p>
+            </div>
+            <div class="ladder-step-card">
+              <span class="ladder-badge" style="background: var(--gov-copper);">Day 30</span>
+              <h4>Statutory SLA</h4>
+              <p>Standard 30-day window expires. (48 hours if life/liberty). Day 31 triggers ₹250/day penalty clock.</p>
+            </div>
+            <div class="ladder-step-card">
+              <span class="ladder-badge" style="background: var(--status-review);">Day 60</span>
+              <h4>First Appeal</h4>
+              <p>File First Appeal under Section 19(1) to First Appellate Authority (FAA) against deemed refusal.</p>
+            </div>
+            <div class="ladder-step-card">
+              <span class="ladder-badge" style="background: #4f46e5;">Day 150</span>
+              <h4>Second Appeal</h4>
+              <p>Escalate to Central / State Information Commission under Section 19(3) with prayer for Section 20 penalties.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;" class="pillars-four-grid">
         <!-- Pillar 1 -->
         <div class="ops-panel">
           <div class="ops-panel-header">
@@ -361,26 +484,71 @@
           </div>
           <div style="padding: 16px; font-size: 12px; color: var(--ink-secondary); line-height: 1.55;">
             <p>
-              AARZI uses the great-circle Haversine formula across verified municipal coordinates (Varanasi / Banaras, Delhi NCT, Lucknow) to assign the nearest competent Public Information Officer and First Appellate Authority with room numbers and emails.
+              ARZI uses the great-circle Haversine formula across verified municipal coordinates (Delhi NCT, Varanasi, Lucknow) to assign the nearest competent Public Information Officer and First Appellate Authority with room numbers and emails.
             </p>
           </div>
         </div>
       </div>
 
-      <!-- Comprehensive IPC vs BNS Statutory Matrix Table -->
-      <div class="ops-panel">
+      <!-- Landmark Supreme Court Precedents Section -->
+      <div class="ops-panel" style="margin-bottom: 20px;">
         <div class="ops-panel-header">
-          <span class="ops-panel-title">Comprehensive IPC 1860 &harr; BNS 2023 Statutory Comparison Matrix</span>
+          <span class="ops-panel-title">
+            <i data-lucide="landmark" style="width: 14px; height: 14px; color: var(--gov-navy);"></i>
+            <span>Landmark Supreme Court Jurisprudence on Right to Information</span>
+          </span>
+          <span class="status-pill approved">Constitutional Bench</span>
         </div>
-        <div style="padding: 14px; overflow-x: auto;">
-          <table class="editorial-table">
+        <div style="padding: 16px;">
+          <div class="precedents-grid">
+            <div class="precedent-card">
+              <div class="precedent-citation">State of UP v. Raj Narain (1975) 4 SCC 428</div>
+              <h4>Fundamental Right Under Article 19(1)(a)</h4>
+              <p>The Supreme Court established that in a government of responsibility like ours, where all the agents of the public must be responsible for their conduct, there can be but few secrets.</p>
+            </div>
+            <div class="precedent-card">
+              <div class="precedent-citation">Manohar s/o Manikrao Anchule v. State of Maharashtra AIR 2013 SC 681</div>
+              <h4>Mandatory Nature of Section 20 Penalty</h4>
+              <p>The apex court ruled that the penalty under Section 20(1) is mandatory upon finding unjustified delay, subject only to providing reasonable opportunity of hearing (audi alteram partem).</p>
+            </div>
+            <div class="precedent-card">
+              <div class="precedent-citation">CBSE v. Aditya Bandopadhyay (2011) 8 SCC 497</div>
+              <h4>Scope of Public Records & Inspection</h4>
+              <p>Clarified that citizens have a right to inspect records, obtain certified copies, and that public authorities cannot deny access on broad pretextual claims of fiduciary relationship.</p>
+            </div>
+            <div class="precedent-card">
+              <div class="precedent-citation">CIC v. State of Manipur (2011) 15 SCC 1</div>
+              <h4>Section 18 Complaint vs Section 19 Appeal</h4>
+              <p>Distinguished the punitive jurisdiction of Section 18 complaints (focusing on officer misconduct and penalties) from the remedial jurisdiction of Section 19 appeals (directing disclosure).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comprehensive IPC vs BNS Statutory Matrix Table with Interactive Filter -->
+      <div class="ops-panel">
+        <div class="ops-panel-header" style="flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="binary" style="width: 15px; height: 15px; color: var(--gov-navy);"></i>
+            <span class="ops-panel-title">Comprehensive IPC 1860 &harr; BNS 2023 Statutory Comparison Matrix</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="position: relative;">
+              <input type="text" id="statutorySearchInput" placeholder="Filter by section, crime, or keyword..." oninput="filterStatutoryMatrix()" style="padding: 5px 10px 5px 28px; font-size: 11.5px; width: 240px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-card); color: var(--ink-primary);" />
+              <i data-lucide="search" style="position: absolute; left: 8px; top: 7px; width: 12px; height: 12px; color: var(--ink-muted);"></i>
+            </div>
+            <span class="status-pill neutral" id="statutoryFilterCount">8 Provisions Active</span>
+          </div>
+        </div>
+        <div class="table-responsive" style="padding: 14px;">
+          <table class="editorial-table" id="statutoryCodexTable">
             <thead>
               <tr>
                 <th>Offense Category</th>
                 <th>Historical Indian Penal Code (IPC 1860)</th>
                 <th>Bharatiya Nyaya Sanhita (BNS 2023)</th>
                 <th>Maximum Punishment Scope</th>
-                <th>Cognizability</th>
+                <th>Cognizability & Bail Status</th>
               </tr>
             </thead>
             <tbody>
@@ -425,6 +593,20 @@
                 <td><span class="statutory-tag bns">BNS Section 279</span></td>
                 <td>Imprisonment up to 3 months or fine</td>
                 <td><span class="status-pill approved">Cognizable / Bailable</span></td>
+              </tr>
+              <tr>
+                <td><b>Disobedience to Order Promulgated by Public Servant</b></td>
+                <td><span class="statutory-tag ipc">IPC Section 188</span></td>
+                <td><span class="statutory-tag bns">BNS Section 223</span></td>
+                <td>Imprisonment up to 6 months or fine</td>
+                <td><span class="status-pill approved">Cognizable / Bailable</span></td>
+              </tr>
+              <tr>
+                <td><b>Forgery of Public Register or Court Record</b></td>
+                <td><span class="statutory-tag ipc">IPC Section 466</span></td>
+                <td><span class="statutory-tag bns">BNS Section 338</span></td>
+                <td>Imprisonment up to 7 years + fine</td>
+                <td><span class="status-pill approved">Cognizable / Non-Bailable</span></td>
               </tr>
             </tbody>
           </table>
@@ -1137,26 +1319,140 @@
         </div>
       </div>
 
-      <!-- TAB 4: COMPLIANCE & SLA -->
+      <!-- TAB 4: COMPLIANCE & SLA (INTERACTIVE SECTION 20 CALCULATOR & RISK DESK) -->
       <div id="dashtab-compliance" class="dash-module">
+        <div class="ops-panel" style="margin-bottom: 18px;">
+          <div class="ops-panel-header" style="flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="calculator" style="width: 15px; height: 15px; color: var(--gov-navy);"></i>
+              <span class="ops-panel-title">Interactive Section 20(1) Penalty & Statutory SLA Clock</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="status-pill needs-review" id="slaClockStatusPill">Statutory Overdue</span>
+              <span class="legal-source-tag" style="margin: 0;">Sec 20(1) RTI Act 2005</span>
+            </div>
+          </div>
+
+          <div style="padding: 18px;">
+            <div class="sla-calculator-grid">
+              
+              <!-- Column 1: Statutory Filing Parameters -->
+              <div class="sla-inputs-card">
+                <div class="sla-card-heading">
+                  <i data-lucide="calendar" style="width: 14px; height: 14px; color: var(--gov-navy);"></i>
+                  <span>Case Timeline & SLA Parameters</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label class="form-label" for="slaFilingDate">RTI Application Filing Date *</label>
+                  <input type="date" id="slaFilingDate" onchange="calculateSlaPenalty()" class="form-input" style="width: 100%;" />
+                  <span class="form-hint">Date official receipt or postal booking was registered</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label class="form-label" for="slaProvisionType">Statutory SLA Provision *</label>
+                  <select id="slaProvisionType" onchange="calculateSlaPenalty()" class="form-select" style="width: 100%;">
+                    <option value="30">Section 7(1) — Standard Civic Window (30 Days)</option>
+                    <option value="2">Section 7(1) Proviso — Life or Liberty Urgent (48 Hours / 2 Days)</option>
+                    <option value="35_apio">Section 5(2) — Application via Assistant PIO (35 Days)</option>
+                    <option value="35_transfer">Section 6(3) — Transferred Public Authority (35 Days)</option>
+                    <option value="45">Section 19(1) — First Appellate Authority Disposal (30 to 45 Days)</option>
+                  </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label class="form-label" for="slaResponseDate">PIO Response Date (Leave empty if still pending)</label>
+                  <input type="date" id="slaResponseDate" onchange="calculateSlaPenalty()" class="form-input" style="width: 100%;" />
+                  <span class="form-hint">Optional: Enter date if a delayed response was received</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 14px;">
+                  <label class="form-label" for="slaPioDepartment">Target Public Authority / Department</label>
+                  <input type="text" id="slaPioDepartment" value="Delhi Jal Board / BSES Power Discom" oninput="calculateSlaPenalty()" class="form-input" style="width: 100%;" />
+                </div>
+
+                <button type="button" class="btn-gov-outline" style="width: 100%; justify-content: center;" onclick="resetSlaCalculator()">
+                  <i data-lucide="rotate-ccw" style="width: 13px; height: 13px;"></i>
+                  <span>Reset to 35-Day Overdue Benchmark</span>
+                </button>
+              </div>
+
+              <!-- Column 2: Live Statutory Liability & Penalty Computation -->
+              <div class="sla-results-card">
+                <div class="sla-card-heading">
+                  <i data-lucide="scale" style="width: 14px; height: 14px; color: var(--gov-copper);"></i>
+                  <span>Live Accrued Personal Penalty Liability</span>
+                </div>
+
+                <!-- 4 Metrics Counter Strip -->
+                <div class="sla-metrics-strip">
+                  <div class="sla-metric-cell">
+                    <span class="sla-metric-label">Statutory Deadline</span>
+                    <span class="sla-metric-value" id="slaDeadlineDisplay">--</span>
+                    <span class="sla-metric-sub" id="slaDeadlineSub">Section 7(1)</span>
+                  </div>
+                  <div class="sla-metric-cell">
+                    <span class="sla-metric-label">Days Elapsed</span>
+                    <span class="sla-metric-value" id="slaElapsedDaysDisplay" style="color: var(--gov-navy);">35 Days</span>
+                    <span class="sla-metric-sub">From filing timestamp</span>
+                  </div>
+                  <div class="sla-metric-cell">
+                    <span class="sla-metric-label">Delinquent Days</span>
+                    <span class="sla-metric-value" id="slaOverdueDaysDisplay" style="color: var(--status-review);">5 Days</span>
+                    <span class="sla-metric-sub">Beyond statutory SLA</span>
+                  </div>
+                  <div class="sla-metric-cell" style="background: rgba(220, 38, 38, 0.05); border: 1px solid rgba(220, 38, 38, 0.2);">
+                    <span class="sla-metric-label" style="color: var(--status-review);">Accrued Penalty</span>
+                    <span class="sla-metric-value" id="slaPenaltyAmountDisplay" style="color: var(--status-review); font-size: 20px;">₹1,250</span>
+                    <span class="sla-metric-sub">₹250/day (Max ₹25,000)</span>
+                  </div>
+                </div>
+
+                <!-- Statutory Legal Guidance Box -->
+                <div class="legal-basis-box" id="slaGuidanceBox" style="margin-bottom: 14px; border-left-color: var(--status-review);">
+                  <b style="color: var(--status-review); font-size: 12.5px;" id="slaGuidanceTitle">⚠️ Statutory Default: Personal Salary Deduction Triggered</b>
+                  <p style="margin-top: 4px; font-size: 11.5px; color: var(--ink-secondary);" id="slaGuidanceText">
+                    The Public Information Officer has exceeded the statutory deadline by 5 days without valid order. Under Section 20(1) of the RTI Act 2005, a mandatory penalty of ₹250 per day (Total: ₹1,250) has accrued and is deductible directly from the PIO's personal salary upon First Appeal or Section 18 complaint.
+                  </p>
+                </div>
+
+                <!-- Pre-Drafted Notice Clause Box -->
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px; padding: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--gov-navy); text-transform: uppercase; letter-spacing: 0.5px;">
+                      Generated Section 20 Show-Cause Clause
+                    </span>
+                    <button type="button" class="btn-gov-outline" id="btnCopySlaClause" style="padding: 3px 8px; font-size: 10.5px;" onclick="copySlaNoticeClause()">
+                      <i data-lucide="copy" style="width: 12px; height: 12px;"></i>
+                      <span id="copyClauseBtnText">Copy Clause</span>
+                    </button>
+                  </div>
+                  <textarea id="slaGeneratedClause" rows="3" readonly style="width: 100%; font-family: var(--font-mono); font-size: 11px; background: var(--bg-subtle); color: var(--ink-primary); border: 1px solid var(--border-medium); border-radius: 3px; padding: 8px; line-height: 1.45; resize: none;"></textarea>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 20 & 19 Statutory Jurisprudence Benchmarks -->
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">Section 20(1) Penalty Tracking & Statutory SLA Benchmarks</span>
+            <span class="ops-panel-title">Statutory Enforcement Mandates under RTI Act, 2005</span>
           </div>
-          <div style="padding: 18px;">
-            <div class="legal-basis-box" style="margin-bottom: 16px;">
-              <div class="legal-basis-title">Section 20(1) Personal Financial Penalty Rule</div>
-              <div class="legal-basis-text">
-                Where the Commission finds that a Public Information Officer (PIO) has refused to receive an application or failed to furnish information within the 30-day statutory SLA without reasonable cause, it <b>shall impose a penalty of ₹250 each day</b> up to a maximum of <b>₹25,000</b> directly deducted from the officer's salary.
-              </div>
-              <span class="legal-source-tag">Precedent: Manohar s/o Manikrao Anchule v. State of Maharashtra AIR 2013 SC 681</span>
+          <div style="padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;" class="compliance-benchmarks-grid">
+            <div class="legal-basis-box" style="margin-bottom: 0;">
+              <b style="color: var(--gov-navy);">Section 19(1) Immediate First Appeal Right</b>
+              <p style="color: var(--ink-secondary); margin-top: 4px; font-size: 12px;">
+                Any person who does not receive a decision within the specified time under Section 7(1) may within thirty days from the expiry of such period prefer an appeal to the officer senior in rank to the PIO (First Appellate Authority).
+              </p>
             </div>
-
-            <div class="legal-basis-box" style="border-left-color: var(--gov-navy); background: var(--bg-subtle);">
-              <div class="legal-basis-title" style="color: var(--gov-navy);">Section 6(3) 5-Day Mandatory Inter-Departmental Transfer Rule</div>
-              <div class="legal-basis-text">
-                Where an application is made to a public authority requesting information held by another public authority, the receiving officer <b>shall transfer the application within five days</b> and inform the applicant immediately in writing.
-              </div>
+            <div class="legal-basis-box" style="margin-bottom: 0; border-left-color: var(--gov-copper);">
+              <b style="color: var(--gov-copper);">Section 18 Direct Penalty Complaint</b>
+              <p style="color: var(--ink-secondary); margin-top: 4px; font-size: 12px;">
+                Where a PIO has refused to receive an application, or failed to respond within time, the complainant may file a direct complaint to the Central or State Information Commission praying for invocation of Section 20(1) penalties and disciplinary action under Section 20(2).
+              </p>
             </div>
           </div>
         </div>
@@ -1626,6 +1922,6 @@
     </footer>
   </div>
 
-  <script src="/app.js?v=20260906.6"></script>
+  <script src="/app.js?v=20260907.1"></script>
 </body>
 </html>
