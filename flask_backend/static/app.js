@@ -276,6 +276,8 @@ async function submitIntake(event) {
       document.getElementById("intakeForm").reset();
       const pBadge = document.getElementById("pincodeJurisdictionBadge");
       if (pBadge) { pBadge.style.display = "none"; pBadge.innerHTML = ""; }
+      const mlBox = document.getElementById("liveMlPredictionBox");
+      if (mlBox) { mlBox.style.display = "none"; mlBox.innerHTML = ""; }
       currentCase = data.case;
       populateWorkspaceFields(data.case);
       
@@ -400,15 +402,139 @@ function loadPreset(num) {
     document.getElementById("intakeSubDate").value = "02-Mar-2026";
     document.getElementById("rawGrievance").value = "Police Station SHO refuses to register mandatory FIR under Section 173 BNSS (old Section 154 CrPC) regarding violent armed snatching incident at market junction. Sub-Inspector refuses to provide GD entry copy or acknowledge complaint.";
     pinToResolve = "211001";
+  } else if (num === 9) {
+    // 9. Delhi Electricity Outage / Discom
+    document.getElementById("complainantName").value = "Virender Gupta";
+    document.getElementById("complainantContact").value = "+91-9810234567";
+    document.getElementById("complainantAddr").value = "Kalkaji, South Delhi, Delhi";
+    document.getElementById("complainantPincode").value = "110019";
+    document.getElementById("intakeRefNo").value = "DISCOM-PWR-44910";
+    document.getElementById("intakeSubDate").value = "28-Feb-2026";
+    document.getElementById("rawGrievance").value = "Severe recurrent unscheduled power outage and burned distribution transformer causing blackout for 5 days. BSES / Discom division junior engineer refuses to restore power grid or provide breakdown inspection logbook.";
+    pinToResolve = "110019";
+  } else if (num === 10) {
+    // 10. Varanasi Jal Board / Water Contamination
+    document.getElementById("complainantName").value = "Manoj Tripathy";
+    document.getElementById("complainantContact").value = "+91-9793112244";
+    document.getElementById("complainantAddr").value = "Bhelupur, Varanasi, Uttar Pradesh";
+    document.getElementById("complainantPincode").value = "221010";
+    document.getElementById("intakeRefNo").value = "JAL-SAN-78219";
+    document.getElementById("intakeSubDate").value = "01-Mar-2026";
+    document.getElementById("rawGrievance").value = "Severe water pipeline contamination with sewage backflow into municipal drinking water supply lines. Varanasi Jal Sansthan executive engineer has ignored repeated samples and lab test reports.";
+    pinToResolve = "221010";
+  } else if (num === 11) {
+    // 11. Delhi Transport / RTO License Renewal
+    document.getElementById("complainantName").value = "Rajesh Narang";
+    document.getElementById("complainantContact").value = "+91-9811445566";
+    document.getElementById("complainantAddr").value = "Mayur Vihar Phase 1, East Delhi, Delhi";
+    document.getElementById("complainantPincode").value = "110013";
+    document.getElementById("intakeRefNo").value = "DL-RTO-55201";
+    document.getElementById("intakeSubDate").value = "12-Jan-2026";
+    document.getElementById("rawGrievance").value = "Commercial driving license renewal and vehicle fitness RC endorsement application pending at Sarai Kale Khan RTO for over 60 days. Motor Licensing Officer refusing to issue smart card without illicit speed money.";
+    pinToResolve = "110013";
+  } else if (num === 12) {
+    // 12. Delhi EPFO Pension Delay
+    document.getElementById("complainantName").value = "Harcharan Singh";
+    document.getElementById("complainantContact").value = "+91-9871556677";
+    document.getElementById("complainantAddr").value = "Ashok Vihar, North West Delhi, Delhi";
+    document.getElementById("complainantPincode").value = "110052";
+    document.getElementById("intakeRefNo").value = "EPFO-PPO-33019";
+    document.getElementById("intakeSubDate").value = "05-Nov-2025";
+    document.getElementById("rawGrievance").value = "Retired senior citizen EPS-95 pension claim and PPO Pension Payment Order disbursal settlement pending at EPFO Wazirpur Regional Office for 120 days. Assistant Provident Fund Commissioner has failed to release accumulated superannuation pension arrears.";
+    pinToResolve = "110052";
+  } else if (num === 13) {
+    // 13. Delhi Environment & Chemical Pollution
+    document.getElementById("complainantName").value = "Anita Saxena";
+    document.getElementById("complainantContact").value = "+91-9899887711";
+    document.getElementById("complainantAddr").value = "Shahdara Industrial Area, Delhi";
+    document.getElementById("complainantPincode").value = "110032";
+    document.getElementById("intakeRefNo").value = "DPCC-ENV-90214";
+    document.getElementById("intakeSubDate").value = "15-Jan-2026";
+    document.getElementById("rawGrievance").value = "Illegal chemical electroplating factory emitting toxic noxious fumes and releasing untreated acidic effluent directly into residential open drains in violation of Air and Water Acts. DPCC pollution control board has failed to seal units.";
+    pinToResolve = "110032";
   }
 
   if (pinToResolve) {
     handlePincodeInput(pinToResolve);
   }
 
+  // Auto-run ML Domain Prediction on the loaded preset
+  triggerLiveMlPrediction();
+
   // Scroll to intake form smoothly
   const intakeForm = document.getElementById("intakeForm");
   if (intakeForm) intakeForm.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+// Live ML Domain & Public Authority Prediction
+async function triggerLiveMlPrediction() {
+  const grievanceEl = document.getElementById("rawGrievance");
+  const box = document.getElementById("liveMlPredictionBox");
+  if (!grievanceEl || !box) return;
+
+  const text = grievanceEl.value.trim();
+  if (!text) {
+    box.style.display = "block";
+    box.innerHTML = `
+      <div style="background:#fffbeb; border:1px solid #fef3c7; border-left:4px solid #f59e0b; border-radius:6px; padding:8px 12px; font-size:12px; color:#92400e; display:flex; align-items:center; gap:8px;">
+        <span>⚠️</span>
+        <span>Please enter or load grievance details first to run the ML domain prediction model.</span>
+      </div>
+    `;
+    return;
+  }
+
+  box.style.display = "block";
+  box.innerHTML = `
+    <div style="background:#f0fdfa; border:1px solid #ccfbf1; border-radius:6px; padding:8px 12px; font-size:12px; color:#0f766e; display:flex; align-items:center; gap:8px;">
+      <span class="spinner-border spinner-border-sm" role="status" style="width:14px; height:14px; border-width:2px;"></span>
+      <span>Running ML civic classification algorithms (TF-IDF keyword matching & domain heuristics)...</span>
+    </div>
+  `;
+
+  try {
+    const res = await fetch(`${API_BASE}/cases/classify-domain`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      box.innerHTML = `
+        <div style="background:#fef2f2; border:1px solid #fee2e2; border-left:4px solid #ef4444; border-radius:6px; padding:8px 12px; font-size:12px; color:#991b1b;">
+          ❌ ML Prediction error: ${escapeHtml(data.detail || data.error || "Failed to classify grievance")}
+        </div>
+      `;
+      return;
+    }
+
+    const conf = Math.round(data.confidence || 0);
+    const domain = escapeHtml(data.domain || "general");
+    const domainUpper = domain.toUpperCase();
+    const triggers = (data.triggers || []).map(t => `<span class="badge" style="font-size:10px; background:#e6fffa; color:#0d9488; border:1px solid #99f6e4; padding:2px 6px; border-radius:4px; margin-right:4px;">${escapeHtml(t)}</span>`).join("");
+    const pio = data.pio || {};
+    const pioInfo = pio.name ? `<div style="margin-top:5px; font-size:11px; color:#475569; border-top:1px dashed #ccfbf1; padding-top:4px;"><strong>Target Public Authority / PIO:</strong> ${escapeHtml(pio.name)} (${escapeHtml(pio.department || pio.public_authority || "")}) &bull; <em>${escapeHtml(pio.designation || "Public Information Officer")}</em></div>` : "";
+
+    box.innerHTML = `
+      <div style="background:#f0fdfa; border:1px solid #5eead4; border-left:4px solid #0d9488; border-radius:6px; padding:10px 14px; font-size:12px; color:#134e4a; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-weight:700; font-size:13px; color:#0f766e;">
+            🤖 ML Classified Domain: <span style="background:#0d9488; color:#fff; padding:2px 8px; border-radius:12px; font-size:11px;">${domainUpper}</span>
+          </span>
+          <span style="font-weight:700; color:#0d9488; font-size:12px;">Confidence: ${conf}%</span>
+        </div>
+        <div style="color:#334155; font-size:11px; margin-bottom:4px;">${escapeHtml(data.reason || "")}</div>
+        ${triggers ? `<div style="margin-top:4px; display:flex; align-items:center; flex-wrap:wrap; gap:4px;"><span style="font-size:10px; color:#64748b; font-weight:600;">Trigger Keywords:</span> ${triggers}</div>` : ""}
+        ${pioInfo}
+      </div>
+    `;
+  } catch (err) {
+    box.innerHTML = `
+      <div style="background:#fef2f2; border:1px solid #fee2e2; border-left:4px solid #ef4444; border-radius:6px; padding:8px 12px; font-size:12px; color:#991b1b;">
+        ❌ Connection error connecting to ML service: ${escapeHtml(err.message)}
+      </div>
+    `;
+  }
 }
 
 // Queue Listing & Global Multi-Field Search
@@ -2682,6 +2808,7 @@ window.submitCaseUpdateFromDetail = submitCaseUpdateFromDetail;
 window.submitCaseMergeFromDetail = submitCaseMergeFromDetail;
 window.refreshActiveCaseDetailTimeline = refreshActiveCaseDetailTimeline;
 window.populateMergeDuplicateSelect = populateMergeDuplicateSelect;
+window.triggerLiveMlPrediction = triggerLiveMlPrediction;
 
 
 

@@ -543,15 +543,22 @@
                   </div>
 
                   <div style="margin-bottom: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
                       <label class="form-label" style="margin-bottom: 0;">Statement of Facts & Grievance Narrative *</label>
-                      <button type="button" id="btnVoiceDictate" class="btn-voice-dictate" onclick="toggleVoiceDictation()" title="Click to speak (Hindi / English)">
-                        <i data-lucide="mic" style="width: 12px; height: 12px;"></i>
-                        <span id="voiceStatusText">Voice Dictation</span>
-                      </button>
+                      <div style="display: flex; gap: 6px; align-items: center;">
+                        <button type="button" id="btnLiveMlPredict" class="btn-voice-dictate" onclick="triggerLiveMlPrediction()" title="Instant ML classification of civic domain, confidence, and authority" style="border-color: var(--gov-navy); color: var(--gov-navy);">
+                          <i data-lucide="sparkles" style="width: 12px; height: 12px;"></i>
+                          <span id="mlPredictBtnText">⚡ Predict Domain via ML</span>
+                        </button>
+                        <button type="button" id="btnVoiceDictate" class="btn-voice-dictate" onclick="toggleVoiceDictation()" title="Click to speak (Hindi / English)">
+                          <i data-lucide="mic" style="width: 12px; height: 12px;"></i>
+                          <span id="voiceStatusText">Voice Dictation</span>
+                        </button>
+                      </div>
                     </div>
                     <textarea id="rawGrievance" rows="3" placeholder="Enter or dictate factual details regarding public record request, administrative delay, or refusal..." required></textarea>
                     <div id="voiceLiveTranscript" class="voice-live-transcript"></div>
+                    <div id="liveMlPredictionBox" style="display: none; margin-top: 6px; padding: 8px 10px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 2px; font-size: 11px;"></div>
                   </div>
 
                   <button type="submit" class="btn-gov-primary" style="width: 100%;">
@@ -564,7 +571,7 @@
                 <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle);">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                     <span style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">All-India Civic Presets (1-Click):</span>
-                    <span style="font-size: 9.5px; color: var(--gov-navy); font-weight: 600;">28 States & 8 UTs Supported</span>
+                    <span style="font-size: 9.5px; color: var(--gov-navy); font-weight: 600;">11 Civic Domains Supported</span>
                   </div>
                   <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                     <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(1)">🌾 PDS Ration: Delhi (110054)</button>
@@ -575,6 +582,11 @@
                     <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(6)">🌾 Bihar Land Mutation: Patna (800001)</button>
                     <button type="button" class="btn-gov-outline preset-pill urgent-preset" onclick="loadPreset(7)">🚨 48h ICU Emergency: AIIMS (110029)</button>
                     <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(8)">👮 Police FIR Inaction (211001)</button>
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(9)">⚡ Power Outage: Delhi (110019)</button>
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(10)">💧 Water Contamination: Varanasi (221010)</button>
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(11)">🚗 RTO License Renewal: Delhi (110013)</button>
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(12)">💼 EPFO Pension Delay: Delhi (110052)</button>
+                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(13)">🏭 Chemical Pollution: Delhi (110032)</button>
                   </div>
                 </div>
               </div>
@@ -942,9 +954,16 @@
                   <label class="form-label">Statutory Domain / Practice Area *</label>
                   <select id="customActDomain">
                     <option value="Revenue & Land Records">Revenue & Land Records</option>
-                    <option value="Consumer Protection & Services">Consumer Protection & Services</option>
+                    <option value="Food, Civil Supplies & Consumer Affairs">Food, Civil Supplies & Consumer Affairs</option>
+                    <option value="Municipal Public Works & Sanitation">Municipal Public Works & Sanitation</option>
+                    <option value="Water Supply & Jal Board">Water Supply & Jal Board</option>
+                    <option value="Electricity & Power Discom">Electricity & Power Discom</option>
                     <option value="Police, Criminal Justice & BNSS">Police, Criminal Justice & BNSS</option>
-                    <option value="Municipal, Urban & Civic Works">Municipal, Urban & Civic Works</option>
+                    <option value="Health & Family Welfare">Health & Family Welfare</option>
+                    <option value="Higher Education & Student Welfare">Higher Education & Student Welfare</option>
+                    <option value="Transport, Highways & Motor Vehicles / RTO">Transport, Highways & Motor Vehicles / RTO</option>
+                    <option value="Labour, Employment, Pension & Social Security">Labour, Employment, Pension & Social Security</option>
+                    <option value="Environment & Pollution Control">Environment & Pollution Control</option>
                   </select>
                 </div>
                 <div>
@@ -1543,9 +1562,16 @@
           <label class="form-label">Target Public Authority</label>
           <select id="transferDeptSelect">
             <option value="Revenue & Land Records">Revenue & Land Records (Tehsildar)</option>
-            <option value="Food & Civil Supplies">Food & Civil Supplies (DSO)</option>
+            <option value="Food & Civil Supplies">Food & Civil Supplies (DSO / PDS)</option>
             <option value="Municipal Public Works & Drainage">Municipal Public Works (Executive Engineer)</option>
+            <option value="Water Supply & Jal Board">Water Supply & Jal Board (Chief Engineer / Jal Sansthan)</option>
+            <option value="Electricity & Power Discom">Electricity & Power Discom (Superintending Engineer)</option>
             <option value="Police & Law Enforcement">Police & Law Enforcement (DCP / RTI Cell)</option>
+            <option value="Health & Family Welfare">Health & Family Welfare (Chief Medical Officer)</option>
+            <option value="Higher Education & Student Welfare">Higher Education (Deputy Registrar / Nodal PIO)</option>
+            <option value="Transport, Highways & Motor Vehicles / RTO">Transport & Motor Vehicles (RTO Officer)</option>
+            <option value="Labour, Employment, Pension & Social Security">Pension & Labour (Assistant PF Commissioner)</option>
+            <option value="Environment & Pollution Control">Environment & Pollution (Senior Environmental Engineer)</option>
           </select>
         </div>
 

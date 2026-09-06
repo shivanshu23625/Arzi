@@ -1,4 +1,5 @@
 import hashlib
+import re
 from datetime import datetime
 from flask import Blueprint, request, jsonify, make_response
 from flask_backend.models.store import db_store
@@ -512,6 +513,72 @@ def merge_duplicate_cases():
         "master_case": master,
         "duplicate_case": duplicate
     }), 200
+
+@cases_bp.route("/classify-domain", methods=["POST"])
+def classify_domain_endpoint():
+    """
+    Interactive Real-Time Machine Learning Domain Classifier.
+    Predicts the authentic Indian public administration domain (from 11 sectors)
+    along with confidence score, matched trigger keywords, and designated nodal PIO.
+    """
+    data = request.get_json() or {}
+    text = (data.get("text") or data.get("raw_grievance") or "").strip()
+    locality = data.get("locality", "Local Division")
+
+    if not text:
+        return jsonify({"error": "Bad Request", "message": "text or raw_grievance is required"}), 400
+
+    from flask_backend.services.domain_classifier import domain_classifier
+    result = domain_classifier.classify_grievance(text, locality)
+
+    # Find matching PIO authority in directory using lexical overlap
+    matched_pio = None
+    pred_lower = result["domain"].lower()
+    pred_words = set(re.findall(r"\w+", pred_lower)) - {"and", "the", "of", "in", "for"}
+    best_pio = None
+    best_score = 0
+
+    for p in db_store.pio_directory:
+        dept = p.get("department", "").lower()
+        if dept == pred_lower:
+            matched_pio = p
+            break
+        dept_words = set(re.findall(r"\w+", dept)) - {"and", "the", "of", "in", "for"}
+        overlap = len(pred_words.intersection(dept_words))
+        if overlap > best_score:
+            best_score = overlap
+            best_pio = p
+
+    if not matched_pio and best_pio and best_score > 0:
+        matched_pio = best_pio
+    if not matched_pio and db_store.pio_directory:
+        matched_pio = db_store.pio_directory[0]
+
+    # Build clean PIO payload
+    pio_payload = None
+    if matched_pio:
+        pio_payload = {
+            "name": matched_pio.get("pio_name") or matched_pio.get("name", "Public Information Officer"),
+            "pio_name": matched_pio.get("pio_name") or matched_pio.get("name", "Public Information Officer"),
+            "department": matched_pio.get("department", result["domain"]),
+            "designation": matched_pio.get("designation", "Designated Public Information Officer"),
+            "office_address": matched_pio.get("office_address", "District Administrative Complex"),
+            "email": matched_pio.get("email", "pio.office@gov.in"),
+            "phone": matched_pio.get("phone", "+91-11-23381000")
+        }
+
+    return jsonify({
+        "status": "success",
+        "domain": result["domain"],
+        "confidence": result["confidence"],
+        "reason": result["reason"],
+        "triggers": result.get("matched_keywords") or result.get("trigger_keywords", []),
+        "trigger_keywords": result.get("matched_keywords") or result.get("trigger_keywords", []),
+        "matched_keywords": result.get("matched_keywords", []),
+        "pio": pio_payload,
+        "assigned_pio": pio_payload
+    }), 200
+
 
 @cases_bp.route("/<case_id>/override", methods=["POST"])
 def override_pio(case_id):
