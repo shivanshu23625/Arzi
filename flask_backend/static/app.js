@@ -944,13 +944,21 @@ async function loadCaseQueue() {
       const ipcBrief = legal.ipc_sections ? legal.ipc_sections[0] : "IPC Sec 420";
       const bnsBrief = legal.bns_sections ? legal.bns_sections[0] : "BNS Sec 318(4)";
       const distLabel = pio.distance_label || (c.geospatial_meta ? c.geospatial_meta.distance_label : "1.5 km away");
+      const statusMap = {
+        "APPROVED": "APPROVED • स्वीकृत",
+        "TRANSFERRED_SEC_6_3": "TRANSFERRED • अंतरित",
+        "NEEDS_REVIEW": "UNDER REVIEW • समीक्षाधीन",
+        "UNDER_REVIEW": "UNDER REVIEW • समीक्षाधीन",
+        "REJECTED": "REJECTED • अस्वीकृत"
+      };
+      const displayStatus = statusMap[c.status] || c.status;
       tr.innerHTML = `
         <td><b style="font-family: var(--font-mono); color: var(--gov-navy); font-size: 11.5px;">${c.case_id}</b></td>
         <td><b>${c.complainant.name}</b><br/><span style="font-size: 10px; color: var(--ink-muted);">${c.complainant.address || 'Local'}${c.pincode ? ' (' + c.pincode + ')' : ''}</span></td>
         <td><b>${c.department}</b><br/><span style="font-size: 10px; color: var(--gov-copper);">${legal.statutory_infraction || 'Administrative Infraction'}</span></td>
         <td><span class="statutory-tag bns" style="font-size: 9.5px; padding: 1px 4px;">${bnsBrief}</span><br/><span class="statutory-tag ipc" style="font-size: 9.5px; padding: 1px 4px; margin-top: 2px;">${ipcBrief}</span></td>
         <td><b>${pio.pio_name || 'Designated PIO'}</b><br/><span style="font-size: 9.5px; color: var(--status-active); font-family: var(--font-mono);">${distLabel}</span></td>
-        <td><span class="status-pill ${c.status === 'APPROVED' ? 'approved' : (c.status === 'TRANSFERRED_SEC_6_3' ? 'transferred' : 'under-review')}">● ${c.status}</span></td>
+        <td><span class="status-pill ${c.status === 'APPROVED' ? 'approved' : (c.status === 'TRANSFERRED_SEC_6_3' ? 'transferred' : 'under-review')}">● ${displayStatus}</span></td>
         <td><button class="btn-gov-outline btn-view-docket" style="padding: 3px 8px; font-size: 10.5px;" onclick="event.stopPropagation(); openCaseById('${c.case_id}')">${t("btn_view")}</button></td>
       `;
       tbody.appendChild(tr);
@@ -990,9 +998,17 @@ function populateWorkspaceFields(c) {
 
   document.getElementById("viewCaseId").textContent = c.case_id;
 
+  const statusMap = {
+    "APPROVED": "APPROVED • स्वीकृत",
+    "TRANSFERRED_SEC_6_3": "TRANSFERRED • अंतरित",
+    "NEEDS_REVIEW": "UNDER REVIEW • समीक्षाधीन",
+    "UNDER_REVIEW": "UNDER REVIEW • समीक्षाधीन",
+    "REJECTED": "REJECTED • अस्वीकृत"
+  };
+
   const statusEl = document.getElementById("viewCaseStatus");
   if (statusEl) {
-    statusEl.textContent = `● ${c.status}`;
+    statusEl.textContent = `● ${statusMap[c.status] || c.status}`;
     statusEl.className = `status-pill ${c.status === 'APPROVED' ? 'approved' : (c.status === 'TRANSFERRED_SEC_6_3' ? 'transferred' : 'under-review')}`;
   }
 
@@ -1036,10 +1052,10 @@ function populateWorkspaceFields(c) {
   }
 
   const legal = c.statutory_legal_analysis || {};
-  document.getElementById("viewMeritBadge").textContent = `${legal.case_merit_score || 92}/100 Merit (${legal.win_probability || 'High'})`;
+  document.getElementById("viewMeritBadge").textContent = `${legal.case_merit_score || 92}/100 Merit • योग्यता (${legal.win_probability || 'High'} • उच्च)`;
 
   const pen = legal.section_20_penalty_liability_inr || 0;
-  document.getElementById("viewPenaltyBadge").textContent = `Section 20(1) Penalty Liability: ₹${pen} (Mandatory ₹250/day deduction applicable on delinquent PIO)`;
+  document.getElementById("viewPenaltyBadge").textContent = `Section 20(1) Penalty Liability: ₹${pen} (Mandatory ₹250/day deduction applicable on delinquent PIO) • धारा 20(1) जुर्माना: ₹${pen} (अधिकारी के वेतन से ₹250/दिन अनिवार्य कटौती)`;
 
   // 48-Hour Urgent Life & Liberty Status
   const isUrgent = !!(c.is_life_liberty || c.is_urgent_48h);
@@ -1052,15 +1068,15 @@ function populateWorkspaceFields(c) {
   if (isUrgent) {
     if (urgencyBadge) urgencyBadge.style.display = "inline-block";
     if (urgencyBtn) urgencyBtn.classList.add("active");
-    if (urgencyLabel) urgencyLabel.textContent = "Fast-Track Active (48-Hr SLA)";
-    if (slaEl) slaEl.textContent = "🚨 48 Hours (URGENT LIFE & LIBERTY)";
-    if (dueDateEl) dueDateEl.textContent = `Statutory Deadline: ${c.statutory_deadline_date || c.calculated_due_date || "Within 48 Hours"} (Sec 7(1) Proviso)`;
+    if (urgencyLabel) urgencyLabel.textContent = "Fast-Track Active (48-Hr SLA) • 48 घंटे आपातकालीन";
+    if (slaEl) slaEl.textContent = "🚨 48 Hours (URGENT LIFE & LIBERTY) • 48 घंटे आपातकाल";
+    if (dueDateEl) dueDateEl.textContent = `Statutory Deadline: ${c.statutory_deadline_date || c.calculated_due_date || "Within 48 Hours"} • अंतिम तिथि (48 घंटे)`;
   } else {
     if (urgencyBadge) urgencyBadge.style.display = "none";
     if (urgencyBtn) urgencyBtn.classList.remove("active");
-    if (urgencyLabel) urgencyLabel.textContent = "Fast-Track (48-Hr Life & Liberty)";
-    if (slaEl) slaEl.textContent = `${c.sla_days_remaining || 30} Days Remaining`;
-    if (dueDateEl) dueDateEl.textContent = `Statutory Deadline: ${c.statutory_deadline_date || c.calculated_due_date || "30 Days"}`;
+    if (urgencyLabel) urgencyLabel.textContent = "Fast-Track (48-Hr Life & Liberty) • 48 घंटे आपातकाल";
+    if (slaEl) slaEl.textContent = `${c.sla_days_remaining || 30} Days Remaining • दिन शेष`;
+    if (dueDateEl) dueDateEl.textContent = `Statutory Deadline: ${c.statutory_deadline_date || c.calculated_due_date || "30 Days"} • विधिक समयसीमा`;
   }
 
   document.getElementById("viewRefNo").textContent = c.application_ref_no || "Not Provided";
@@ -1138,17 +1154,17 @@ function populateWorkspaceFields(c) {
   if (c.dispatch_info) {
     proofBox.classList.remove("hidden");
     document.getElementById("proofDetails").innerHTML = `
-      <div>DISPATCH ID: <b>${c.dispatch_info.dispatch_id}</b></div>
-      <div>TRACKING ID: <b>${c.dispatch_info.tracking_id}</b></div>
-      <div>DISPATCHED AT: <b>${c.dispatch_info.dispatched_at}</b></div>
-      <div>RECIPIENT: <b>${c.dispatch_info.recipient_name} (${c.dispatch_info.recipient_email})</b></div>
+      <div>DISPATCH ID / प्रेषण संख्या: <b>${c.dispatch_info.dispatch_id}</b></div>
+      <div>TRACKING ID / ट्रैकिंग नंबर: <b>${c.dispatch_info.tracking_id}</b></div>
+      <div>DISPATCHED AT / प्रेषण तिथि: <b>${c.dispatch_info.dispatched_at}</b></div>
+      <div>RECIPIENT / प्राप्तकर्ता: <b>${c.dispatch_info.recipient_name} (${c.dispatch_info.recipient_email})</b></div>
     `;
     document.getElementById("approveBtn").disabled = true;
-    document.getElementById("approveBtn").textContent = "CASE DISPATCHED & SEALED ✓";
+    document.getElementById("approveBtn").textContent = "CASE DISPATCHED & SEALED ✓ • प्रेषण सम्पन्न एवं मुहरबंद";
   } else {
     proofBox.classList.add("hidden");
     document.getElementById("approveBtn").disabled = false;
-    document.getElementById("approveBtn").textContent = "⚖️ APPROVE & EXECUTE DISPATCH →";
+    document.getElementById("approveBtn").textContent = "⚖️ APPROVE & EXECUTE DISPATCH • विधिक प्रेषण स्वीकृत करें →";
   }
 
   updateRadarTelemetry(c);
@@ -1157,9 +1173,9 @@ function populateWorkspaceFields(c) {
 
 function updateWorkspacePersonaView(c) {
   if (activePersona === "gov_desk") {
-    document.getElementById("approveBtn").innerHTML = `<i data-lucide="check-check"></i> <span>Dispose / Approve on Gov Desk</span>`;
+    document.getElementById("approveBtn").innerHTML = `<i data-lucide="check-check"></i> <span>Dispose / Approve on Gov Desk • सरकारी डेस्क पर निस्तारण</span>`;
   } else {
-    document.getElementById("approveBtn").innerHTML = `<i data-lucide="send"></i> <span>Advocate Approve & Release Dispatch</span>`;
+    document.getElementById("approveBtn").innerHTML = `<i data-lucide="send"></i> <span>Approve & Execute Dispatch • विधिक प्रेषण स्वीकृत करें</span>`;
   }
   renderLucide();
 }
@@ -1570,25 +1586,32 @@ async function openCaseDetailView(caseId) {
     if (pinEl) pinEl.textContent = `PIN: ${caseData.pincode || caseData.complainant?.pincode || '—'}`;
 
     // Status & SLA
+    const statusMap = {
+      "APPROVED": "APPROVED • स्वीकृत",
+      "TRANSFERRED_SEC_6_3": "TRANSFERRED • अंतरित",
+      "NEEDS_REVIEW": "UNDER REVIEW • समीक्षाधीन",
+      "UNDER_REVIEW": "UNDER REVIEW • समीक्षाधीन",
+      "REJECTED": "REJECTED • अस्वीकृत"
+    };
     const statusPill = document.getElementById("detailDocketStatusPill");
     if (statusPill) {
-      statusPill.textContent = caseData.status;
+      statusPill.textContent = statusMap[caseData.status] || caseData.status;
       statusPill.className = `status-pill ${getStatusClass(caseData.status)}`;
     }
     const slaBadge = document.getElementById("detailDocketSlaBadge");
     const urgentBadge = document.getElementById("detailDocketUrgentBadge");
     const isUrgent = Boolean(caseData.is_life_liberty);
     if (urgentBadge) urgentBadge.style.display = isUrgent ? "inline-block" : "none";
-    if (slaBadge) slaBadge.textContent = isUrgent ? "48-Hour Urgent SLA" : "30-Day Standard SLA";
+    if (slaBadge) slaBadge.textContent = isUrgent ? "48-Hour Urgent SLA • 48 घंटे आपातकालीन समयसीमा" : "30-Day Standard SLA • 30-दिवसीय समयसीमा";
 
     const daysRemaining = caseData.sla_days_remaining !== undefined ? caseData.sla_days_remaining : 30;
     const slaCountdown = document.getElementById("detailDocketSlaCountdown");
     if (slaCountdown) {
-      slaCountdown.textContent = isUrgent ? "48 Hours" : `${daysRemaining} Days`;
+      slaCountdown.textContent = isUrgent ? "48 Hours • 48 घंटे" : `${daysRemaining} Days • दिन शेष`;
       slaCountdown.style.color = daysRemaining <= 5 ? "var(--status-risk)" : "var(--gov-navy)";
     }
     const dueDateEl = document.getElementById("detailDocketDueDate");
-    if (dueDateEl) dueDateEl.textContent = `Due: ${caseData.due_date || 'Within Statutory Period'}`;
+    if (dueDateEl) dueDateEl.textContent = `Due / अंतिम तिथि: ${caseData.due_date || 'Within Statutory Period • विधिक अवधि में'}`;
 
     // 2. Complainant & PIO Details
     const cName = document.getElementById("detailCompName");
@@ -1606,7 +1629,7 @@ async function openCaseDetailView(caseId) {
     const pioAddress = document.getElementById("detailPioAddress");
     if (pioAddress) pioAddress.textContent = pio.office_address || "Tehsil / District Collectorate Complex";
     const pioDist = document.getElementById("detailPioDistance");
-    if (pioDist) pioDist.textContent = pio.distance_label ? `📍 ${pio.distance_label}` : "📍 1.2 km away (Haversine jurisdiction)";
+    if (pioDist) pioDist.textContent = pio.distance_label ? `📍 ${pio.distance_label} • भू-स्थानिक निकटता` : "📍 1.2 km away • 1.2 किमी निकट";
 
     // 3. Grievance & Questions
     const grievanceText = document.getElementById("detailGrievanceText");
@@ -1625,7 +1648,7 @@ async function openCaseDetailView(caseId) {
     const mlConf = caseData.confidence?.overall || 95;
     const mlConfBadge = document.getElementById("detailMlConfidenceBadge");
     if (mlConfBadge) {
-      mlConfBadge.textContent = `${mlConf}% ML Confidence`;
+      mlConfBadge.textContent = `${mlConf}% ML Confidence • एआई सटीकता`;
       mlConfBadge.className = `status-pill ${mlConf >= 80 ? "approved" : "under-review"}`;
     }
     const domainTitle = document.getElementById("detailMlDomainTitle");

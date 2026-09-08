@@ -9,7 +9,7 @@
   <meta name="keywords" content="RTI Act 2005, Bharatiya Nyaya Sanhita, BNS 2023, IPC 1860, Section 20 Penalty, Public Authority, PIO Directory, Railway, Supabase" />
   
   <!-- Institutional Google Fonts: Source Serif 4 & Inter & JetBrains Mono -->
-  <link rel="stylesheet" href="/style.css?v=20260908.3" />
+  <link rel="stylesheet" href="/style.css?v=20260908.4" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,600&display=swap" rel="stylesheet">
@@ -650,7 +650,7 @@
                   <span>Citizen Grievance Ingestion • नागरिक शिकायत दर्ज करें</span>
                 </span>
                 <button class="btn-gov-outline" style="padding: 2px 8px; font-size: 10.5px;" onclick="toggleIntakeForm()">
-                  <span id="intakeToggleText" data-i18n="intake_toggle_btn">Toggle Form</span>
+                  <span id="intakeToggleText">Toggle Form • फॉर्म छिपाएं/दिखाएं</span>
                 </button>
               </div>
 
@@ -766,18 +766,18 @@
                   <i data-lucide="list" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
                   <span>Active Casework Dockets / सक्रिय मामले</span> (<span id="inboxCount">0</span>)
                 </span>
-                <select id="queueFilter" onchange="loadCaseQueue()" style="width: 130px; font-size: 10.5px; padding: 2px 5px;">
-                  <option value="">All Statuses</option>
-                  <option value="NEEDS_REVIEW">Under Review</option>
-                  <option value="APPROVED">Dispatched</option>
-                  <option value="TRANSFERRED_SEC_6_3">Sec 6(3) Transferred</option>
+                <select id="queueFilter" onchange="loadCaseQueue()" style="width: 155px; font-size: 10.5px; padding: 2px 5px;">
+                  <option value="">All Statuses / सभी स्थितियां</option>
+                  <option value="NEEDS_REVIEW">Under Review / समीक्षाधीन</option>
+                  <option value="APPROVED">Dispatched / प्रेषित</option>
+                  <option value="TRANSFERRED_SEC_6_3">Sec 6(3) Transferred / अंतरित</option>
                 </select>
               </div>
 
               <!-- Search Bar -->
               <div class="queue-filter-bar">
                 <input type="text" id="caseSearchInput" placeholder="Search Case ID, Citizen, Varanasi, Section..." data-i18n-placeholder="queue_search_ph" onkeydown="if(event.key==='Enter') loadCaseQueue()" style="font-size: 11.5px; padding: 4px 7px;" />
-                <button class="btn-gov-outline" style="padding: 4px 8px; font-size: 10.5px;" onclick="loadCaseQueue()" data-i18n="queue_filter_btn">Filter</button>
+                <button class="btn-gov-outline" style="padding: 4px 8px; font-size: 10.5px;" onclick="loadCaseQueue()">Filter • खोजें</button>
               </div>
 
               <!-- Table -->
@@ -805,7 +805,7 @@
             <!-- Empty State -->
             <div id="noCaseSelected" class="ops-panel" style="text-align: center; padding: 44px 20px;">
               <i data-lucide="file-search" style="width: 36px; height: 36px; color: var(--gov-navy); margin-bottom: 10px;"></i>
-              <h3 style="font-family: var(--font-serif); font-size: 17px; color: var(--ink-primary); margin-bottom: 6px;" data-i18n="no_case_title">No Active Case Docket Selected</h3>
+              <h3 style="font-family: var(--font-serif); font-size: 17px; color: var(--ink-primary); margin-bottom: 6px;">No Active Case Docket Selected • कोई केस चयनित नहीं है</h3>
               <p style="font-size: 12px; color: var(--ink-muted); max-width: 420px; margin: 0 auto;">
                 <span data-i18n="no_case_desc">Select a case file from the left queue, or ingest a citizen brief to open the legal evidence dossier.</span>
               </p>
@@ -952,43 +952,43 @@
                     <div style="padding: 10px; background: var(--bg-surface);">
                       <div id="docPanelRti">
                         <div style="margin-bottom: 6px;">
-                          <label class="form-label" style="font-size: 10px;">Subject Matter (Section 6(1))</label>
+                          <label class="form-label" style="font-size: 10px;">Subject Matter (Section 6(1)) • आवेदन का विषय (धारा 6(1))</label>
                           <input type="text" id="editDraftSubject" />
                         </div>
                         <div style="margin-bottom: 6px;">
-                          <label class="form-label" style="font-size: 10px;">Information Sought under Section 2(f)</label>
+                          <label class="form-label" style="font-size: 10px;">Information Sought under Section 2(f) • मांगी गई सूचना (धारा 2(f))</label>
                           <textarea id="editDraftQuestions" rows="4"></textarea>
                         </div>
                         <div>
-                          <label class="form-label" style="font-size: 10px;">Fee Particulars (Central RTI Rules 2012)</label>
+                          <label class="form-label" style="font-size: 10px;">Fee Particulars (Central RTI Rules 2012) • आवेदन शुल्क विवरण</label>
                           <input type="text" id="editDraftFees" />
                         </div>
                       </div>
 
                       <div id="docPanelAppeal" class="hidden">
                         <div style="margin-bottom: 6px;">
-                          <label class="form-label" style="font-size: 10px;">Memorandum of First Appeal (Section 19(1))</label>
+                          <label class="form-label" style="font-size: 10px;">Memorandum of First Appeal (Section 19(1)) • प्रथम अपील का विषय (धारा 19(1))</label>
                           <input type="text" id="viewAppealSubject" readonly />
                         </div>
                         <div style="margin-bottom: 6px;">
-                          <label class="form-label" style="font-size: 10px;">Statutory Grounds (Deemed Refusal Sec 7(2))</label>
+                          <label class="form-label" style="font-size: 10px;">Statutory Grounds (Deemed Refusal Sec 7(2)) • कानूनी आधार (धारा 7(2))</label>
                           <textarea id="viewAppealGrounds" rows="4" readonly></textarea>
                         </div>
                         <div>
-                          <label class="form-label" style="font-size: 10px;">Prayers Sought Before FAA</label>
+                          <label class="form-label" style="font-size: 10px;">Prayers Sought Before FAA • प्रथम अपीलीय अधिकारी से याचना</label>
                           <textarea id="viewAppealPrayers" rows="2" readonly></textarea>
                         </div>
                       </div>
 
                       <div id="docPanelNotice" class="hidden">
-                        <label class="form-label" style="font-size: 10px;">Statutory Legal Notice (Section 80 CPC)</label>
+                        <label class="form-label" style="font-size: 10px;">Statutory Legal Notice (Section 80 CPC) • धारा 80 सीपीसी विधिक नोटिस</label>
                         <textarea id="viewLegalNoticeText" rows="8" style="font-family: var(--font-mono); font-size: 10.5px;" readonly></textarea>
                       </div>
 
                       <div id="docPanelSection8" class="hidden">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                          <label class="form-label" style="font-size: 10px; margin-bottom: 0;">Pre-emptive Section 8 Exemption Neutralizer & Public Interest Shield</label>
-                          <button class="btn-gov-outline" style="font-size: 10px; padding: 2px 6px;" onclick="refreshSection8Shield()">Audit Shield</button>
+                          <label class="form-label" style="font-size: 10px; margin-bottom: 0;">Section 8 Exemption Neutralizer & Public Interest Shield • धारा 8 छूट निवारण एवं जनहित शील्ड</label>
+                          <button class="btn-gov-outline" style="font-size: 10px; padding: 2px 6px;" onclick="refreshSection8Shield()">Audit Shield • शील्ड जांचें</button>
                         </div>
                         <div id="section8ShieldBody" style="font-size: 11px;">
                           <!-- Populated dynamically -->
@@ -997,8 +997,8 @@
 
                       <div id="docPanelSlip" class="hidden">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                          <label class="form-label" style="font-size: 10px; margin-bottom: 0;">Speed Post Registered Dispatch Docket & Barcode</label>
-                          <button class="btn-gov-outline" style="font-size: 10px; padding: 2px 6px;" onclick="downloadSlipPdf()">Print / Export Slip PDF</button>
+                          <label class="form-label" style="font-size: 10px; margin-bottom: 0;">Speed Post Registered Dispatch Docket & Barcode • स्पीड पोस्ट प्रेषण रसीद एवं बारकोड</label>
+                          <button class="btn-gov-outline" style="font-size: 10px; padding: 2px 6px;" onclick="downloadSlipPdf()">Print / Export Slip PDF • रसीद प्रिंट करें</button>
                         </div>
                         <div id="tabPostalSlipContainer">
                           <!-- Populated dynamically -->
@@ -1006,7 +1006,7 @@
                       </div>
 
                       <div id="docPanelReport" class="hidden">
-                        <label class="form-label" style="font-size: 10px;">Full Assessment Report</label>
+                        <label class="form-label" style="font-size: 10px;">Full Assessment Report • संपूर्ण विधिक मूल्यांकन रिपोर्ट</label>
                         <textarea id="viewMlReportFormat" rows="8" style="font-family: var(--font-mono); font-size: 10.5px; background: var(--bg-subtle);" readonly></textarea>
                       </div>
                     </div>
@@ -1016,15 +1016,15 @@
                   <div style="margin-top: 10px; padding: 10px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: 2px;">
                     <div class="form-row-2col" style="gap: 8px; margin-bottom: 8px;">
                       <div>
-                        <label class="form-label" style="font-size: 10px;">Reviewer / Desk Officer *</label>
+                        <label class="form-label" style="font-size: 10px;">Reviewer / Desk Officer • समीक्षक / अधिकारी *</label>
                         <input type="text" id="reviewerName" value="Adv. S. Kalra (Bar Council / Legal Counsel)" />
                       </div>
                       <div>
-                        <label class="form-label" style="font-size: 10px;">Action Protocol</label>
+                        <label class="form-label" style="font-size: 10px;">Action Protocol • कार्रवाई का प्रकार</label>
                         <select id="reviewActionSelect">
-                          <option value="APPROVED_DISPATCH">Approve & Release Registered Dispatch</option>
-                          <option value="ISSUE_APPEAL">File Section 19(1) First Appeal</option>
-                          <option value="SERVE_NOTICE">Serve Section 80 CPC Legal Notice</option>
+                          <option value="APPROVED_DISPATCH">Approve & Release Registered Dispatch • स्वीकृत करें एवं डाक प्रेषण जारी करें</option>
+                          <option value="ISSUE_APPEAL">File Section 19(1) First Appeal • धारा 19(1) प्रथम अपील दायर करें</option>
+                          <option value="SERVE_NOTICE">Serve Section 80 CPC Legal Notice • धारा 80 सीपीसी विधिक नोटिस भेजें</option>
                         </select>
                       </div>
                     </div>
@@ -1032,27 +1032,27 @@
                     <div style="display: flex; gap: 6px; margin-bottom: 6px;">
                       <button class="btn-gov-primary" id="approveBtn" style="flex: 1;" onclick="approveCurrentCase()">
                         <i data-lucide="check-circle" style="width: 13px; height: 13px;"></i>
-                        <span>Approve & Issue Registered Dispatch</span>
+                        <span>Approve & Issue Registered Dispatch • विधिक प्रेषण स्वीकृत करें</span>
                       </button>
                     </div>
 
                     <div style="display: flex; gap: 4px;">
                       <button class="btn-gov-outline" style="flex: 1; font-size: 10.5px;" onclick="viewPdf('rti')">
                         <i data-lucide="download" style="width: 11px; height: 11px;"></i>
-                        <span>RTI Form-A PDF</span>
+                        <span>RTI Form-A PDF • फॉर्म-A डाउनलोड</span>
                       </button>
                       <button class="btn-gov-outline" style="flex: 1; font-size: 10.5px;" onclick="viewPdf('appeal')">
                         <i data-lucide="download" style="width: 11px; height: 11px;"></i>
-                        <span>1st Appeal PDF</span>
+                        <span>1st Appeal PDF • अपील पीडीएफ</span>
                       </button>
                       <button class="btn-gov-outline" style="flex: 1; font-size: 10.5px;" onclick="viewPdf('notice')">
                         <i data-lucide="download" style="width: 11px; height: 11px;"></i>
-                        <span>Notice PDF</span>
+                        <span>Notice PDF • नोटिस पीडीएफ</span>
                       </button>
                     </div>
 
                     <div id="dispatchProofBox" class="hidden" style="margin-top: 8px; padding: 8px; background: #ECFDF5; border: 1px solid #A7F3D0; font-size: 10.5px;">
-                      <div style="font-weight: 700; color: var(--status-active); margin-bottom: 2px;">DIGITAL DISPATCH SEAL RECORDED</div>
+                      <div style="font-weight: 700; color: var(--status-active); margin-bottom: 2px;">DIGITAL DISPATCH SEAL RECORDED • डिजिटल प्रेषण मुहर दर्ज</div>
                       <div id="proofDetails" style="font-family: var(--font-mono); color: var(--status-active);"></div>
                     </div>
                   </div>
@@ -1060,7 +1060,7 @@
 
                 <!-- 6. Activity & Audit Timeline -->
                 <div>
-                  <label class="form-label">Activity & Audit Timeline</label>
+                  <label class="form-label">Activity & Audit Timeline • गतिविधि एवं ऑडिट समय-रेखा</label>
                   <div class="audit-timeline">
                     <div class="audit-timeline-entry">
                       <span class="audit-time">10:00 &middot; SYSTEM</span>
@@ -1479,14 +1479,14 @@
             <!-- Quick Filter Pill Suggestions -->
             <div style="display: flex; gap: 6px; margin-top: 10px; align-items: center; flex-wrap: wrap;">
               <span style="font-size: 10.5px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Quick Search • त्वरित खोज:</span>
-              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Shivanshu')">Shivanshu</button>
-              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Sunita')">Sunita Devi</button>
-              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Varanasi')">Varanasi</button>
-              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Mehrauli')">Mehrauli</button>
-              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Civil Lines')">Civil Lines</button>
-              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Sharma')">Shri R. K. Sharma</button>
-              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Land Mutation')">Land Mutation</button>
-              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('ARZ-1046')">ARZ-1046</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Shivanshu')">Shivanshu • शिवंशु</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Sunita')">Sunita Devi • सुनीता देवी</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Varanasi')">Varanasi • वाराणसी</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Mehrauli')">Mehrauli • महरौली</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Civil Lines')">Civil Lines • सिविल लाइंस</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Sharma')">Shri R. K. Sharma • आर. के. शर्मा</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Land Mutation')">Land Mutation • जमीन नामांतरण</button>
+              <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('ARZ-1046')">ARZ-1046 • केस 1046</button>
             </div>
           </div>
         </div>
@@ -1909,6 +1909,6 @@
     </footer>
   </div>
 
-  <script src="/app.js?v=20260908.3"></script>
+  <script src="/app.js?v=20260908.4"></script>
 </body>
 </html>

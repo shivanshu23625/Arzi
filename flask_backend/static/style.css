@@ -688,7 +688,7 @@ body {
 
 .desk-split-layout {
   display: grid;
-  grid-template-columns: 450px 1fr;
+  grid-template-columns: minmax(320px, 440px) minmax(0, 1fr);
   gap: 16px;
   align-items: start;
 }
