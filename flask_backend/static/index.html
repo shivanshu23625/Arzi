@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>ARZI — Civic RTI & Statutory Legal Intelligence Desk</title>
+  <title>ARZI / अर्जी — Civic RTI & Statutory Legal Intelligence Desk</title>
   <meta name="description" content="An institutional legal operations desk for citizen RTI grievances, IPC to BNS 2023 statutory cross-referencing, public authority discovery and Section 20 compliance tracking." />
   <meta name="keywords" content="RTI Act 2005, Bharatiya Nyaya Sanhita, BNS 2023, IPC 1860, Section 20 Penalty, Public Authority, PIO Directory, Railway, Supabase" />
   
   <!-- Institutional Google Fonts: Source Serif 4 & Inter & JetBrains Mono -->
-  <link rel="stylesheet" href="/style.css?v=20260907.1" />
+  <link rel="stylesheet" href="/style.css?v=20260908.3" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,600&display=swap" rel="stylesheet">
@@ -52,8 +52,8 @@
           </svg>
         </div>
         <div class="brand-titles">
-          <span class="title-main">ARZI</span>
-          <span class="title-sub">Civic Legal Intelligence Desk</span>
+          <span class="title-main">ARZI / अर्जी</span>
+          <span class="title-sub">Civic Legal Intelligence Desk • नागरिक विधिक सहायता डेस्क</span>
         </div>
       </div>
 
@@ -61,15 +61,15 @@
       <nav class="header-nav">
         <button class="nav-link-btn active" id="siteNavHome" onclick="showPage('home')">
           <i data-lucide="home" style="width: 13px; height: 13px;"></i>
-          <span>Home Overview</span>
+          <span>Home / मुख्य पृष्ठ</span>
         </button>
         <button class="nav-link-btn" id="siteNavAbout" onclick="showPage('about')">
           <i data-lucide="book-open" style="width: 13px; height: 13px;"></i>
-          <span>About & Mission</span>
+          <span>About / परिचय</span>
         </button>
         <button class="nav-link-btn" id="siteNavPillars" onclick="showPage('pillars')">
           <i data-lucide="scale" style="width: 13px; height: 13px;"></i>
-          <span>Statutory Pillars</span>
+          <span>Pillars / कानूनी नियम</span>
         </button>
       </nav>
 
@@ -77,13 +77,15 @@
       <div class="header-right-actions">
         <button class="nav-dashboard-btn" id="navDashboardBtn" onclick="showPage('dashboard')">
           <i data-lucide="layout-dashboard" style="width: 14px; height: 14px;"></i>
-          <span>Operations Dashboard</span>
+          <span>Dashboard / डैशबोर्ड</span>
           <i data-lucide="arrow-right" style="width: 13px; height: 13px;"></i>
         </button>
 
-        <div class="persona-toggle-group">
-          <button class="persona-toggle-btn active" id="btnPersonaLaw" onclick="switchPersona('law_firm')">Counsel</button>
-          <button class="persona-toggle-btn" id="btnPersonaGov" onclick="switchPersona('gov_desk')">Gov Desk</button>
+        <!-- Language Switcher: Bilingual | EN | हिंदी -->
+        <div class="lang-switch-group" role="group" aria-label="Language Selection">
+          <button type="button" class="lang-btn active" id="langBi" onclick="setLanguage('bi')">दोनों (Bilingual)</button>
+          <button type="button" class="lang-btn" id="langEn" onclick="setLanguage('en')">EN</button>
+          <button type="button" class="lang-btn" id="langHi" onclick="setLanguage('hi')">हिंदी</button>
         </div>
 
         <!-- Executive Theme Switcher (Dark / Light) -->
@@ -93,7 +95,7 @@
 
         <div class="system-status-indicator">
           <span class="status-dot"></span>
-          <span id="repoStatusText">Operational</span>
+          <span id="repoStatusText">Operational / सक्रिय</span>
         </div>
       </div>
     </header>
@@ -111,44 +113,26 @@
       <div class="editorial-hero">
         <div class="hero-tagline">
           <i data-lucide="sparkles" style="width: 12px; height: 12px;"></i>
-          <span>AUTONOMOUS CIVIC RTI & STATUTORY LEGAL INTELLIGENCE</span>
+          <span>AUTONOMOUS CIVIC RTI DESK • स्वचालित नागरिक आरटीआई एवं विधिक सहायता</span>
         </div>
-        <h1>Democratizing Indian Public Law with <br/><span style="color: var(--gov-navy);">Autonomous Statutory Intelligence</span></h1>
-        <p class="hero-lead-text">
-          ARZI is an autonomous civic operations desk that transforms citizen grievances into legally enforceable RTI applications, First Appeals, and Section 80 CPC notices—cross-referencing IPC 1860 with Bharatiya Nyaya Sanhita (BNS 2023), identifying designated Public Information Officers via geodesy, and enforcing statutory compliance deadlines.
-        </p>
+        <h1>Democratizing Indian Public Law • जन-कानून का सरलीकरण<br/><span style="color: var(--gov-navy);">Autonomous Statutory Intelligence • सटीक विधिक प्रणाली</span></h1>
+        <p class="hero-lead-text"><b>Transform citizen grievances into enforceable RTI applications & First Appeals.</b> Automatically map IPC 1860 to Bharatiya Nyaya Sanhita (BNS 2023), discover your designated Public Information Officer, and enforce statutory deadlines.<br/><span style="color: var(--ink-secondary); font-size: 13px; display: inline-block; margin-top: 4px;">अपनी नागरिक समस्याओं को कानूनी रूप से मान्य आरटीआई व प्रथम अपील में बदलें। बीएनएस 2023 की धाराएं जांचें, संबंधित जन सूचना अधिकारी (PIO) खोजें और 30 दिन में समाधान पाएं।</span></p>
 
         <div class="hero-action-row">
-          <button class="hero-launch-btn" onclick="showPage('dashboard')">
-            <i data-lucide="layout-dashboard" style="width: 15px; height: 15px;"></i>
-            <span>Launch Live Operations Desk</span>
+          <button class="hero-launch-btn" onclick="showPage('dashboard'); switchDashTab('casework');">
+            <i data-lucide="file-plus" style="width: 15px; height: 15px;"></i>
+            <span>File RTI / शिकायत दर्ज करें</span>
             <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
           </button>
           
-          <button class="btn-gov-outline" style="padding: 9px 16px; font-size: 12px;" onclick="showPage('dashboard'); switchDashTab('runlog');">
-            <i data-lucide="scroll-text" style="width: 13px; height: 13px;"></i>
-            <span>Audit Run Log</span>
+          <button class="btn-gov-outline" style="padding: 10px 18px; font-size: 13px;" onclick="showPage('pillars');">
+            <i data-lucide="scale" style="width: 14px; height: 14px;"></i>
+            <span>Statutory Codex / कानूनी नियम</span>
           </button>
 
-          <button class="btn-gov-outline" style="padding: 9px 16px; font-size: 12px;" onclick="showPage('pillars')">
-            <i data-lucide="scale" style="width: 13px; height: 13px;"></i>
-            <span>Statutory Codex</span>
-          </button>
-        </div>
-
-        <!-- Quick Launchpad Shortcuts -->
-        <div style="display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap;">
-          <button class="btn-gov-outline" style="font-size: 11px; padding: 4px 10px;" onclick="showPage('dashboard'); switchDashTab('casework');">
-            <i data-lucide="file-plus" style="width: 12px; height: 12px;"></i>
-            <span>Ingest Grievance Brief</span>
-          </button>
-          <button class="btn-gov-outline" style="font-size: 11px; padding: 4px 10px;" onclick="showPage('dashboard'); switchDashTab('casework');">
-            <i data-lucide="list" style="width: 12px; height: 12px;"></i>
-            <span>Active Case Dockets (<span id="homeQueueBadge">2</span>)</span>
-          </button>
-          <button class="btn-gov-outline" style="font-size: 11px; padding: 4px 10px;" onclick="showPage('dashboard'); switchDashTab('pio');">
-            <i data-lucide="map-pin" style="width: 12px; height: 12px;"></i>
-            <span>PIO Proximity Radar</span>
+          <button class="btn-gov-outline" style="padding: 10px 18px; font-size: 13px;" onclick="showPage('dashboard'); switchDashTab('runlog');">
+            <i data-lucide="scroll-text" style="width: 14px; height: 14px;"></i>
+            <span>Audit Run Log / ऑडिट लॉग</span>
           </button>
         </div>
       </div>
@@ -156,24 +140,24 @@
       <!-- Operations Snapshot Metric Strip -->
       <div class="snapshot-strip">
         <div class="snapshot-cell">
-          <span class="snapshot-label">Active Cases</span>
+          <span class="snapshot-label">Active Cases / सक्रिय मामले</span>
           <span class="snapshot-value" id="homeStatInbox">0</span>
-          <span class="snapshot-subtext">Pending Counsel / Desk Review</span>
+          <span class="snapshot-subtext">Pending Review / समीक्षाधीन</span>
         </div>
         <div class="snapshot-cell">
-          <span class="snapshot-label">PIO Proximity Average</span>
+          <span class="snapshot-label">Avg PIO Distance / औसत दूरी</span>
           <span class="snapshot-value" style="color: var(--gov-navy);">1.2 km</span>
-          <span class="snapshot-subtext">Haversine Great-Circle Geodesy</span>
+          <span class="snapshot-subtext">Geodesic Proximity / निकटतम अधिकारी</span>
         </div>
         <div class="snapshot-cell">
-          <span class="snapshot-label">Section 20 Liability Tracked</span>
+          <span class="snapshot-label">Sec 20 Penalty / धारा 20 जुर्माना</span>
           <span class="snapshot-value" style="color: var(--gov-copper);">₹28,750+</span>
-          <span class="snapshot-subtext">Mandatory ₹250/day Penalty</span>
+          <span class="snapshot-subtext">₹250/Day Mandatory / ₹250 प्रतिदिन</span>
         </div>
         <div class="snapshot-cell">
-          <span class="snapshot-label">Total Dockets</span>
+          <span class="snapshot-label">Total Dockets / कुल मामले</span>
           <span class="snapshot-value" id="homeStatTotal">0</span>
-          <span class="snapshot-subtext">Cumulative Recorded Cases</span>
+          <span class="snapshot-subtext">Recorded Grievances / दर्ज मामले</span>
         </div>
       </div>
 
@@ -182,35 +166,35 @@
         <div class="ops-panel-header">
           <span class="ops-panel-title">
             <i data-lucide="git-branch" style="width: 14px; height: 14px; color: var(--gov-navy);"></i>
-            <span>Autonomous Grievance-to-Enforcement Pipeline</span>
+            <span>4-Stage Simple Workflow • 4-चरणीय सरल प्रक्रिया</span>
           </span>
-          <span class="status-pill approved">Deterministic SLA</span>
+          <span class="status-pill approved">30-Day SLA • समयबद्ध</span>
         </div>
         <div style="padding: 18px;">
           <div class="workflow-pipeline-grid">
             <div class="pipeline-step-card">
               <div class="step-num">01</div>
               <div class="step-icon"><i data-lucide="file-text" style="width: 18px; height: 18px;"></i></div>
-              <h4>Ingest & Structured Parsing</h4>
-              <p>Translates colloquial citizen grievances into legally enforceable questions admissible under Section 2(f) of the RTI Act.</p>
+              <h4>1. Ingest / शिकायत दर्ज करें</h4>
+              <p>Translates citizen grievances into enforceable questions under Section 2(f) RTI Act. (नागरिक की समस्या को कानूनी सवालों में बदलना।)</p>
             </div>
             <div class="pipeline-step-card">
               <div class="step-num">02</div>
               <div class="step-icon"><i data-lucide="cpu" style="width: 18px; height: 18px;"></i></div>
-              <h4>11-Domain ML Classification</h4>
-              <p>Identifies the competent public sector (Power, Water, Transport, Revenue, Labour, Environment) with confidence scoring.</p>
+              <h4>2. Law Match / धारा चयन</h4>
+              <p>Maps grievance to exact civic sector and BNS 2023 penal provisions. (बिजली, पानी, जमीन आदि विभाग व बीएनएस 2023 की धाराएं।)</p>
             </div>
             <div class="pipeline-step-card">
               <div class="step-num">03</div>
               <div class="step-icon"><i data-lucide="map-pin" style="width: 18px; height: 18px;"></i></div>
-              <h4>Geodesic PIO Discovery</h4>
-              <p>Applies Haversine spherical geodesy to map pincodes and coordinates to the verified nodal Public Information Officer.</p>
+              <h4>3. Find PIO / अधिकारी खोज</h4>
+              <p>Locates the nearest designated PIO and Appellate Authority in your area. (पिन कोड के आधार पर सही जन सूचना अधिकारी की पहचान।)</p>
             </div>
             <div class="pipeline-step-card">
               <div class="step-num">04</div>
               <div class="step-icon"><i data-lucide="shield-check" style="width: 18px; height: 18px;"></i></div>
-              <h4>Enforceable Instrument & Log</h4>
-              <p>Compiles court-admissible Form-A PDFs with SHA-256 digital seals and records state updates to the immutable audit run log.</p>
+              <h4>4. File & Track / ड्राफ्ट व ट्रैकिंग</h4>
+              <p>Generates ready-to-file Form-A PDF with 30-day countdown and ₹250/day penalty tracking. (डाउनलोड योग्य आरटीआई फॉर्म और ट्रैकिंग।)</p>
             </div>
           </div>
         </div>
@@ -221,7 +205,7 @@
         <div class="ops-panel-header">
           <span class="ops-panel-title">
             <i data-lucide="zap" style="width: 14px; height: 14px; color: var(--gov-copper);"></i>
-            <span>Instant Civic Sector Triage Launchpad (1-Click Load into Casework)</span>
+            <span>Instant Civic Triage (1-Click) • सामान्य नागरिक शिकायतें</span>
           </span>
           <span class="status-pill neutral">11 Public Domains</span>
         </div>
@@ -230,48 +214,48 @@
             <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(9);">
               <div class="triage-icon" style="background: rgba(234, 88, 12, 0.1); color: #ea580c;">⚡</div>
               <div class="triage-info">
-                <b>Electricity & Power Discom</b>
-                <span>Transformer burnout & blackout &bull; BSES Delhi (110019)</span>
+                <b>⚡ Electricity / बिजली आपूर्ति</b>
+                <span>Transformer burnout & power cuts • बिजली कटौती (110019)</span>
               </div>
               <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
             </div>
             <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(10);">
               <div class="triage-icon" style="background: rgba(14, 165, 233, 0.1); color: #0284c7;">💧</div>
               <div class="triage-info">
-                <b>Drinking Water Supply & Jal Board</b>
-                <span>Sewage line contamination &bull; Jal Sansthan Varanasi (221010)</span>
+                <b>💧 Water & Sewer / जल व सीवर</b>
+                <span>Contaminated water & pipeline leak • गंदा पानी व सीवर (221010)</span>
               </div>
               <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
             </div>
             <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(11);">
               <div class="triage-icon" style="background: rgba(16, 185, 129, 0.1); color: #059669;">🚗</div>
               <div class="triage-info">
-                <b>Transport & RTO Motor Vehicles</b>
-                <span>Driving license renewal delay &bull; Sarai Kale Khan RTO (110013)</span>
+                <b>🚗 Transport & RTO / परिवहन व आरटीओ</b>
+                <span>Driving license renewal delay • ड्राइविंग लाइसेंस में देरी (110013)</span>
               </div>
               <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
             </div>
             <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(12);">
               <div class="triage-icon" style="background: rgba(99, 102, 241, 0.1); color: #4f46e5;">💼</div>
               <div class="triage-info">
-                <b>Labour, Pension & Social Security</b>
-                <span>EPS-95 monthly pension settlement &bull; EPFO Delhi (110052)</span>
+                <b>💼 Labour & Pension / पेंशन व पीएफ</b>
+                <span>EPS-95 monthly pension delay • पेंशन भुगतान में देरी (110052)</span>
               </div>
               <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
             </div>
             <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(13);">
               <div class="triage-icon" style="background: rgba(220, 38, 38, 0.1); color: #dc2626;">🏭</div>
               <div class="triage-info">
-                <b>Environment & Pollution Control</b>
-                <span>Illegal industrial toxic effluent &bull; DPCC Delhi (110032)</span>
+                <b>🏭 Environment / पर्यावरण व प्रदूषण</b>
+                <span>Industrial toxic waste • औद्योगिक प्रदूषण (110032)</span>
               </div>
               <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
             </div>
             <div class="quick-triage-card" onclick="showPage('dashboard'); switchDashTab('casework'); loadPreset(1);">
               <div class="triage-icon" style="background: rgba(217, 119, 6, 0.1); color: #d97706;">📜</div>
               <div class="triage-info">
-                <b>Revenue & Land Records</b>
-                <span>Mutation & Khasra delay &bull; Sadar Tehsil Varanasi (221002)</span>
+                <b>🏛️ Land Records / जमीन व खतौनी</b>
+                <span>Land mutation & registry delay • दाखिल-खारिज में देरी (221002)</span>
               </div>
               <i data-lucide="chevron-right" style="width: 16px; height: 16px; color: var(--ink-muted);"></i>
             </div>
@@ -288,11 +272,12 @@
       <div class="editorial-hero">
         <div class="hero-tagline">
           <i data-lucide="book-open" style="width: 12px; height: 12px;"></i>
-          <span>ABOUT ARZI &middot; CIVIC ACCOUNTABILITY & INSTITUTIONAL MANDATE</span>
+          <span>ABOUT ARZI • CIVIC ACCOUNTABILITY & MANDATE • अर्जी के बारे में • पारदर्शिता व नागरिक अधिकार</span>
         </div>
-        <h1>Dismantling Administrative Silence <br/><span style="color: var(--gov-navy);">Through Autonomous Legal Engineering</span></h1>
+        <h1>Dismantling Administrative Silence • प्रशासनिक लेटलतीफी का अंत<br/><span style="color: var(--gov-navy);">Through Autonomous Legal Engineering • सशक्त नागरिक कानूनी तकनीक द्वारा</span></h1>
         <p class="hero-lead-text">
-          ARZI was engineered to solve the systemic failure of bureaucratic opacity in India. By bridging colloquial citizen complaints with formal public law, ARZI creates legally enforceable accountability backed by financial penalties under Section 20 of the RTI Act.
+          <b>ARZI bridges colloquial citizen complaints with formal statutory public law.</b> It creates legally enforceable accountability backed by financial penalties under Section 20 of the RTI Act 2005.<br/>
+          <span style="color: var(--ink-secondary); font-size: 13px; display: inline-block; margin-top: 4px;">अर्जी नागरिकों और अधिवक्ताओं को यह अधिकार देती है कि वे अपनी समस्याओं को कानूनी रूप से बाध्यकारी आरटीआई में बदलकर धारा 20 के तहत सरकारी जवाबदेही सुनिश्चित करें।</span>
         </p>
       </div>
 
@@ -300,30 +285,34 @@
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;" class="about-two-col-grid">
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">The Administrative Silence Crisis in India</span>
-            <span class="status-pill needs-review">Systemic Inertia</span>
+            <span class="ops-panel-title">The Administrative Silence Crisis • विभागों में जवाब न मिलने की समस्या</span>
+            <span class="status-pill needs-review">Systemic Inertia • प्रशासनिक शिथिलता</span>
           </div>
           <div style="padding: 18px; font-size: 13px; color: var(--ink-secondary); line-height: 1.65;">
             <p style="margin-bottom: 12px;">
-              Across municipal corporations, tehsils, and statutory boards, millions of legitimate citizen requests languish unanswered. Public authorities exploit procedural friction, confusing departmental boundaries, and citizen unfamiliarity with statutory provisions to maintain administrative silence.
+              Across municipal corporations, tehsils, and statutory boards, millions of citizen requests languish unanswered. Public authorities exploit procedural friction and lack of legal citations to maintain administrative silence.<br/>
+              <span style="color: var(--ink-muted); font-size: 12px; display: block; margin-top: 4px;">नगर निगमों, तहसीलों और सरकारी दफ्तरों में लाखों नागरिक आवेदन बिना किसी जवाब के लंबित रहते हैं।</span>
             </p>
             <p>
-              When grievances remain informal—conveyed via verbal complaints, letters without statutory citations, or unverified WhatsApp forwards—officers face zero legal accountability. Bureaucratic delays become the default operating procedure.
+              When grievances remain informal—conveyed via verbal complaints or letters without statutory citations—officers face zero legal accountability. Delays become the default operating procedure.<br/>
+              <span style="color: var(--ink-muted); font-size: 12px; display: block; margin-top: 4px;">जब शिकायतें बिना कानूनी धाराओं के दी जाती हैं, तो लापरवाह अधिकारियों पर कोई कानूनी जवाबदेही नहीं बनती।</span>
             </p>
           </div>
         </div>
 
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">The ARZI Operational Intervention</span>
-            <span class="status-pill approved">Statutory Enforcement</span>
+            <span class="ops-panel-title">The ARZI Operational Intervention • अर्जी का ठोस समाधान</span>
+            <span class="status-pill approved">Statutory Enforcement • विधिक अनुपालन</span>
           </div>
           <div style="padding: 18px; font-size: 13px; color: var(--ink-secondary); line-height: 1.65;">
             <p style="margin-bottom: 12px;">
-              <b>ARZI transforms the balance of power.</b> It automates the exact legal conversion required by courts: translating ambiguous grievances into precise questions under Section 2(f), identifying the exact nodal PIO via geodesy, and establishing the strict 30-day statutory clock.
+              <b>ARZI transforms the balance of power.</b> It translates ambiguous grievances into precise questions under Section 2(f), identifies the exact nodal PIO via geodesy, and establishes the strict 30-day statutory clock.<br/>
+              <span style="color: var(--ink-muted); font-size: 12px; display: block; margin-top: 4px;">अर्जी आम शिकायतों को धारा 2(f) के तहत कानूनी प्रश्नों में बदलती है, सही अधिकारी खोजती है और 30 दिन की उलटी गिनती शुरू करती है।</span>
             </p>
             <p>
-              By activating the ₹250/day personal salary deduction mandate under Section 20(1), ARZI replaces bureaucratic discretion with enforceable personal legal liability.
+              By activating the ₹250/day personal salary deduction mandate under Section 20(1), ARZI replaces bureaucratic discretion with enforceable personal legal liability.<br/>
+              <span style="color: var(--ink-muted); font-size: 12px; display: block; margin-top: 4px;">धारा 20(1) के तहत लापरवाह अधिकारी के वेतन से ₹250/दिन व्यक्तिगत कटौती का डर समय पर जवाब सुनिश्चित करता है।</span>
             </p>
           </div>
         </div>
@@ -332,22 +321,22 @@
       <!-- Multi-Stakeholder Utility Ecosystem -->
       <div class="ops-panel" style="margin-bottom: 20px;">
         <div class="ops-panel-header">
-          <span class="ops-panel-title">Multi-Stakeholder Operational Utility</span>
-          <span class="status-pill neutral">3 Operating Personas</span>
+          <span class="ops-panel-title">Multi-Stakeholder Operational Utility • सभी हितधारकों के लिए उपयोगिता</span>
+          <span class="status-pill neutral">3 Operating Personas • 3 उपयोग वर्ग</span>
         </div>
         <div style="padding: 18px;">
           <div class="stakeholder-grid">
             <div class="stakeholder-card">
-              <div class="stakeholder-badge" style="background: rgba(30, 58, 138, 0.1); color: var(--gov-navy);"><i data-lucide="user" style="width: 18px; height: 18px;"></i> Citizen Complainants</div>
-              <p>File clear, structured RTI questions in under 2 minutes without needing expensive legal representation. Track statutory countdowns and receive alerts when authorities fail to comply.</p>
+              <div class="stakeholder-badge" style="background: rgba(30, 58, 138, 0.1); color: var(--gov-navy);"><i data-lucide="user" style="width: 18px; height: 18px;"></i> Citizen Complainants • आम नागरिक</div>
+              <p>File clear, structured RTI questions in under 2 minutes without needing expensive legal representation. Track statutory countdowns and receive compliance alerts.<br/><span style="color: var(--ink-muted); font-size: 11px; display: block; margin-top: 4px;">बिना किसी वकील के 2 मिनट में सटीक आरटीआई प्रश्न तैयार करें और 30-दिवसीय समयसीमा ट्रैक करें।</span></p>
             </div>
             <div class="stakeholder-card">
-              <div class="stakeholder-badge" style="background: rgba(180, 83, 9, 0.1); color: var(--gov-copper);"><i data-lucide="briefcase" style="width: 18px; height: 18px;"></i> Legal Counsel & Advocates</div>
-              <p>Manage high-volume civic casework with automated IPC ↔ BNS concordance, rapid Section 19(1) First Appeal generation, and verifiable SHA-256 court docket seals.</p>
+              <div class="stakeholder-badge" style="background: rgba(180, 83, 9, 0.1); color: var(--gov-copper);"><i data-lucide="briefcase" style="width: 18px; height: 18px;"></i> Legal Counsel & Advocates • अधिवक्तागण</div>
+              <p>Manage high-volume civic casework with automated IPC ↔ BNS concordance, rapid Section 19(1) First Appeal generation, and verifiable SHA-256 court docket seals.<br/><span style="color: var(--ink-muted); font-size: 11px; display: block; margin-top: 4px;">बीएनएस 2023 और प्रथम अपील के साथ नागरिक मामलों को तेजी से निपटाएं एवं डिजिटल प्रमाण पत्र प्राप्त करें।</span></p>
             </div>
             <div class="stakeholder-card">
-              <div class="stakeholder-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--status-active);"><i data-lucide="building-2" style="width: 18px; height: 18px;"></i> Public Grievance Desks</div>
-              <p>Nodal public authorities can identify jurisdictional overlap, execute Section 6(3) 5-day inter-departmental transfers seamlessly, and avoid personal Section 20 penalty liabilities.</p>
+              <div class="stakeholder-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--status-active);"><i data-lucide="building-2" style="width: 18px; height: 18px;"></i> Public Grievance Desks • लोक शिकायत प्रकोष्ठ</div>
+              <p>Nodal public authorities can identify jurisdictional overlap, execute Section 6(3) 5-day inter-departmental transfers seamlessly, and avoid personal Section 20 penalty liabilities.<br/><span style="color: var(--ink-muted); font-size: 11px; display: block; margin-top: 4px;">धारा 6(3) के तहत 5 दिन में सही विभाग को आवेदन भेजें और व्यक्तिगत जुर्माने से बचें।</span></p>
             </div>
           </div>
         </div>
@@ -356,21 +345,21 @@
       <!-- Engineering & Cryptographic Security Blueprint -->
       <div class="ops-panel">
         <div class="ops-panel-header">
-          <span class="ops-panel-title">Engineering Rigor & Cryptographic Verifiability</span>
+          <span class="ops-panel-title">Engineering Rigor & Cryptographic Verifiability • तकनीकी प्रामाणिकता एवं सुरक्षा</span>
         </div>
         <div style="padding: 18px; font-size: 12.5px; color: var(--ink-secondary); line-height: 1.6;">
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;" class="about-three-col-grid">
             <div class="legal-basis-box" style="margin-bottom: 0; border-left-color: var(--gov-navy);">
-              <b style="color: var(--gov-navy); font-size: 13px;">Deterministic Legal Reasoning</b>
-              <p style="margin-top: 6px;">Zero hallucination risk. Statutory questions, time limits, and fee clauses are compiled via deterministic statutory rule engines verified against official Indian Gazettes.</p>
+              <b style="color: var(--gov-navy); font-size: 13px;">Deterministic Legal Reasoning • सटीक कानूनी तर्क</b>
+              <p style="margin-top: 6px;">Zero hallucination risk. Statutory questions, time limits, and fee clauses are compiled via deterministic statutory rule engines verified against official Indian Gazettes.<br/><span style="color: var(--ink-muted); font-size: 11px; display: block; margin-top: 4px;">शून्य त्रुटि। कानूनी प्रश्न और समयसीमा आधिकारिक राजपत्रों के अनुसार तैयार होते हैं।</span></p>
             </div>
             <div class="legal-basis-box" style="margin-bottom: 0; border-left-color: var(--gov-copper);">
-              <b style="color: var(--gov-copper); font-size: 13px;">SHA-256 Digital Sealing</b>
-              <p style="margin-top: 6px;">Every generated Form-A and First Appeal PDF embeds an immutable SHA-256 cryptographic hash guaranteeing tamper-evident authenticity in judicial proceedings.</p>
+              <b style="color: var(--gov-copper); font-size: 13px;">SHA-256 Digital Sealing • डिजिटल सुरक्षा</b>
+              <p style="margin-top: 6px;">Every generated Form-A and First Appeal PDF embeds an immutable SHA-256 cryptographic hash guaranteeing tamper-evident authenticity in judicial proceedings.<br/><span style="color: var(--ink-muted); font-size: 11px; display: block; margin-top: 4px;">प्रत्येक दस्तावेज में डिजिटल हैश कोड होता है जो न्यायालय में उसकी सत्यता सिद्ध करता है।</span></p>
             </div>
             <div class="legal-basis-box" style="margin-bottom: 0; border-left-color: var(--status-active);">
-              <b style="color: var(--status-active); font-size: 13px;">Immutable Audit Ledger</b>
-              <p style="margin-top: 6px;">Every intake, classification, transfer, and case update is permanently journaled with microsecond ISO timestamps, creating an indisputable timeline for Information Commissions.</p>
+              <b style="color: var(--status-active); font-size: 13px;">Immutable Audit Ledger • स्थायी ऑडिट लेजर</b>
+              <p style="margin-top: 6px;">Every intake, classification, transfer, and case update is permanently journaled with microsecond ISO timestamps, creating an indisputable timeline for Information Commissions.<br/><span style="color: var(--ink-muted); font-size: 11px; display: block; margin-top: 4px;">प्रत्येक कार्रवाई का समयबद्ध रिकॉर्ड दर्ज होता है जिसे बदला नहीं जा सकता।</span></p>
             </div>
           </div>
         </div>
@@ -384,11 +373,12 @@
       <div class="editorial-hero">
         <div class="hero-tagline">
           <i data-lucide="scale" style="width: 12px; height: 12px;"></i>
-          <span>LEGAL CODEX & STATUTORY BENCHMARKS</span>
+          <span>LEGAL CODEX & STATUTORY BENCHMARKS • कानूनी संहिता एवं समयसीमा</span>
         </div>
-        <h1>Authoritative Statutory Provisions & <br/><span style="color: var(--gov-navy);">Judicial Enforcement Standards</span></h1>
+        <h1>Authoritative Statutory Provisions & • अधिनियम के मुख्य प्रावधान एवं<br/><span style="color: var(--gov-navy);">Judicial Enforcement Standards • न्यायिक निर्णय व मानक</span></h1>
         <p class="hero-lead-text">
-          Comprehensive reference guide on Section 20 penalty enforcement, Bharatiya Nyaya Sanhita criminal law transition, statutory escalation ladders, and landmark Supreme Court jurisprudence.
+          Comprehensive reference guide on Section 20 penalty enforcement, Bharatiya Nyaya Sanhita criminal law transition, statutory escalation ladders, and landmark Supreme Court jurisprudence.<br/>
+          <span style="color: var(--ink-secondary); font-size: 13px; display: inline-block; margin-top: 4px;">धारा 20 जुर्माना प्रक्रिया, बीएनएस 2023 में धाराओं का बदलाव, आरटीआई की समयसीमा और सुप्रीम कोर्ट के महत्वपूर्ण निर्णयों का संपूर्ण विवरण।</span>
         </p>
       </div>
 
@@ -397,36 +387,36 @@
         <div class="ops-panel-header">
           <span class="ops-panel-title">
             <i data-lucide="clock" style="width: 14px; height: 14px; color: var(--gov-navy);"></i>
-            <span>Statutory Escalation Ladder & Mandatory Time Limits</span>
+            <span>Statutory Escalation Ladder & Mandatory Time Limits • आरटीआई की कानूनी समयसीमा व चरण</span>
           </span>
-          <span class="status-pill approved">Enforceable Milestones</span>
+          <span class="status-pill approved">Enforceable Milestones • विधिक समयसीमा</span>
         </div>
         <div style="padding: 18px;">
           <div class="escalation-ladder-grid">
             <div class="ladder-step-card">
-              <span class="ladder-badge">Day 0</span>
-              <h4>Filing & Fee</h4>
-              <p>Form-A submission with ₹10 court fee / postal order. Receipt acknowledgment legally mandatory.</p>
+              <span class="ladder-badge">Day 0 / दिन 0</span>
+              <h4>Filing & Fee • आवेदन व शुल्क</h4>
+              <p>Form-A submission with ₹10 court fee / postal order. Receipt acknowledgment legally mandatory.<br/><span style="color: var(--ink-muted); font-size: 11px;">₹10 शुल्क के साथ फॉर्म-A जमा करें; रसीद मिलना अनिवार्य है।</span></p>
             </div>
             <div class="ladder-step-card">
-              <span class="ladder-badge">Day 5</span>
-              <h4>Sec 6(3) Transfer</h4>
-              <p>If info held by another public authority, transfer within 5 days with written notice to citizen.</p>
+              <span class="ladder-badge">Day 5 / दिन 5</span>
+              <h4>Sec 6(3) Transfer • धारा 6(3) अंतरण</h4>
+              <p>If info held by another public authority, transfer within 5 days with written notice to citizen.<br/><span style="color: var(--ink-muted); font-size: 11px;">दूसरे विभाग का मामला होने पर 5 दिन में फाइल भेजना अनिवार्य है।</span></p>
             </div>
             <div class="ladder-step-card">
-              <span class="ladder-badge" style="background: var(--gov-copper);">Day 30</span>
-              <h4>Statutory SLA</h4>
-              <p>Standard 30-day window expires. (48 hours if life/liberty). Day 31 triggers ₹250/day penalty clock.</p>
+              <span class="ladder-badge" style="background: var(--gov-copper);">Day 30 / दिन 30</span>
+              <h4>Statutory SLA • 30-दिवसीय सीमा</h4>
+              <p>Standard 30-day window expires. (48 hours if life/liberty). Day 31 triggers ₹250/day penalty clock.<br/><span style="color: var(--ink-muted); font-size: 11px;">जवाब देने की 30 दिन की सीमा। 31वें दिन से ₹250/दिन जुर्माना शुरू।</span></p>
             </div>
             <div class="ladder-step-card">
-              <span class="ladder-badge" style="background: var(--status-review);">Day 60</span>
-              <h4>First Appeal</h4>
-              <p>File First Appeal under Section 19(1) to First Appellate Authority (FAA) against deemed refusal.</p>
+              <span class="ladder-badge" style="background: var(--status-review);">Day 60 / दिन 60</span>
+              <h4>First Appeal • प्रथम अपील</h4>
+              <p>File First Appeal under Section 19(1) to First Appellate Authority (FAA) against deemed refusal.<br/><span style="color: var(--ink-muted); font-size: 11px;">जवाब न मिलने पर वरिष्ठ अधिकारी (FAA) को प्रथम अपील करें।</span></p>
             </div>
             <div class="ladder-step-card">
-              <span class="ladder-badge" style="background: #4f46e5;">Day 150</span>
-              <h4>Second Appeal</h4>
-              <p>Escalate to Central / State Information Commission under Section 19(3) with prayer for Section 20 penalties.</p>
+              <span class="ladder-badge" style="background: #4f46e5;">Day 150 / दिन 150</span>
+              <h4>Second Appeal • द्वितीय अपील</h4>
+              <p>Escalate to Central / State Information Commission under Section 19(3) with prayer for Section 20 penalties.<br/><span style="color: var(--ink-muted); font-size: 11px;">राज्य या केंद्रीय सूचना आयोग में अपील कर जुर्माना लगाने की मांग करें।</span></p>
             </div>
           </div>
         </div>
@@ -436,12 +426,13 @@
         <!-- Pillar 1 -->
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">Pillar 1: Section 20(1) Personal Penalty Clock</span>
-            <span class="status-pill under-review">₹250 / Day Mandatory</span>
+            <span class="ops-panel-title">Pillar 1: Section 20(1) Personal Penalty Clock • स्तंभ 1: व्यक्तिगत जुर्माना</span>
+            <span class="status-pill under-review">₹250 / Day Mandatory • ₹250/दिन अनिवार्य</span>
           </div>
           <div style="padding: 16px; font-size: 12px; color: var(--ink-secondary); line-height: 1.55;">
             <p style="margin-bottom: 10px;">
-              Under Section 20(1) of the RTI Act 2005, where the Commission finds that a Public Information Officer (PIO) has refused to receive an application or failed to furnish information within 30 days without reasonable cause, it <b>shall impose a penalty of ₹250 each day</b> until the information is furnished, up to <b>₹25,000</b> deducted directly from the officer's salary.
+              Under Section 20(1) of the RTI Act 2005, where the Commission finds that a PIO has delayed information without reasonable cause, it <b>shall impose a penalty of ₹250 each day</b> up to <b>₹25,000</b> deducted directly from the officer's salary.<br/>
+              <span style="color: var(--ink-muted); font-size: 11px; display: block; margin-top: 4px;">धारा 20(1) के तहत, 30 दिन में सूचना न देने पर आयोग अधिकारी के वेतन से ₹250 प्रतिदिन (अधिकतम ₹25,000) जुर्माना काटता है।</span>
             </p>
             <div class="legal-source-tag">Precedent: <i>Manohar s/o Manikrao Anchule v. State of Maharashtra AIR 2013 SC 681</i></div>
           </div>
@@ -450,14 +441,14 @@
         <!-- Pillar 2 -->
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">Pillar 2: IPC 1860 to BNS 2023 Criminal Codex</span>
-            <span class="status-pill approved">Criminal Law Reform</span>
+            <span class="ops-panel-title">Pillar 2: IPC 1860 to BNS 2023 Criminal Codex • स्तंभ 2: आपराधिक विधि सुधार</span>
+            <span class="status-pill approved">Criminal Law Reform • नए कानून</span>
           </div>
           <div style="padding: 16px; font-size: 12px; color: var(--ink-secondary); line-height: 1.55;">
             <div style="display: flex; flex-direction: column; gap: 6px;">
-              <div>&bull; <b>Land Mutation Fraud:</b> IPC 420 / 218 &rarr; <span class="statutory-tag bns">BNS 318(4) & 231</span></div>
-              <div>&bull; <b>Ration / Public Breach:</b> IPC 409 / 166A &rarr; <span class="statutory-tag bns">BNS 316(5) & 199</span></div>
-              <div>&bull; <b>Public Nuisance / Contamination:</b> IPC 268 / 277 &rarr; <span class="statutory-tag bns">BNS 270 & 279</span></div>
+              <div>&bull; <b>Land Mutation Fraud / जमीन धोखाधड़ी:</b> IPC 420 / 218 &rarr; <span class="statutory-tag bns">BNS 318(4) & 231</span></div>
+              <div>&bull; <b>Ration / Public Breach / राशन गबन:</b> IPC 409 / 166A &rarr; <span class="statutory-tag bns">BNS 316(5) & 199</span></div>
+              <div>&bull; <b>Public Nuisance / Contamination / गंदगी व प्रदूषण:</b> IPC 268 / 277 &rarr; <span class="statutory-tag bns">BNS 270 & 279</span></div>
             </div>
             <div class="legal-source-tag">Substantive Law: Bharatiya Nyaya Sanhita, 2023 (Central Act 45 of 2023)</div>
           </div>
@@ -466,12 +457,13 @@
         <!-- Pillar 3 -->
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">Pillar 3: Section 6(3) 5-Day Mandatory Transfer</span>
-            <span class="status-pill under-review">Statutory 5-Day SLA</span>
+            <span class="ops-panel-title">Pillar 3: Section 6(3) 5-Day Mandatory Transfer • स्तंभ 3: 5-दिवसीय अंतरण</span>
+            <span class="status-pill under-review">Statutory 5-Day SLA • 5-दिवसीय समयसीमा</span>
           </div>
           <div style="padding: 16px; font-size: 12px; color: var(--ink-secondary); line-height: 1.55;">
             <p>
-              Where an application is made to a public authority requesting information held by another public authority, the receiving officer <b>shall transfer the application within five days</b> and immediately inform the applicant in writing.
+              Where an application is made to an authority requesting info held by another, the officer <b>shall transfer within 5 days</b> and inform the applicant in writing.<br/>
+              <span style="color: var(--ink-muted); font-size: 11px; display: block; margin-top: 4px;">यदि मांगी गई सूचना किसी अन्य विभाग से संबंधित है, तो अधिकारी 5 दिन में आवेदन सही विभाग को भेजने के लिए बाध्य है।</span>
             </p>
           </div>
         </div>
@@ -479,12 +471,13 @@
         <!-- Pillar 4 -->
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">Pillar 4: Haversine Geodetic PIO Mapping</span>
-            <span class="status-pill approved">GIS Jurisdiction</span>
+            <span class="ops-panel-title">Pillar 4: Haversine Geodetic PIO Mapping • स्तंभ 4: भू-स्थानिक अधिकारी मैपिंग</span>
+            <span class="status-pill approved">GIS Jurisdiction • भू-स्थानिक क्षेत्राधिकार</span>
           </div>
           <div style="padding: 16px; font-size: 12px; color: var(--ink-secondary); line-height: 1.55;">
             <p>
-              ARZI uses the great-circle Haversine formula across verified municipal coordinates (Delhi NCT, Varanasi, Lucknow) to assign the nearest competent Public Information Officer and First Appellate Authority with room numbers and emails.
+              ARZI uses the great-circle Haversine formula across municipal coordinates (Delhi NCT, Varanasi, Lucknow) to assign the nearest competent PIO and FAA with office rooms and emails.<br/>
+              <span style="color: var(--ink-muted); font-size: 11px; display: block; margin-top: 4px;">अर्जी पिन कोड और निर्देशांकों के आधार पर निकटतम सक्षम जन सूचना अधिकारी को चुनती है।</span>
             </p>
           </div>
         </div>
@@ -495,31 +488,31 @@
         <div class="ops-panel-header">
           <span class="ops-panel-title">
             <i data-lucide="landmark" style="width: 14px; height: 14px; color: var(--gov-navy);"></i>
-            <span>Landmark Supreme Court Jurisprudence on Right to Information</span>
+            <span>Landmark Supreme Court Jurisprudence on RTI • सूचना के अधिकार पर सुप्रीम कोर्ट के ऐतिहासिक फैसले</span>
           </span>
-          <span class="status-pill approved">Constitutional Bench</span>
+          <span class="status-pill approved">Constitutional Bench • संविधान पीठ</span>
         </div>
         <div style="padding: 16px;">
           <div class="precedents-grid">
             <div class="precedent-card">
               <div class="precedent-citation">State of UP v. Raj Narain (1975) 4 SCC 428</div>
-              <h4>Fundamental Right Under Article 19(1)(a)</h4>
-              <p>The Supreme Court established that in a government of responsibility like ours, where all the agents of the public must be responsible for their conduct, there can be but few secrets.</p>
+              <h4>Fundamental Right Under Article 19(1)(a) • मौलिक अधिकार</h4>
+              <p>The Supreme Court established that in a responsible government, where agents of public are responsible, there can be but few secrets.<br/><span style="color: var(--ink-muted); font-size: 11px;">सुप्रीम कोर्ट ने स्पष्ट किया कि लोक सेवकों को जनता के प्रति जवाबदेह होना होगा।</span></p>
             </div>
             <div class="precedent-card">
               <div class="precedent-citation">Manohar s/o Manikrao Anchule v. State of Maharashtra AIR 2013 SC 681</div>
-              <h4>Mandatory Nature of Section 20 Penalty</h4>
-              <p>The apex court ruled that the penalty under Section 20(1) is mandatory upon finding unjustified delay, subject only to providing reasonable opportunity of hearing (audi alteram partem).</p>
+              <h4>Mandatory Nature of Section 20 Penalty • जुर्माना अनिवार्य</h4>
+              <p>The apex court ruled that penalty under Section 20(1) is mandatory upon finding unjustified delay, subject to fair hearing.<br/><span style="color: var(--ink-muted); font-size: 11px;">अकारण विलंब पाए जाने पर धारा 20(1) का जुर्माना लगाना अनिवार्य है।</span></p>
             </div>
             <div class="precedent-card">
               <div class="precedent-citation">CBSE v. Aditya Bandopadhyay (2011) 8 SCC 497</div>
-              <h4>Scope of Public Records & Inspection</h4>
-              <p>Clarified that citizens have a right to inspect records, obtain certified copies, and that public authorities cannot deny access on broad pretextual claims of fiduciary relationship.</p>
+              <h4>Scope of Public Records & Inspection • रिकॉर्ड्स का निरीक्षण</h4>
+              <p>Clarified that citizens have a right to inspect records, obtain certified copies, and authorities cannot deny access on broad pretexts.<br/><span style="color: var(--ink-muted); font-size: 11px;">नागरिकों को रिकॉर्ड देखने और प्रमाणित प्रतियां पाने का पूरा अधिकार है।</span></p>
             </div>
             <div class="precedent-card">
               <div class="precedent-citation">CIC v. State of Manipur (2011) 15 SCC 1</div>
-              <h4>Section 18 Complaint vs Section 19 Appeal</h4>
-              <p>Distinguished the punitive jurisdiction of Section 18 complaints (focusing on officer misconduct and penalties) from the remedial jurisdiction of Section 19 appeals (directing disclosure).</p>
+              <h4>Section 18 Complaint vs Section 19 Appeal • शिकायत बनाम अपील</h4>
+              <p>Distinguished punitive jurisdiction of Sec 18 (officer penalties) from remedial jurisdiction of Sec 19 (directing disclosure).<br/><span style="color: var(--ink-muted); font-size: 11px;">धारा 18 में अधिकारी पर दंडात्मक कार्रवाई और धारा 19 में सूचना प्राप्ति की व्यवस्था है।</span></p>
             </div>
           </div>
         </div>
@@ -530,83 +523,83 @@
         <div class="ops-panel-header" style="flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <i data-lucide="binary" style="width: 15px; height: 15px; color: var(--gov-navy);"></i>
-            <span class="ops-panel-title">Comprehensive IPC 1860 &harr; BNS 2023 Statutory Comparison Matrix</span>
+            <span class="ops-panel-title">Comprehensive IPC 1860 ↔ BNS 2023 Matrix • आईपीसी 1860 ↔ बीएनएस 2023 तुलनात्मक तालिका</span>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <div style="position: relative;">
-              <input type="text" id="statutorySearchInput" placeholder="Filter by section, crime, or keyword..." oninput="filterStatutoryMatrix()" style="padding: 5px 10px 5px 28px; font-size: 11.5px; width: 240px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-card); color: var(--ink-primary);" />
+              <input type="text" id="statutorySearchInput" placeholder="Filter by section, crime, or keyword... / धारा या समस्या से खोजें..." oninput="filterStatutoryMatrix()" style="padding: 5px 10px 5px 28px; font-size: 11.5px; width: 280px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-card); color: var(--ink-primary);" />
               <i data-lucide="search" style="position: absolute; left: 8px; top: 7px; width: 12px; height: 12px; color: var(--ink-muted);"></i>
             </div>
-            <span class="status-pill neutral" id="statutoryFilterCount">8 Provisions Active</span>
+            <span class="status-pill neutral" id="statutoryFilterCount">8 Provisions Active • 8 धाराएं सक्रिय</span>
           </div>
         </div>
         <div class="table-responsive" style="padding: 14px;">
           <table class="editorial-table" id="statutoryCodexTable">
             <thead>
               <tr>
-                <th>Offense Category</th>
-                <th>Historical Indian Penal Code (IPC 1860)</th>
-                <th>Bharatiya Nyaya Sanhita (BNS 2023)</th>
-                <th>Maximum Punishment Scope</th>
-                <th>Cognizability & Bail Status</th>
+                <th>Offense Category / अपराध / समस्या श्रेणी</th>
+                <th>Historical Indian Penal Code (IPC 1860) / पुराना कानून</th>
+                <th>Bharatiya Nyaya Sanhita (BNS 2023) / नया कानून</th>
+                <th>Maximum Punishment Scope / सजा का प्रावधान</th>
+                <th>Cognizability & Bail Status / संज्ञेयता व जमानत</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td><b>Cheating & Dishonest Property Inducement</b></td>
+                <td><b>Cheating & Dishonest Property Inducement • धोखाधड़ी एवं संपत्ति हड़पना</b></td>
                 <td><span class="statutory-tag ipc">IPC Section 420</span></td>
                 <td><span class="statutory-tag bns">BNS Section 318(4)</span></td>
-                <td>Imprisonment up to 7 years + fine</td>
-                <td><span class="status-pill approved">Cognizable / Non-Bailable</span></td>
+                <td>Imprisonment up to 7 years + fine • 7 वर्ष तक कारावास + जुर्माना</td>
+                <td><span class="status-pill approved">Cognizable / Non-Bailable • संज्ञेय / गैर-जमानती</span></td>
               </tr>
               <tr>
-                <td><b>Criminal Breach of Trust by Public Servant</b></td>
+                <td><b>Criminal Breach of Trust by Public Servant • लोक सेवक द्वारा विश्वासघात (गबन)</b></td>
                 <td><span class="statutory-tag ipc">IPC Section 409</span></td>
                 <td><span class="statutory-tag bns">BNS Section 316(5)</span></td>
-                <td>Imprisonment for life or up to 10 years + fine</td>
-                <td><span class="status-pill approved">Cognizable / Non-Bailable</span></td>
+                <td>Imprisonment for life or up to 10 years + fine • आजीवन कारावास या 10 वर्ष तक</td>
+                <td><span class="status-pill approved">Cognizable / Non-Bailable • संज्ञेय / गैर-जमानती</span></td>
               </tr>
               <tr>
-                <td><b>Public Servant Framing Incorrect Record</b></td>
+                <td><b>Public Servant Framing Incorrect Record • लोक सेवक द्वारा गलत रिकॉर्ड बनाना</b></td>
                 <td><span class="statutory-tag ipc">IPC Section 218</span></td>
                 <td><span class="statutory-tag bns">BNS Section 231</span></td>
-                <td>Imprisonment up to 3 years or fine</td>
-                <td><span class="status-pill approved">Cognizable / Bailable</span></td>
+                <td>Imprisonment up to 3 years or fine • 3 वर्ष तक कारावास या जुर्माना</td>
+                <td><span class="status-pill approved">Cognizable / Bailable • संज्ञेय / जमानती</span></td>
               </tr>
               <tr>
-                <td><b>Public Servant Disobeying Law Direction</b></td>
+                <td><b>Public Servant Disobeying Law Direction • कानूनी निर्देश की सरकारी अवज्ञा</b></td>
                 <td><span class="statutory-tag ipc">IPC Section 166A</span></td>
                 <td><span class="statutory-tag bns">BNS Section 199</span></td>
-                <td>Rigorous imprisonment up to 2 years + fine</td>
-                <td><span class="status-pill approved">Cognizable / Bailable</span></td>
+                <td>Rigorous imprisonment up to 2 years + fine • 2 वर्ष तक सश्रम कारावास + जुर्माना</td>
+                <td><span class="status-pill approved">Cognizable / Bailable • संज्ञेय / जमानती</span></td>
               </tr>
               <tr>
-                <td><b>Public Nuisance Affecting General Health</b></td>
+                <td><b>Public Nuisance Affecting General Health • जन स्वास्थ्य को प्रभावित करने वाला उपद्रव</b></td>
                 <td><span class="statutory-tag ipc">IPC Section 268</span></td>
                 <td><span class="statutory-tag bns">BNS Section 270</span></td>
-                <td>Fine up to ₹1,000 / Injunction relief</td>
-                <td><span class="status-pill under-review">Non-Cognizable / Bailable</span></td>
+                <td>Fine up to ₹1,000 / Injunction • ₹1,000 जुर्माना / निषेधाज्ञा</td>
+                <td><span class="status-pill under-review">Non-Cognizable / Bailable • असंज्ञेय / जमानती</span></td>
               </tr>
               <tr>
-                <td><b>Fouling Water of Public Spring or Reservoir</b></td>
+                <td><b>Fouling Water of Public Spring or Reservoir • सार्वजनिक जलाशय को दूषित करना</b></td>
                 <td><span class="statutory-tag ipc">IPC Section 277</span></td>
                 <td><span class="statutory-tag bns">BNS Section 279</span></td>
-                <td>Imprisonment up to 3 months or fine</td>
-                <td><span class="status-pill approved">Cognizable / Bailable</span></td>
+                <td>Imprisonment up to 3 months or fine • 3 माह तक कारावास या जुर्माना</td>
+                <td><span class="status-pill approved">Cognizable / Bailable • संज्ञेय / जमानती</span></td>
               </tr>
               <tr>
-                <td><b>Disobedience to Order Promulgated by Public Servant</b></td>
+                <td><b>Disobedience to Order Promulgated by Public Servant • सरकारी आदेश का उल्लंघन</b></td>
                 <td><span class="statutory-tag ipc">IPC Section 188</span></td>
                 <td><span class="statutory-tag bns">BNS Section 223</span></td>
-                <td>Imprisonment up to 6 months or fine</td>
-                <td><span class="status-pill approved">Cognizable / Bailable</span></td>
+                <td>Imprisonment up to 6 months or fine • 6 माह तक कारावास या जुर्माना</td>
+                <td><span class="status-pill approved">Cognizable / Bailable • संज्ञेय / जमानती</span></td>
               </tr>
               <tr>
-                <td><b>Forgery of Public Register or Court Record</b></td>
+                <td><b>Forgery of Public Register or Court Record • सरकारी रजिस्टर की जालसाजी</b></td>
                 <td><span class="statutory-tag ipc">IPC Section 466</span></td>
                 <td><span class="statutory-tag bns">BNS Section 338</span></td>
-                <td>Imprisonment up to 7 years + fine</td>
-                <td><span class="status-pill approved">Cognizable / Non-Bailable</span></td>
+                <td>Imprisonment up to 7 years + fine • 7 वर्ष तक कारावास + जुर्माना</td>
+                <td><span class="status-pill approved">Cognizable / Non-Bailable • संज्ञेय / गैर-जमानती</span></td>
               </tr>
             </tbody>
           </table>
@@ -623,23 +616,23 @@
       <nav class="desk-subnav-bar">
         <button class="desk-subnav-btn active" id="subnavCasework" onclick="switchDashTab('casework')">
           <i data-lucide="folder-kanban" style="width: 13px; height: 13px;"></i>
-          <span>01. Casework Desk</span>
+          <span>01. Casework / शिकायत डेस्क</span>
         </button>
         <button class="desk-subnav-btn" id="subnavStatutory" onclick="switchDashTab('statutory')">
           <i data-lucide="book-marked" style="width: 13px; height: 13px;"></i>
-          <span>02. Statutory Library & Custom Acts</span>
+          <span>02. Laws / कानून व धाराएं</span>
         </button>
         <button class="desk-subnav-btn" id="subnavPio" onclick="switchDashTab('pio')">
           <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i>
-          <span>03. PIO Geospatial Map</span>
+          <span>03. PIO Map / अधिकारी मैप</span>
         </button>
         <button class="desk-subnav-btn" id="subnavCompliance" onclick="switchDashTab('compliance')">
           <i data-lucide="clock" style="width: 13px; height: 13px;"></i>
-          <span>04. Compliance & SLA</span>
+          <span>04. Calculator / जुर्माना कैलकुलेटर</span>
         </button>
         <button class="desk-subnav-btn" id="subnavRunlog" onclick="switchDashTab('runlog')">
           <i data-lucide="scroll-text" style="width: 13px; height: 13px;"></i>
-          <span>05. Audit Run Log</span>
+          <span>05. Run Log / ऑडिट लॉग</span>
         </button>
       </nav>
 
@@ -654,27 +647,27 @@
               <div class="ops-panel-header">
                 <span class="ops-panel-title">
                   <i data-lucide="file-plus" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
-                  <span>Citizen Grievance Ingestion</span>
+                  <span>Citizen Grievance Ingestion • नागरिक शिकायत दर्ज करें</span>
                 </span>
                 <button class="btn-gov-outline" style="padding: 2px 8px; font-size: 10.5px;" onclick="toggleIntakeForm()">
-                  <span id="intakeToggleText">Toggle Form</span>
+                  <span id="intakeToggleText" data-i18n="intake_toggle_btn">Toggle Form</span>
                 </button>
               </div>
 
               <div id="intakeFormContainer" style="padding: 14px;">
                 <form id="intakeForm" onsubmit="submitIntake(event)">
                   <div style="margin-bottom: 8px;">
-                    <label class="form-label">Complainant / Client Full Name *</label>
-                    <input type="text" id="complainantName" placeholder="e.g. Shivanshu Pandey" required />
+                    <label class="form-label">Complainant Name / आवेदक का नाम *</label>
+                    <input type="text" id="complainantName" placeholder="e.g. Shivanshu Pandey / शिवंशु पांडेय" required />
                   </div>
 
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                  <div class="form-row-2col">
                     <div>
-                      <label class="form-label">Phone / Contact *</label>
+                      <label class="form-label">Phone / Contact / फोन नंबर *</label>
                       <input type="text" id="complainantContact" placeholder="+91-9988776655" required />
                     </div>
                     <div>
-                      <label class="form-label">Language / Locale</label>
+                      <label class="form-label">Drafting Language / भाषा</label>
                       <select id="complainantLang">
                         <option value="Hindi / English">Hindi / English (Bilingual)</option>
                         <option value="English">English</option>
@@ -683,13 +676,13 @@
                     </div>
                   </div>
 
-                  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 8px; margin-bottom: 8px;">
+                  <div class="form-row-addr">
                     <div>
-                      <label class="form-label">Address / Locality *</label>
+                      <label class="form-label">Address / Locality / पता व मोहल्ला *</label>
                       <input type="text" id="complainantAddr" placeholder="e.g. Indiranagar, Bengaluru / Assi Ghat, Varanasi" required />
                     </div>
                     <div>
-                      <label class="form-label">PIN Code (6-Digit) *</label>
+                      <label class="form-label">PIN Code / पिन कोड (6 अंक) *</label>
                       <input type="text" id="complainantPincode" placeholder="e.g. 560001" maxlength="6" pattern="[0-9]{6}" oninput="handlePincodeInput(this.value)" required />
                     </div>
                   </div>
@@ -705,73 +698,65 @@
                       <input type="checkbox" id="intakeUrgent" />
                       <span class="urgent-indicator-badge">
                         <i data-lucide="zap" style="width: 12px; height: 12px;"></i>
-                        <span>48-Hour Urgent Life & Liberty Fast-Track (Section 7(1) Proviso)</span>
+                        <span>48-Hour Urgent Life & Liberty • 48 घंटे आपातकालीन मामला (Sec 7(1))</span>
                       </span>
                     </label>
                     <div class="urgent-hint-text">
-                      Invokes 48-hour statutory deadline for ICU emergencies, water contamination, unlawful custody, or life threats.
+                      <span>For hospital emergencies, water poisoning, illegal custody, or immediate threats to life. (अस्पताल, दूषित जल, अवैध हिरासत या जीवन को खतरे के मामलों हेतु)</span>
                     </div>
                   </div>
 
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                  <div class="form-row-2col">
                     <div>
-                      <label class="form-label">Original Ref / Ack No.</label>
+                      <label class="form-label">Ref / Ack No. / पूर्व आवेदन संख्या</label>
                       <input type="text" id="intakeRefNo" placeholder="e.g. VNS-99401" />
                     </div>
                     <div>
-                      <label class="form-label">Submission Date</label>
+                      <label class="form-label">Submission Date / आवेदन तिथि</label>
                       <input type="text" id="intakeSubDate" placeholder="e.g. 10-Jan-2026" />
                     </div>
                   </div>
 
                   <div style="margin-bottom: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
-                      <label class="form-label" style="margin-bottom: 0;">Statement of Facts & Grievance Narrative *</label>
+                      <label class="form-label" style="margin-bottom: 0;">Grievance Narrative / शिकायत का विवरण *</label>
                       <div style="display: flex; gap: 6px; align-items: center;">
                         <button type="button" id="btnLiveMlPredict" class="btn-voice-dictate" onclick="triggerLiveMlPrediction()" title="Instant ML classification of civic domain, confidence, and authority" style="border-color: var(--gov-navy); color: var(--gov-navy);">
                           <i data-lucide="sparkles" style="width: 12px; height: 12px;"></i>
-                          <span id="mlPredictBtnText">⚡ Predict Domain via ML</span>
+                          <span id="mlPredictBtnText">⚡ AI Category / श्रेणी जांचें</span>
                         </button>
                         <button type="button" id="btnVoiceDictate" class="btn-voice-dictate" onclick="toggleVoiceDictation()" title="Click to speak (Hindi / English)">
                           <i data-lucide="mic" style="width: 12px; height: 12px;"></i>
-                          <span id="voiceStatusText">Voice Dictation</span>
+                          <span id="voiceStatusText">🎤 Speak / बोलें</span>
                         </button>
                       </div>
                     </div>
-                    <textarea id="rawGrievance" rows="3" placeholder="Enter or dictate factual details regarding public record request, administrative delay, or refusal..." required></textarea>
+                    <textarea id="rawGrievance" rows="3" placeholder="Enter or dictate factual details regarding public record request, administrative delay, or refusal..." data-i18n-placeholder="intake_narrative_ph" required></textarea>
                     <div id="voiceLiveTranscript" class="voice-live-transcript"></div>
                     <div id="liveMlPredictionBox" style="display: none; margin-top: 6px; padding: 8px 10px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 2px; font-size: 11px;"></div>
                   </div>
 
                   <button type="submit" class="btn-gov-primary" style="width: 100%;">
                     <i data-lucide="send" style="width: 13px; height: 13px;"></i>
-                    <span>Ingest, Extract Law & Route PIO</span>
+                    <span>Submit Grievance & Route PIO → / शिकायत दर्ज करें एवं अधिकारी खोजें →</span>
                   </button>
                 </form>
 
                 <!-- 1-Click Civic Presets Bar -->
                 <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <span style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">All-India Civic Presets (1-Click):</span>
-                    <span style="font-size: 9.5px; color: var(--gov-navy); font-weight: 600;">11 Civic Domains Supported</span>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 10.5px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">1-Click Civic Presets / सामान्य शिकायतें:</span>
                   </div>
-                  <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(1)">🌾 PDS Ration: Delhi (110054)</button>
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(2)">🌾 Karnataka Bhoomi Mutation (560001)</button>
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(3)">🏢 Maharashtra 7/12 Title: Mumbai (400001)</button>
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(4)">📜 Rajasthan Land Demarcation (302001)</button>
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(5)">⚖️ Varanasi Land Khasra (221005)</button>
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(6)">🌾 Bihar Land Mutation: Patna (800001)</button>
-                    <button type="button" class="btn-gov-outline preset-pill urgent-preset" onclick="loadPreset(7)">🚨 48h ICU Emergency: AIIMS (110029)</button>
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(8)">👮 Police FIR Inaction (211001)</button>
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(9)">⚡ Power Outage: Delhi (110019)</button>
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(10)">💧 Water Contamination: Varanasi (221010)</button>
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(11)">🚗 RTO License Renewal: Delhi (110013)</button>
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(12)">💼 EPFO Pension Delay: Delhi (110052)</button>
-                    <button type="button" class="btn-gov-outline preset-pill" onclick="loadPreset(13)">🏭 Chemical Pollution: Delhi (110032)</button>
+                  <div class="simplified-presets-bar">
+                    <button type="button" class="preset-pill" onclick="loadPreset(1)">🌾 Ration / राशन कार्ड (PDS)</button>
+                    <button type="button" class="preset-pill" onclick="loadPreset(5)">🏛️ Land / जमीन नामांतरण</button>
+                    <button type="button" class="preset-pill" onclick="loadPreset(10)">💧 Water & Sewer / जल व सीवर</button>
+                    <button type="button" class="preset-pill" onclick="loadPreset(9)">⚡ Electricity / बिजली बिल</button>
+                    <button type="button" class="preset-pill urgent" onclick="loadPreset(7)">🚨 🚨 48h Emergency / आपातकाल</button>
                   </div>
                 </div>
               </div>
+            </div>
             </div>
 
             <!-- Active Casework Queue -->
@@ -779,7 +764,7 @@
               <div class="ops-panel-header">
                 <span class="ops-panel-title">
                   <i data-lucide="list" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
-                  <span>Active Casework Dockets (<span id="inboxCount">0</span>)</span>
+                  <span>Active Casework Dockets / सक्रिय मामले</span> (<span id="inboxCount">0</span>)
                 </span>
                 <select id="queueFilter" onchange="loadCaseQueue()" style="width: 130px; font-size: 10.5px; padding: 2px 5px;">
                   <option value="">All Statuses</option>
@@ -791,8 +776,8 @@
 
               <!-- Search Bar -->
               <div class="queue-filter-bar">
-                <input type="text" id="caseSearchInput" placeholder="Search Case ID, Citizen, Varanasi, Section..." onkeydown="if(event.key==='Enter') loadCaseQueue()" style="font-size: 11.5px; padding: 4px 7px;" />
-                <button class="btn-gov-outline" style="padding: 4px 8px; font-size: 10.5px;" onclick="loadCaseQueue()">Filter</button>
+                <input type="text" id="caseSearchInput" placeholder="Search Case ID, Citizen, Varanasi, Section..." data-i18n-placeholder="queue_search_ph" onkeydown="if(event.key==='Enter') loadCaseQueue()" style="font-size: 11.5px; padding: 4px 7px;" />
+                <button class="btn-gov-outline" style="padding: 4px 8px; font-size: 10.5px;" onclick="loadCaseQueue()" data-i18n="queue_filter_btn">Filter</button>
               </div>
 
               <!-- Table -->
@@ -800,13 +785,13 @@
                 <table class="editorial-table">
                   <thead>
                     <tr>
-                      <th>Docket</th>
-                      <th>Complainant</th>
-                      <th>Department</th>
-                      <th>Sections</th>
-                      <th>Assigned PIO</th>
-                      <th>Status</th>
-                      <th>Action</th>
+                      <th>Docket / केस</th>
+                      <th>Complainant / आवेदक</th>
+                      <th>Department / विभाग</th>
+                      <th>Sections / धाराएं</th>
+                      <th>Assigned PIO / अधिकारी</th>
+                      <th>Status / स्थिति</th>
+                      <th>Action / कार्रवाई</th>
                     </tr>
                   </thead>
                   <tbody id="caseQueueBody"></tbody>
@@ -820,9 +805,9 @@
             <!-- Empty State -->
             <div id="noCaseSelected" class="ops-panel" style="text-align: center; padding: 44px 20px;">
               <i data-lucide="file-search" style="width: 36px; height: 36px; color: var(--gov-navy); margin-bottom: 10px;"></i>
-              <h3 style="font-family: var(--font-serif); font-size: 17px; color: var(--ink-primary); margin-bottom: 6px;">No Active Case Docket Selected</h3>
+              <h3 style="font-family: var(--font-serif); font-size: 17px; color: var(--ink-primary); margin-bottom: 6px;" data-i18n="no_case_title">No Active Case Docket Selected</h3>
               <p style="font-size: 12px; color: var(--ink-muted); max-width: 420px; margin: 0 auto;">
-                Select a case file from the left queue, or ingest a citizen brief to open the legal evidence dossier and drafting instruments.
+                <span data-i18n="no_case_desc">Select a case file from the left queue, or ingest a citizen brief to open the legal evidence dossier.</span>
               </p>
             </div>
 
@@ -832,28 +817,28 @@
               <!-- Case File Header -->
               <div class="dossier-header-box">
                 <div>
-                  <span style="font-family: var(--font-ui); font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">OFFICIAL DIGITAL CASE DOSSIER</span>
+                  <span style="font-family: var(--font-ui); font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">OFFICIAL DIGITAL CASE DOSSIER • आधिकारिक डिजिटल केस डॉसियर</span>
                   <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 2px;">
                     <h2 class="dossier-case-id" id="viewCaseId">ARZ-1046</h2>
                     <span class="status-pill under-review" id="viewCaseStatus">● UNDER REVIEW</span>
                     <span class="statutory-tag" id="viewMeritBadge">98/100 Merit</span>
-                    <span class="statutory-tag" id="viewUrgencyBadge" style="display:none; background:#FEE2E2; color:#991B1B; border:1px solid #DC2626; font-weight:700;">🚨 48-HR LIFE & LIBERTY</span>
+                    <span class="statutory-tag" id="viewUrgencyBadge" style="display:none; background:#FEE2E2; color:#991B1B; border:1px solid #DC2626; font-weight:700;">🚨 48-HR LIFE & LIBERTY • 48 घंटे आपातकाल</span>
                   </div>
                   <div style="display: flex; gap: 6px; margin-top: 6px; align-items: center;">
                     <button class="btn-urgency-toggle" id="dossierUrgencyToggleBtn" onclick="toggleCurrentCaseUrgency()">
                       <i data-lucide="zap" style="width: 12px; height: 12px;"></i>
-                      <span id="dossierUrgencyLabel">Fast-Track (48-Hr Life & Liberty)</span>
+                      <span id="dossierUrgencyLabel">Fast-Track (48-Hr Life & Liberty) • आपातकाल</span>
                     </button>
                     <button class="btn-gov-outline" style="padding: 2px 8px; font-size: 10px;" onclick="openPostalSlipModal()">
                       <i data-lucide="barcode" style="width: 11px; height: 11px;"></i>
-                      <span>Speed Post Docket</span>
+                      <span>Speed Post Docket • डाक रसीद</span>
                     </button>
                   </div>
                 </div>
                 <div style="text-align: right; font-size: 11px;">
-                  <div>Complainant: <b id="viewComplainant">Shivanshu Pandey</b></div>
+                  <div>Complainant / आवेदक: <b id="viewComplainant">Shivanshu Pandey</b></div>
                   <div style="color: var(--gov-copper); font-weight: 600; margin-top: 2px;">
-                    SLA: <span id="viewSla">14 Days Remaining</span>
+                    SLA / समयसीमा: <span id="viewSla">14 Days Remaining</span>
                   </div>
                   <div id="viewDueDate" style="font-family: var(--font-mono); font-size: 9.5px; color: var(--ink-muted); margin-top: 2px;"></div>
                 </div>
@@ -865,7 +850,7 @@
                 <div id="viewJurisdictionBanner" style="display: none; margin-bottom: 12px; padding: 8px 12px; background: rgba(30, 77, 107, 0.06); border-left: 3px solid var(--gov-navy); border-radius: 4px; font-size: 11px;">
                   <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                     <div>
-                      <span style="font-weight: 700; color: var(--gov-navy);"><i data-lucide="map-pin" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle;"></i> Jurisdiction:</span>
+                      <span style="font-weight: 700; color: var(--gov-navy);"><i data-lucide="map-pin" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle;"></i> Jurisdiction / क्षेत्राधिकार:</span>
                       <span id="viewJurisdictionArea" style="font-weight: 600; color: var(--ink-primary);">National Administrative Circle</span>
                     </div>
                     <div id="viewDigitalPortalLink" style="font-size: 10.5px; font-weight: 600; color: var(--gov-copper);">
@@ -873,13 +858,13 @@
                     </div>
                   </div>
                   <div id="viewLandActRow" style="margin-top: 4px; font-size: 10.5px; color: var(--ink-secondary);">
-                    <b>Governing Law:</b> <span id="viewPrimaryLandAct">State Land Revenue Code</span>
+                    <b>Governing Law / अधिनियम:</b> <span id="viewPrimaryLandAct">State Land Revenue Code</span>
                   </div>
                 </div>
 
                 <!-- 1. Statement of Facts -->
                 <div style="margin-bottom: 12px;">
-                  <label class="form-label">Complainant Narrative & Extracted Facts</label>
+                  <label class="form-label">Complainant Narrative & Extracted Facts • शिकायत विवरण व तथ्य</label>
                   <div class="legal-basis-box" style="background: var(--bg-subtle); border-left-color: var(--gov-navy); margin-bottom: 0;">
                     <p id="viewRawGrievance" style="font-size: 11.5px; color: var(--ink-secondary); font-style: italic;"></p>
                     <span class="legal-source-tag">Ref: <b id="viewRefNo">VNS-99401</b> &middot; Submission: <b id="viewSubDate">10-Jan-2026</b></span>
@@ -891,7 +876,7 @@
                   <div class="legal-basis-box" style="margin-bottom: 0;">
                     <div class="legal-basis-title">
                       <i data-lucide="scale" style="width: 13px; height: 13px;"></i>
-                      <span>LEGAL BASIS & STATUTORY PROVISIONS</span>
+                      <span>LEGAL BASIS & STATUTORY PROVISIONS • कानूनी आधार व धाराएं</span>
                     </div>
                     <div class="legal-basis-text" id="viewPenaltyBadge">
                       Mandatory ₹250/day personal penalty calculation active under Section 20(1) of the RTI Act 2005.
@@ -903,13 +888,13 @@
 
                 <!-- 3. Statutory Cross-Reference Matrix (IPC 1860 vs BNS 2023) -->
                 <div style="margin-bottom: 12px;">
-                  <label class="form-label">Statutory Cross-Reference (IPC 1860 &rarr; BNS 2023)</label>
-                  <table class="statutory-table">
+                  <label class="form-label">Statutory Cross-Reference (IPC 1860 &rarr; BNS 2023) • धारा तुलना</label>
+                  <div class="table-responsive"><table class="statutory-table">
                     <thead>
                       <tr>
-                        <th>IPC (1860)</th>
-                        <th>BNS (2023) Substantive Law</th>
-                        <th>Penal Scope / Liability</th>
+                        <th>IPC (1860) / पुराना कानून</th>
+                        <th>BNS (2023) Substantive Law / नया कानून</th>
+                        <th>Penal Scope / Liability / सजा का दायरा</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -919,12 +904,12 @@
                         <td id="viewMaxPunishment" style="font-family: var(--font-mono); font-size: 10.5px; color: var(--gov-copper);">Rigorous imprisonment up to 7 years + fine</td>
                       </tr>
                     </tbody>
-                  </table>
+                  </table></div>
                 </div>
 
                 <!-- 4. Assigned Public Authority (PIO & FAA) -->
                 <div style="margin-bottom: 12px;">
-                  <label class="form-label">Designated Public Authority (PIO & FAA Proximity Match)</label>
+                  <label class="form-label">Designated Public Authority (PIO & FAA) • नामित जन सूचना अधिकारी</label>
                   <div class="pio-record-card" style="margin-bottom: 0;">
                     <div class="pio-record-header">
                       <div>
@@ -941,10 +926,10 @@
                     </div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border-subtle);">
-                      <span style="font-size: 10.5px; color: var(--ink-muted);">Appellate: <b id="viewFaaName">ADM (Revenue), Collectorate</b></span>
+                      <span style="font-size: 10.5px; color: var(--ink-muted);">Appellate / अपीलीय अधिकारी: <b id="viewFaaName">ADM (Revenue), Collectorate</b></span>
                       <button class="btn-gov-outline" style="font-size: 10.5px; padding: 2px 6px;" onclick="openTransferModal()">
                         <i data-lucide="arrow-right-left" style="width: 11px; height: 11px;"></i>
-                        <span>Execute Sec 6(3) Transfer</span>
+                        <span>Execute Sec 6(3) Transfer • धारा 6(3) अंतरण</span>
                       </button>
                     </div>
                   </div>
@@ -952,16 +937,16 @@
 
                 <!-- 5. Document Drafter & Official Instruments -->
                 <div style="margin-bottom: 14px;">
-                  <label class="form-label">Statutory Instruments & Official Filings</label>
+                  <label class="form-label">Statutory Instruments & Official Filings • तैयार किए गए विधिक दस्तावेज</label>
                   
                   <div style="border: 1px solid var(--border-medium); border-radius: 2px; overflow: hidden;">
                     <div class="doc-draft-nav">
-                      <button class="doc-draft-tab active" data-doctab="rti" onclick="switchDocTab('rti')">Form-A RTI (Sec 6)</button>
-                      <button class="doc-draft-tab" data-doctab="appeal" onclick="switchDocTab('appeal')">First Appeal (Sec 19)</button>
-                      <button class="doc-draft-tab" data-doctab="notice" onclick="switchDocTab('notice')">Sec 80 CPC Notice</button>
-                      <button class="doc-draft-tab" data-doctab="section8" onclick="switchDocTab('section8')">Section 8 Shield</button>
-                      <button class="doc-draft-tab" data-doctab="slip" onclick="switchDocTab('slip')">Speed Post Slip</button>
-                      <button class="doc-draft-tab" data-doctab="report" onclick="switchDocTab('report')">ML Assessment Dossier</button>
+                      <button class="doc-draft-tab active" data-doctab="rti" onclick="switchDocTab('rti')">Form-A RTI (Sec 6) / फॉर्म-A</button>
+                      <button class="doc-draft-tab" data-doctab="appeal" onclick="switchDocTab('appeal')">First Appeal (Sec 19) / प्रथम अपील</button>
+                      <button class="doc-draft-tab" data-doctab="notice" onclick="switchDocTab('notice')">Sec 80 Notice / विधिक नोटिस</button>
+                      <button class="doc-draft-tab" data-doctab="section8" onclick="switchDocTab('section8')">Section 8 Shield / धारा 8 छूट</button>
+                      <button class="doc-draft-tab" data-doctab="slip" onclick="switchDocTab('slip')">Speed Post Slip / रसीद</button>
+                      <button class="doc-draft-tab" data-doctab="report" onclick="switchDocTab('report')">ML Report / रिपोर्ट</button>
                     </div>
 
                     <div style="padding: 10px; background: var(--bg-surface);">
@@ -1029,7 +1014,7 @@
 
                   <!-- Approval & Dispatch Controls -->
                   <div style="margin-top: 10px; padding: 10px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: 2px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                    <div class="form-row-2col" style="gap: 8px; margin-bottom: 8px;">
                       <div>
                         <label class="form-label" style="font-size: 10px;">Reviewer / Desk Officer *</label>
                         <input type="text" id="reviewerName" value="Adv. S. Kalra (Bar Council / Legal Counsel)" />
@@ -1088,7 +1073,7 @@
                   </div>
 
                   <div id="caseTimelineContainer" style="display: none;"></div>
-                  <table class="editorial-table" style="font-size: 10.5px; margin-top: 6px;">
+                  <div class="table-responsive"><table class="editorial-table" style="font-size: 10.5px; margin-top: 6px;">
                     <thead>
                       <tr>
                         <th>Time</th>
@@ -1098,7 +1083,7 @@
                       </tr>
                     </thead>
                     <tbody id="caseHistoryBody"></tbody>
-                  </table>
+                  </table></div>
                 </div>
 
               </div>
@@ -1114,60 +1099,60 @@
           <div class="ops-panel-header">
             <span class="ops-panel-title">
               <i data-lucide="book-marked" style="width: 14px; height: 14px; color: var(--gov-navy);"></i>
-              <span>Statutory Codex & Custom Acts Registration</span>
+              <span>Statutory Codex & Custom Acts Registration • कानून एवं अधिनियम पंजीकरण</span>
             </span>
           </div>
 
           <div style="padding: 16px;">
             <form id="customActForm" onsubmit="submitCustomAct(event)">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+              <div class="form-row-2col">
                 <div>
-                  <label class="form-label">Act / Legislation Full Title *</label>
-                  <input type="text" id="customActTitle" placeholder="e.g. Consumer Protection Act, 2019" required />
+                  <label class="form-label">Act / Legislation Full Title * • अधिनियम का पूरा नाम *</label>
+                  <input type="text" id="customActTitle" placeholder="e.g. Consumer Protection Act, 2019 / उपभोक्ता संरक्षण अधिनियम" required />
                 </div>
                 <div>
-                  <label class="form-label">Specific Section(s) / Rule *</label>
-                  <input type="text" id="customActSection" placeholder="e.g. Section 35 & 38" required />
+                  <label class="form-label">Specific Section(s) / Rule * • संबंधित धाराएं / नियम *</label>
+                  <input type="text" id="customActSection" placeholder="e.g. Section 35 & 38 / धारा 35 व 38" required />
                 </div>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+              <div class="form-row-2col">
                 <div>
-                  <label class="form-label">Statutory Domain / Practice Area *</label>
+                  <label class="form-label">Statutory Domain / Practice Area * • कानूनी विभाग / विषय *</label>
                   <select id="customActDomain">
-                    <option value="Revenue & Land Records">Revenue & Land Records</option>
-                    <option value="Food, Civil Supplies & Consumer Affairs">Food, Civil Supplies & Consumer Affairs</option>
-                    <option value="Municipal Public Works & Sanitation">Municipal Public Works & Sanitation</option>
-                    <option value="Water Supply & Jal Board">Water Supply & Jal Board</option>
-                    <option value="Electricity & Power Discom">Electricity & Power Discom</option>
-                    <option value="Police, Criminal Justice & BNSS">Police, Criminal Justice & BNSS</option>
-                    <option value="Health & Family Welfare">Health & Family Welfare</option>
-                    <option value="Higher Education & Student Welfare">Higher Education & Student Welfare</option>
-                    <option value="Transport, Highways & Motor Vehicles / RTO">Transport, Highways & Motor Vehicles / RTO</option>
-                    <option value="Labour, Employment, Pension & Social Security">Labour, Employment, Pension & Social Security</option>
-                    <option value="Environment & Pollution Control">Environment & Pollution Control</option>
+                    <option value="Revenue & Land Records">Revenue & Land Records / राजस्व एवं जमीन</option>
+                    <option value="Food, Civil Supplies & Consumer Affairs">Food & Civil Supplies / खाद्य व आपूर्ति (राशन)</option>
+                    <option value="Municipal Public Works & Sanitation">Municipal Works / नगर निगम व लोक निर्माण</option>
+                    <option value="Water Supply & Jal Board">Water Supply & Jal Board / जल आपूर्ति व जल निगम</option>
+                    <option value="Electricity & Power Discom">Electricity Discom / बिजली व डिस्कॉम</option>
+                    <option value="Police, Criminal Justice & BNSS">Police & Criminal Justice / पुलिस व बीएनएस</option>
+                    <option value="Health & Family Welfare">Health & Family Welfare / स्वास्थ्य एवं चिकित्सा</option>
+                    <option value="Higher Education & Student Welfare">Higher Education / उच्च शिक्षा व विश्वविद्यालय</option>
+                    <option value="Transport, Highways & Motor Vehicles / RTO">Transport & RTO / परिवहन व आरटीओ</option>
+                    <option value="Labour, Employment, Pension & Social Security">Pension & Labour / भविष्य निधि व पेंशन</option>
+                    <option value="Environment & Pollution Control">Environment & Pollution / पर्यावरण व प्रदूषण</option>
                   </select>
                 </div>
                 <div>
-                  <label class="form-label">Advocate / Author Name *</label>
+                  <label class="form-label">Advocate / Author Name * • अधिवक्ता / लेखक का नाम *</label>
                   <input type="text" id="customActAuthor" value="Adv. S. Kalra" required />
                 </div>
               </div>
 
               <div style="margin-bottom: 10px;">
-                <label class="form-label">Statutory Grounds & Legal Effect *</label>
-                <textarea id="customActGrounds" rows="2" placeholder="Legal requirement or statutory duty..." required></textarea>
+                <label class="form-label">Statutory Grounds & Legal Effect * • कानूनी आधार व प्रभाव *</label>
+                <textarea id="customActGrounds" rows="2" placeholder="Legal requirement, statutory obligation, or mandatory public duty... / विधिक कर्तव्य या वैधानिक दायित्व का विवरण..." required></textarea>
               </div>
 
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <label style="font-size: 11.5px; display: flex; align-items: center; gap: 6px;">
                   <input type="checkbox" id="customActLinkActive" checked />
-                  <span>Link immediately to current active docket</span>
+                  <span>Link immediately to current active docket • वर्तमान केस से तुरंत जोड़ें</span>
                 </label>
                 <input type="hidden" id="customActRelief" value="" />
                 <button type="submit" class="btn-gov-primary">
                   <i data-lucide="plus" style="width: 13px; height: 13px;"></i>
-                  <span>Register Custom Act</span>
+                  <span>Register Custom Act • अधिनियम जोड़ें</span>
                 </button>
               </div>
             </form>
@@ -1176,8 +1161,8 @@
 
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">Registered Legislation (<span id="customActsCount">0</span>)</span>
-            <button class="btn-gov-outline" style="padding: 2px 8px; font-size: 10.5px;" onclick="loadCustomActs()">Refresh</button>
+            <span class="ops-panel-title">Registered Legislation • पंजीकृत कानून (<span id="customActsCount">0</span>)</span>
+            <button class="btn-gov-outline" style="padding: 2px 8px; font-size: 10.5px;" onclick="loadCustomActs()">Refresh • ताज़ा करें</button>
           </div>
           <div id="customActsContainer" style="padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
         </div>
@@ -1191,9 +1176,9 @@
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <i data-lucide="check-circle-2" style="width: 16px; height: 16px; color: var(--status-active);"></i>
-              <span id="pioBannerText" style="font-size: 12px; color: var(--ink-primary); font-weight: 600;">Complaint Registered & Nearest Domain PIO Assigned!</span>
+              <span id="pioBannerText" style="font-size: 12px; color: var(--ink-primary); font-weight: 600;">Complaint Registered & Nearest Domain PIO Assigned! • शिकायत दर्ज एवं संबंधित क्षेत्र के PIO का आवंटन सम्पन्न!</span>
             </div>
-            <button class="btn-gov-outline" style="font-size: 10.5px; padding: 2px 8px;" onclick="document.getElementById('pioRegistrationBanner').style.display='none'">Dismiss</button>
+            <button class="btn-gov-outline" style="font-size: 10.5px; padding: 2px 8px;" onclick="document.getElementById('pioRegistrationBanner').style.display='none'">Dismiss • हटाएं</button>
           </div>
         </div>
 
@@ -1202,16 +1187,16 @@
           <div class="ops-panel-header" style="background: var(--bg-subtle);">
             <div style="display: flex; align-items: center; gap: 8px;">
               <i data-lucide="map-pin" style="width: 15px; height: 15px; color: var(--gov-navy);"></i>
-              <span class="ops-panel-title">Active Complaint Docket Geodesy</span>
+              <span class="ops-panel-title">Active Complaint Docket Geodesy • शिकायत का भू-स्थानिक विवरण</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 11px; color: var(--ink-muted);">Inspect Docket:</span>
+              <span style="font-size: 11px; color: var(--ink-muted);">Inspect Docket / केस चुनें:</span>
               <select id="pioMapCaseSelect" onchange="switchPioMapCase(this.value)" style="padding: 3px 8px; font-size: 11.5px; border: 1px solid var(--border-medium); border-radius: 3px; background: #FFFFFF;"></select>
             </div>
           </div>
-          <div style="padding: 12px 16px; display: grid; grid-template-columns: 1fr 1fr 1.3fr auto; gap: 14px; align-items: center;">
+          <div class="geodesy-kpi-bar">
             <div>
-              <span style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Docket & Complainant</span>
+              <span style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Docket & Complainant • केस व आवेदक</span>
               <div style="margin-top: 2px; font-size: 12px; font-weight: 700; color: var(--ink-primary);">
                 <span id="pioMapCaseId" style="font-family: var(--font-mono); color: var(--gov-navy);">ARZ-1046</span> &bull; 
                 <span id="pioMapComplainant">Shivanshu Pandey</span>
@@ -1220,17 +1205,17 @@
             </div>
 
             <div>
-              <span style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Complaint Domain</span>
+              <span style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Complaint Domain • शिकायत श्रेणी</span>
               <div style="margin-top: 2px;">
                 <span id="pioMapDomain" class="statutory-tag bns" style="font-size: 11px; font-weight: 600;">Revenue & Land Records</span>
               </div>
-              <div style="font-size: 10.5px; color: var(--ink-muted); margin-top: 2px;">Domain auto-classified from grievance</div>
+              <div style="font-size: 10.5px; color: var(--ink-muted); margin-top: 2px;">Domain auto-classified from grievance • स्वचालित विभाग चयन</div>
             </div>
 
             <div style="background: rgba(11, 29, 58, 0.04); padding: 8px 10px; border-radius: 4px; border: 1px dashed var(--border-medium);">
               <span style="font-size: 10px; font-weight: 700; color: var(--gov-navy); text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
                 <i data-lucide="shield-check" style="width: 12px; height: 12px; color: var(--gov-navy);"></i>
-                <span>Assigned Nearest Domain PIO</span>
+                <span>Assigned Nearest Domain PIO • नामित अधिकारी</span>
               </span>
               <div style="font-size: 12px; font-weight: 700; color: var(--gov-navy); margin-top: 2px;" id="pioMapAssignedName">
                 Shri N. Goyal (Tehsildar)
@@ -1242,7 +1227,7 @@
 
             <div>
               <button class="btn-gov-outline" style="padding: 7px 12px; font-size: 11.5px; white-space: nowrap;" onclick="switchDashTab('casework')">
-                <span>Casework Desk &rarr;</span>
+                <span>Casework Desk &rarr; • शिकायत डेस्क &rarr;</span>
               </button>
             </div>
           </div>
@@ -1252,10 +1237,10 @@
           <!-- Geospatial Map & Radar Visualizer -->
           <div class="ops-panel">
             <div class="ops-panel-header">
-              <span class="ops-panel-title">Geospatial Jurisdictional Visualizer</span>
+              <span class="ops-panel-title">Geospatial Jurisdictional Visualizer • क्षेत्राधिकार मैप व टेलीमेट्री</span>
               <div style="display: flex; gap: 4px;">
-                <button type="button" class="btn-gov-outline active" id="btnViewMap" style="padding: 2px 8px; font-size: 10px;" onclick="switchGeoView('map')">🗺️ OpenStreetMap</button>
-                <button type="button" class="btn-gov-outline" id="btnViewRadar" style="padding: 2px 8px; font-size: 10px;" onclick="switchGeoView('radar')">📡 Telemetry Radar</button>
+                <button type="button" class="btn-gov-outline active" id="btnViewMap" style="padding: 2px 8px; font-size: 10px;" onclick="switchGeoView('map')">🗺️ OpenStreetMap / मैप</button>
+                <button type="button" class="btn-gov-outline" id="btnViewRadar" style="padding: 2px 8px; font-size: 10px;" onclick="switchGeoView('radar')">📡 Telemetry Radar / रडार</button>
               </div>
             </div>
             <div style="padding: 14px;">
@@ -1268,34 +1253,34 @@
               <!-- Radar Canvas Container (Toggleable) -->
               <div id="radarCanvasContainer" style="display: none; text-align: center;">
                 <!-- Radar Legend -->
-                <div style="display: flex; justify-content: center; gap: 14px; margin-bottom: 10px; font-size: 10.5px; color: var(--ink-secondary);">
+                <div style="display: flex; justify-content: center; gap: 14px; margin-bottom: 10px; font-size: 10.5px; color: var(--ink-secondary); flex-wrap: wrap;">
                   <div style="display: flex; align-items: center; gap: 4px;">
                     <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #D97706;"></span>
-                    <span>Citizen Origin</span>
+                    <span>Citizen Origin • आवेदक का स्थान</span>
                   </div>
                   <div style="display: flex; align-items: center; gap: 4px;">
                     <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #1D4ED8; border: 2px solid #93C5FD;"></span>
-                    <span style="font-weight: 700; color: #1D4ED8;">Assigned Domain PIO</span>
+                    <span style="font-weight: 700; color: #1D4ED8;">Assigned Domain PIO • नामित अधिकारी</span>
                   </div>
                   <div style="display: flex; align-items: center; gap: 4px;">
                     <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #64748B;"></span>
-                    <span>Other Nearby Authorities</span>
+                    <span>Other Nearby Authorities • अन्य कार्यालय</span>
                   </div>
                 </div>
 
                 <canvas id="radarCanvas" width="380" height="380"></canvas>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; font-size: 11px; text-align: left;">
+              <div class="geo-coords-grid">
                 <div class="legal-basis-box" style="margin-bottom: 0; padding: 6px 10px;">
-                  Citizen Location: <b id="radarUserCoords">25.2905° N, 82.9995° E</b>
+                  Citizen Location / आवेदक: <b id="radarUserCoords">25.2905° N, 82.9995° E</b>
                 </div>
                 <div class="legal-basis-box" style="margin-bottom: 0; padding: 6px 10px;">
-                  Assigned PIO Office: <b id="radarPioCoords">25.3340° N, 82.9860° E</b>
+                  Assigned PIO Office / कार्यालय: <b id="radarPioCoords">25.3340° N, 82.9860° E</b>
                 </div>
               </div>
               <div style="font-family: var(--font-mono); font-size: 11px; color: var(--status-active); margin-top: 8px; text-align: center;">
-                Proximity Telemetry: <b id="radarDistance">1.42 km away</b>
+                Proximity Telemetry / दूरी: <b id="radarDistance">1.42 km away</b>
               </div>
             </div>
           </div>
@@ -1304,12 +1289,12 @@
           <div class="ops-panel">
             <div class="ops-panel-header" style="flex-wrap: wrap; gap: 8px;">
               <div>
-                <span class="ops-panel-title">Nearest PIO Officers in Area (<span id="radarAreaCount">0</span> Authorities)</span>
+                <span class="ops-panel-title">Nearest PIO Officers in Area • क्षेत्र के जन सूचना अधिकारी (<span id="radarAreaCount">0</span>)</span>
               </div>
               <div style="display: flex; gap: 4px;">
-                <button type="button" class="statutory-tag active" id="pioFilterAll" style="cursor: pointer; padding: 2px 8px; font-size: 10px;" onclick="filterRadarDirectory('all')">All Nearby</button>
-                <button type="button" class="statutory-tag" id="pioFilterDomain" style="cursor: pointer; padding: 2px 8px; font-size: 10px;" onclick="filterRadarDirectory('domain')">Domain Only</button>
-                <button type="button" class="statutory-tag" id="pioFilterClose" style="cursor: pointer; padding: 2px 8px; font-size: 10px;" onclick="filterRadarDirectory('close')">&lt; 3 km</button>
+                <button type="button" class="statutory-tag active" id="pioFilterAll" style="cursor: pointer; padding: 2px 8px; font-size: 10px;" onclick="filterRadarDirectory('all')">All Nearby • सभी</button>
+                <button type="button" class="statutory-tag" id="pioFilterDomain" style="cursor: pointer; padding: 2px 8px; font-size: 10px;" onclick="filterRadarDirectory('domain')">Domain Only • विभाग</button>
+                <button type="button" class="statutory-tag" id="pioFilterClose" style="cursor: pointer; padding: 2px 8px; font-size: 10px;" onclick="filterRadarDirectory('close')">&lt; 3 km • 3 किमी</button>
               </div>
             </div>
             <div id="radarDirectoryList" style="padding: 12px; display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto;">
@@ -1325,10 +1310,10 @@
           <div class="ops-panel-header" style="flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <i data-lucide="calculator" style="width: 15px; height: 15px; color: var(--gov-navy);"></i>
-              <span class="ops-panel-title">Interactive Section 20(1) Penalty & Statutory SLA Clock</span>
+              <span class="ops-panel-title">Interactive Section 20(1) Penalty & Statutory SLA Clock • धारा 20(1) जुर्माना एवं समयसीमा कैलकुलेटर</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="status-pill needs-review" id="slaClockStatusPill">Statutory Overdue</span>
+              <span class="status-pill needs-review" id="slaClockStatusPill">Statutory Overdue • समयसीमा समाप्त</span>
               <span class="legal-source-tag" style="margin: 0;">Sec 20(1) RTI Act 2005</span>
             </div>
           </div>
@@ -1340,40 +1325,40 @@
               <div class="sla-inputs-card">
                 <div class="sla-card-heading">
                   <i data-lucide="calendar" style="width: 14px; height: 14px; color: var(--gov-navy);"></i>
-                  <span>Case Timeline & SLA Parameters</span>
+                  <span>Case Timeline & Parameters • आवेदन विवरण व समयसीमा</span>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 12px;">
-                  <label class="form-label" for="slaFilingDate">RTI Application Filing Date *</label>
+                  <label class="form-label" for="slaFilingDate">RTI Application Filing Date * • आवेदन जमा करने की तिथि *</label>
                   <input type="date" id="slaFilingDate" onchange="calculateSlaPenalty()" class="form-input" style="width: 100%;" />
-                  <span class="form-hint">Date official receipt or postal booking was registered</span>
+                  <span class="form-hint">Date official receipt or postal booking was registered • डाक रसीद या पावती की तिथि</span>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 12px;">
-                  <label class="form-label" for="slaProvisionType">Statutory SLA Provision *</label>
+                  <label class="form-label" for="slaProvisionType">Statutory SLA Provision * • कानूनी श्रेणी *</label>
                   <select id="slaProvisionType" onchange="calculateSlaPenalty()" class="form-select" style="width: 100%;">
-                    <option value="30">Section 7(1) — Standard Civic Window (30 Days)</option>
-                    <option value="2">Section 7(1) Proviso — Life or Liberty Urgent (48 Hours / 2 Days)</option>
-                    <option value="35_apio">Section 5(2) — Application via Assistant PIO (35 Days)</option>
-                    <option value="35_transfer">Section 6(3) — Transferred Public Authority (35 Days)</option>
-                    <option value="45">Section 19(1) — First Appellate Authority Disposal (30 to 45 Days)</option>
+                    <option value="30">Section 7(1) — Standard Window (30 Days) / सामान्य (30 दिन)</option>
+                    <option value="2">Section 7(1) Proviso — Life/Liberty (48 Hours) / आपातकालीन (48 घंटे)</option>
+                    <option value="35_apio">Section 5(2) — Via Assistant PIO (35 Days) / सहायक PIO (35 दिन)</option>
+                    <option value="35_transfer">Section 6(3) — Transferred Authority (35 Days) / अंतरित (35 दिन)</option>
+                    <option value="45">Section 19(1) — First Appeal (30-45 Days) / प्रथम अपील (30-45 दिन)</option>
                   </select>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 12px;">
-                  <label class="form-label" for="slaResponseDate">PIO Response Date (Leave empty if still pending)</label>
+                  <label class="form-label" for="slaResponseDate">PIO Response Date (Leave empty if pending) • जवाब मिलने की तिथि</label>
                   <input type="date" id="slaResponseDate" onchange="calculateSlaPenalty()" class="form-input" style="width: 100%;" />
-                  <span class="form-hint">Optional: Enter date if a delayed response was received</span>
+                  <span class="form-hint">Optional: Enter date if a delayed response was received • लंबित होने पर खाली छोड़ें</span>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 14px;">
-                  <label class="form-label" for="slaPioDepartment">Target Public Authority / Department</label>
+                  <label class="form-label" for="slaPioDepartment">Target Public Authority / Department • संबंधित सरकारी विभाग</label>
                   <input type="text" id="slaPioDepartment" value="Delhi Jal Board / BSES Power Discom" oninput="calculateSlaPenalty()" class="form-input" style="width: 100%;" />
                 </div>
 
                 <button type="button" class="btn-gov-outline" style="width: 100%; justify-content: center;" onclick="resetSlaCalculator()">
                   <i data-lucide="rotate-ccw" style="width: 13px; height: 13px;"></i>
-                  <span>Reset to 35-Day Overdue Benchmark</span>
+                  <span>Reset to 35-Day Overdue Benchmark • डिफ़ॉल्ट पर रीसेट करें</span>
                 </button>
               </div>
 
@@ -1381,28 +1366,28 @@
               <div class="sla-results-card">
                 <div class="sla-card-heading">
                   <i data-lucide="scale" style="width: 14px; height: 14px; color: var(--gov-copper);"></i>
-                  <span>Live Accrued Personal Penalty Liability</span>
+                  <span>Accrued Penalty Liability • अधिकारी पर देय जुर्माना</span>
                 </div>
 
                 <!-- 4 Metrics Counter Strip -->
                 <div class="sla-metrics-strip">
                   <div class="sla-metric-cell">
-                    <span class="sla-metric-label">Statutory Deadline</span>
+                    <span class="sla-metric-label">Deadline / अंतिम तिथि</span>
                     <span class="sla-metric-value" id="slaDeadlineDisplay">--</span>
                     <span class="sla-metric-sub" id="slaDeadlineSub">Section 7(1)</span>
                   </div>
                   <div class="sla-metric-cell">
-                    <span class="sla-metric-label">Days Elapsed</span>
+                    <span class="sla-metric-label">Days Elapsed / बीते दिन</span>
                     <span class="sla-metric-value" id="slaElapsedDaysDisplay" style="color: var(--gov-navy);">35 Days</span>
                     <span class="sla-metric-sub">From filing timestamp</span>
                   </div>
                   <div class="sla-metric-cell">
-                    <span class="sla-metric-label">Delinquent Days</span>
+                    <span class="sla-metric-label">Overdue / विलंब के दिन</span>
                     <span class="sla-metric-value" id="slaOverdueDaysDisplay" style="color: var(--status-review);">5 Days</span>
                     <span class="sla-metric-sub">Beyond statutory SLA</span>
                   </div>
                   <div class="sla-metric-cell" style="background: rgba(220, 38, 38, 0.05); border: 1px solid rgba(220, 38, 38, 0.2);">
-                    <span class="sla-metric-label" style="color: var(--status-review);">Accrued Penalty</span>
+                    <span class="sla-metric-label" style="color: var(--status-review);">Penalty / कुल जुर्माना</span>
                     <span class="sla-metric-value" id="slaPenaltyAmountDisplay" style="color: var(--status-review); font-size: 20px;">₹1,250</span>
                     <span class="sla-metric-sub">₹250/day (Max ₹25,000)</span>
                   </div>
@@ -1410,9 +1395,9 @@
 
                 <!-- Statutory Legal Guidance Box -->
                 <div class="legal-basis-box" id="slaGuidanceBox" style="margin-bottom: 14px; border-left-color: var(--status-review);">
-                  <b style="color: var(--status-review); font-size: 12.5px;" id="slaGuidanceTitle">⚠️ Statutory Default: Personal Salary Deduction Triggered</b>
+                  <b style="color: var(--status-review); font-size: 12.5px;" id="slaGuidanceTitle">⚠️ Statutory Default: Personal Salary Deduction Triggered • वैधानिक विलंब: वेतन कटौती लागू</b>
                   <p style="margin-top: 4px; font-size: 11.5px; color: var(--ink-secondary);" id="slaGuidanceText">
-                    The Public Information Officer has exceeded the statutory deadline by 5 days without valid order. Under Section 20(1) of the RTI Act 2005, a mandatory penalty of ₹250 per day (Total: ₹1,250) has accrued and is deductible directly from the PIO's personal salary upon First Appeal or Section 18 complaint.
+                    The Public Information Officer has exceeded statutory deadline by 5 days. Under Section 20(1) RTI Act, a mandatory penalty of ₹250/day (Total: ₹1,250) has accrued.<br/><span style="color: var(--ink-muted); font-size: 11px;">जन सूचना अधिकारी ने 5 दिन का विलंब किया है। धारा 20(1) के तहत कुल ₹1,250 जुर्माना अधिकारी के वेतन से काटा जाएगा।</span>
                   </p>
                 </div>
 
@@ -1420,11 +1405,11 @@
                 <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px; padding: 12px;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <span style="font-size: 11px; font-weight: 700; color: var(--gov-navy); text-transform: uppercase; letter-spacing: 0.5px;">
-                      Generated Section 20 Show-Cause Clause
+                      Generated Section 20 Notice Clause • धारा 20 कानूनी नोटिस क्लॉज
                     </span>
                     <button type="button" class="btn-gov-outline" id="btnCopySlaClause" style="padding: 3px 8px; font-size: 10.5px;" onclick="copySlaNoticeClause()">
                       <i data-lucide="copy" style="width: 12px; height: 12px;"></i>
-                      <span id="copyClauseBtnText">Copy Clause</span>
+                      <span id="copyClauseBtnText">Copy Clause • कॉपी करें</span>
                     </button>
                   </div>
                   <textarea id="slaGeneratedClause" rows="3" readonly style="width: 100%; font-family: var(--font-mono); font-size: 11px; background: var(--bg-subtle); color: var(--ink-primary); border: 1px solid var(--border-medium); border-radius: 3px; padding: 8px; line-height: 1.45; resize: none;"></textarea>
@@ -1439,19 +1424,21 @@
         <!-- Section 20 & 19 Statutory Jurisprudence Benchmarks -->
         <div class="ops-panel">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">Statutory Enforcement Mandates under RTI Act, 2005</span>
+            <span class="ops-panel-title">Statutory Enforcement Mandates under RTI Act, 2005 • आरटीआई अधिनियम 2005 के मुख्य कानूनी अधिकार</span>
           </div>
           <div style="padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;" class="compliance-benchmarks-grid">
             <div class="legal-basis-box" style="margin-bottom: 0;">
-              <b style="color: var(--gov-navy);">Section 19(1) Immediate First Appeal Right</b>
+              <b style="color: var(--gov-navy);">Section 19(1) Immediate First Appeal Right • धारा 19(1) प्रथम अपील का अधिकार</b>
               <p style="color: var(--ink-secondary); margin-top: 4px; font-size: 12px;">
-                Any person who does not receive a decision within the specified time under Section 7(1) may within thirty days from the expiry of such period prefer an appeal to the officer senior in rank to the PIO (First Appellate Authority).
+                Any citizen who does not receive a decision within 30 days under Section 7(1) may within thirty days prefer an appeal to the First Appellate Authority (FAA).<br/>
+                <span style="color: var(--ink-muted); font-size: 11px; display: block; margin-top: 4px;">30 दिन में जवाब न मिलने पर नागरिक वरिष्ठ अधिकारी के समक्ष 30 दिन में प्रथम अपील कर सकता है।</span>
               </p>
             </div>
             <div class="legal-basis-box" style="margin-bottom: 0; border-left-color: var(--gov-copper);">
-              <b style="color: var(--gov-copper);">Section 18 Direct Penalty Complaint</b>
+              <b style="color: var(--gov-copper);">Section 18 Direct Penalty Complaint • धारा 18 प्रत्यक्ष जुर्माना शिकायत</b>
               <p style="color: var(--ink-secondary); margin-top: 4px; font-size: 12px;">
-                Where a PIO has refused to receive an application, or failed to respond within time, the complainant may file a direct complaint to the Central or State Information Commission praying for invocation of Section 20(1) penalties and disciplinary action under Section 20(2).
+                Where a PIO has refused to receive an application, or failed to respond within time, file directly to Information Commission for Section 20 penalties.<br/>
+                <span style="color: var(--ink-muted); font-size: 11px; display: block; margin-top: 4px;">अधिकारी द्वारा आवेदन न लेने या जानबूझकर देरी करने पर सीधे राज्य या केंद्रीय सूचना आयोग में शिकायत की जा सकती है।</span>
               </p>
             </div>
           </div>
@@ -1464,8 +1451,8 @@
         <!-- Multi-Field Case & Audit Search Bar -->
         <div class="ops-panel" style="margin-bottom: 14px;">
           <div class="ops-panel-header">
-            <span class="ops-panel-title">Search Case Dockets & Audit Trail</span>
-            <span class="status-pill approved" id="runLogSearchStatus">All Logs Active</span>
+            <span class="ops-panel-title">Search Case Dockets & Audit Trail • केस ऑडिट ट्रायल व सर्च</span>
+            <span class="status-pill approved" id="runLogSearchStatus">All Logs Active • सभी लॉग सक्रिय</span>
           </div>
           <div style="padding: 14px;">
             <div style="display: flex; gap: 10px; align-items: center;">
@@ -1474,24 +1461,24 @@
                 <input 
                   type="text" 
                   id="runLogSearchInput" 
-                  placeholder="Type any keyword: complainant name, place/district, subject, address, officer name, or Case ID..." 
+                  placeholder="Type any keyword: complainant name, place/district, subject, address, officer name, or Case ID... / नाम, जिला, विषय, पता या केस आईडी..." 
                   oninput="handleRunLogSearch(this.value)"
                   style="padding-left: 32px; font-size: 12.5px; height: 34px;"
                 />
               </div>
               <button class="btn-gov-outline" style="padding: 6px 12px; font-size: 11.5px;" onclick="clearRunLogSearch()">
                 <i data-lucide="x" style="width: 12px; height: 12px;"></i>
-                <span>Clear</span>
+                <span>Clear • हटाएं</span>
               </button>
               <button class="btn-gov-outline" style="padding: 6px 12px; font-size: 11.5px;" onclick="loadRunLogs()">
                 <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i>
-                <span>Refresh</span>
+                <span>Refresh • ताज़ा करें</span>
               </button>
             </div>
 
             <!-- Quick Filter Pill Suggestions -->
             <div style="display: flex; gap: 6px; margin-top: 10px; align-items: center; flex-wrap: wrap;">
-              <span style="font-size: 10.5px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Quick Search:</span>
+              <span style="font-size: 10.5px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Quick Search • त्वरित खोज:</span>
               <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Shivanshu')">Shivanshu</button>
               <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Sunita')">Sunita Devi</button>
               <button type="button" class="statutory-tag" style="cursor: pointer; border: 1px solid var(--border-medium); background: var(--bg-surface);" onclick="setRunLogSearchQuery('Varanasi')">Varanasi</button>
@@ -1509,9 +1496,9 @@
           <div class="ops-panel-header" style="background: var(--bg-subtle);">
             <div style="display: flex; align-items: center; gap: 8px;">
               <i data-lucide="folder-search" style="width: 15px; height: 15px; color: var(--gov-navy);"></i>
-              <span class="ops-panel-title">Related Case Dockets (<span id="matchedCasesCount">0</span>)</span>
+              <span class="ops-panel-title">Related Case Dockets • संबंधित केस डॉसियर (<span id="matchedCasesCount">0</span>)</span>
             </div>
-            <span style="font-size: 11px; color: var(--ink-muted);">Click "Inspect Dossier" to open case in Casework Desk</span>
+            <span style="font-size: 11px; color: var(--ink-muted);">Click "Inspect Dossier" to open case in Casework Desk • केस डॉसियर खोलने के लिए क्लिक करें</span>
           </div>
           <div id="matchedCasesContainer" style="padding: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px;">
             <!-- Dynamically rendered matched case cards -->
@@ -1523,20 +1510,20 @@
           <div class="ops-panel-header">
             <div style="display: flex; align-items: center; gap: 8px;">
               <i data-lucide="scroll-text" style="width: 14px; height: 14px; color: var(--gov-navy);"></i>
-              <span class="ops-panel-title">Immutable Code-Generated Execution Run Log (<span id="runLogCountBadge">0</span> Records)</span>
+              <span class="ops-panel-title">Immutable Code-Generated Execution Run Log • अपरिवर्तनीय ऑडिट रन लॉग (<span id="runLogCountBadge">0</span> Records)</span>
             </div>
-            <span id="runLogFilterBadge" class="status-pill approved" style="font-size: 10px;">All Events</span>
+            <span id="runLogFilterBadge" class="status-pill approved" style="font-size: 10px;">All Events • सभी घटनाएं</span>
           </div>
-          <div style="padding: 12px; overflow-x: auto;">
+          <div class="table-responsive" style="padding: 12px; overflow-x: auto;">
             <table class="editorial-table">
               <thead>
                 <tr>
-                  <th>Timestamp</th>
-                  <th>Event Type</th>
-                  <th>Case ID</th>
-                  <th>Actor</th>
-                  <th>Action & Result</th>
-                  <th>Correlation ID</th>
+                  <th>Timestamp / समय</th>
+                  <th>Event Type / प्रकार</th>
+                  <th>Case ID / केस आईडी</th>
+                  <th>Actor / प्रयोक्ता</th>
+                  <th>Action & Result / कार्रवाई व परिणाम</th>
+                  <th>Correlation ID / ट्रैकिंग आईडी</th>
                 </tr>
               </thead>
               <tbody id="runLogBody"></tbody>
@@ -1558,21 +1545,21 @@
         <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
           <button class="btn-gov-outline" onclick="returnToAuditRunLog()" style="padding: 6px 14px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
             <i data-lucide="arrow-left" style="width: 13px; height: 13px;"></i>
-            <span>&larr; Return to Audit Run Log</span>
+            <span>&larr; Return to Audit Run Log • वापस ऑडिट लॉग</span>
           </button>
           <span style="color: var(--border-strong);">&bull;</span>
-          <span style="color: var(--ink-muted); font-size: 11.5px;">Audit Trail</span>
+          <span style="color: var(--ink-muted); font-size: 11.5px;">Audit Trail • ऑडिट ट्रेल</span>
           <span style="color: var(--border-strong);">&bull;</span>
           <span id="detailCaseBreadcrumb" style="font-family: var(--font-mono); font-weight: 700; color: var(--gov-navy); font-size: 12px;">Case Dossier</span>
         </div>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <button class="btn-gov-outline" style="padding: 6px 12px; font-size: 11.5px; display: inline-flex; align-items: center; gap: 5px;" onclick="openCaseInCaseworkDesk()">
             <i data-lucide="folder-kanban" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
-            <span>Open in Casework Workspace</span>
+            <span>Open in Casework Workspace • शिकायत डेस्क</span>
           </button>
           <button class="btn-gov-primary" style="padding: 6px 14px; font-size: 11.5px; display: inline-flex; align-items: center; gap: 5px;" onclick="downloadActiveCasePdf()">
             <i data-lucide="download" style="width: 13px; height: 13px;"></i>
-            <span>Download Form-A PDF</span>
+            <span>Download Form-A PDF • फॉर्म-A</span>
           </button>
         </div>
       </div>
@@ -1585,25 +1572,25 @@
               <h2 id="detailDocketId" style="font-family: var(--font-serif); font-size: 22px; font-weight: 700; color: var(--gov-navy); margin: 0;">ARZ-XXXX</h2>
               <span id="detailDocketStatusPill" class="status-pill needs-review">NEEDS REVIEW</span>
               <span id="detailDocketSlaBadge" class="status-pill sla-standard">30-Day SLA</span>
-              <span id="detailDocketUrgentBadge" class="status-pill" style="display: none; background: #FEF2F2; color: #B91C1C; border-color: #FECACA;">48H Life &amp; Liberty</span>
+              <span id="detailDocketUrgentBadge" class="status-pill" style="display: none; background: #FEF2F2; color: #B91C1C; border-color: #FECACA;">48H Life &amp; Liberty • आपातकाल</span>
             </div>
             <div id="detailDocketSubject" style="font-size: 13.5px; font-weight: 600; color: var(--ink-secondary); margin-bottom: 8px;">
               Right to Information Application
             </div>
             <div style="display: flex; gap: 8px; font-size: 11.5px; color: var(--ink-secondary); flex-wrap: wrap; align-items: center;">
-              <span><b>Filing Date:</b> <span id="detailDocketDate">&mdash;</span></span>
+              <span><b>Filing Date / आवेदन तिथि:</b> <span id="detailDocketDate">&mdash;</span></span>
               <span style="color: var(--ink-muted);">&bull;</span>
-              <span><b>Ref No:</b> <span id="detailDocketRef" style="font-family: var(--font-mono); font-weight: 600;">&mdash;</span></span>
+              <span><b>Ref No / संदर्भ:</b> <span id="detailDocketRef" style="font-family: var(--font-mono); font-weight: 600;">&mdash;</span></span>
               <span style="color: var(--ink-muted);">&bull;</span>
-              <span><b>Department:</b> <span id="detailDocketDept" class="statutory-tag">&mdash;</span></span>
+              <span><b>Department / विभाग:</b> <span id="detailDocketDept" class="statutory-tag">&mdash;</span></span>
               <span style="color: var(--ink-muted);">&bull;</span>
-              <span><b>Complainant:</b> <span id="detailDocketComplainantName" style="font-weight: 600;">&mdash;</span></span>
+              <span><b>Complainant / आवेदक:</b> <span id="detailDocketComplainantName" style="font-weight: 600;">&mdash;</span></span>
               <span style="color: var(--ink-muted);">&bull;</span>
-              <span><b>Jurisdiction:</b> <span id="detailDocketLocation">&mdash;</span></span>
+              <span><b>Jurisdiction / क्षेत्राधिकार:</b> <span id="detailDocketLocation">&mdash;</span></span>
             </div>
           </div>
           <div style="background: var(--bg-alt); border: 1px solid var(--border-subtle); padding: 10px 16px; border-radius: 2px; text-align: center; min-width: 140px;">
-            <div style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.5px;">Statutory SLA Window</div>
+            <div style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.5px;">Statutory SLA Window • समयसीमा</div>
             <div id="detailDocketSlaCountdown" style="font-size: 20px; font-weight: 700; font-family: var(--font-mono); color: var(--gov-navy); margin: 4px 0;">30 Days</div>
             <div id="detailDocketDueDate" style="font-size: 10.5px; color: var(--ink-muted);">Due: &mdash;</div>
           </div>
@@ -1619,7 +1606,7 @@
             <div class="ops-panel-header">
               <span class="ops-panel-title">
                 <i data-lucide="user-check" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
-                <span>Citizen Complainant &amp; Designated Public Authority</span>
+                <span>Citizen Complainant &amp; Designated Public Authority • नागरिक आवेदक एवं नामित अधिकारी</span>
               </span>
               <span class="statutory-tag" id="detailPincodeBadge">PIN: &mdash;</span>
             </div>
@@ -1627,14 +1614,14 @@
               <div class="detail-parties-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <!-- Complainant box -->
                 <div style="background: var(--bg-alt); border: 1px solid var(--border-subtle); padding: 10px; border-radius: 2px;">
-                  <div style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 4px;">Citizen Applicant</div>
+                  <div style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 4px;">Citizen Applicant • नागरिक आवेदक</div>
                   <div id="detailCompName" style="font-weight: 700; font-size: 13px; color: var(--ink-primary);">&mdash;</div>
                   <div id="detailCompContact" style="font-size: 11.5px; color: var(--ink-secondary); margin-top: 2px;">&mdash;</div>
                   <div id="detailCompAddress" style="font-size: 11px; color: var(--ink-muted); margin-top: 4px; line-height: 1.4;">&mdash;</div>
                 </div>
                 <!-- PIO box -->
                 <div style="background: var(--bg-alt); border: 1px solid var(--border-subtle); padding: 10px; border-radius: 2px;">
-                  <div style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 4px;">Designated PIO &amp; Authority</div>
+                  <div style="font-size: 10px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 4px;">Designated PIO &amp; Authority • नामित अधिकारी</div>
                   <div id="detailPioName" style="font-weight: 700; font-size: 13px; color: var(--gov-navy);">&mdash;</div>
                   <div id="detailPioDept" style="font-size: 11.5px; color: var(--gov-copper); font-weight: 600;">&mdash;</div>
                   <div id="detailPioAddress" style="font-size: 11px; color: var(--ink-muted); margin-top: 4px; line-height: 1.4;">&mdash;</div>
@@ -1649,16 +1636,16 @@
             <div class="ops-panel-header">
               <span class="ops-panel-title">
                 <i data-lucide="file-text" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
-                <span>Citizen Grievance &amp; Structured Questions</span>
+                <span>Citizen Grievance &amp; Structured Questions • शिकायत विवरण एवं आरटीआई प्रश्न</span>
               </span>
             </div>
             <div class="ops-panel-body" style="padding: 12px 14px;">
               <div style="margin-bottom: 12px;">
-                <label class="form-label" style="font-size: 10.5px; text-transform: uppercase; color: var(--ink-muted);">Raw Grievance Narrative</label>
+                <label class="form-label" style="font-size: 10.5px; text-transform: uppercase; color: var(--ink-muted);">Raw Grievance Narrative • शिकायत का मूल विवरण</label>
                 <div id="detailGrievanceText" style="font-size: 12px; color: var(--ink-secondary); line-height: 1.6; background: var(--bg-subtle); padding: 10px; border: 1px solid var(--border-subtle); border-radius: 2px; max-height: 150px; overflow-y: auto; white-space: pre-wrap;">&mdash;</div>
               </div>
               <div>
-                <label class="form-label" style="font-size: 10.5px; text-transform: uppercase; color: var(--ink-muted);">Drafted RTI Form-A Questions</label>
+                <label class="form-label" style="font-size: 10.5px; text-transform: uppercase; color: var(--ink-muted);">Drafted RTI Form-A Questions • तैयार किए गए कानूनी प्रश्न</label>
                 <ol id="detailQuestionsList" style="font-size: 11.5px; color: var(--ink-secondary); line-height: 1.5; padding-left: 18px; margin: 0;">
                   <!-- Dynamically populated numbered questions -->
                 </ol>
@@ -1671,14 +1658,14 @@
             <div class="ops-panel-header">
               <span class="ops-panel-title">
                 <i data-lucide="brain-circuit" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
-                <span>ML Domain Classification Intelligence</span>
+                <span>ML Domain Classification • एआई वर्गीकरण व धारा विश्लेषण</span>
               </span>
               <span id="detailMlConfidenceBadge" class="status-pill approved">98% Confidence</span>
             </div>
             <div class="ops-panel-body" style="padding: 12px 14px;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
                 <div>
-                  <span style="font-size: 11px; color: var(--ink-muted);">Designated Civic Sector (11-Domain Classifier):</span>
+                  <span style="font-size: 11px; color: var(--ink-muted);">Designated Civic Sector • निर्धारित सरकारी विभाग:</span>
                   <div id="detailMlDomainTitle" style="font-size: 14px; font-weight: 700; color: var(--gov-navy);">Revenue &amp; Land Records</div>
                 </div>
                 <div id="detailMlTriggers" style="display: flex; gap: 4px; flex-wrap: wrap;">
@@ -1688,12 +1675,12 @@
               <div id="detailMlReason" style="font-size: 11.5px; color: var(--ink-secondary); line-height: 1.5; background: #F8FAFC; border-left: 3px solid var(--gov-navy); padding: 6px 10px; margin-bottom: 8px;">
                 Intent classified via multi-gram TF-IDF analysis.
               </div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+              <div class="form-row-2col" style="gap: 8px; font-size: 11px;">
                 <div style="background: var(--bg-alt); padding: 6px 8px; border: 1px solid var(--border-subtle); border-radius: 2px;">
-                  <b>IPC &rarr; BNS Mapping:</b> <span id="detailBnsMapping">&mdash;</span>
+                  <b>IPC &rarr; BNS Mapping • धारा रूपांतरण:</b> <span id="detailBnsMapping">&mdash;</span>
                 </div>
                 <div style="background: var(--bg-alt); padding: 6px 8px; border: 1px solid var(--border-subtle); border-radius: 2px;">
-                  <b>Section 20 Penalty Risk:</b> <span id="detailSec20Penalty" style="color: var(--gov-copper); font-weight: 700;">₹0</span>
+                  <b>Section 20 Penalty Risk • धारा 20 जुर्माना:</b> <span id="detailSec20Penalty" style="color: var(--gov-copper); font-weight: 700;">₹0</span>
                 </div>
               </div>
             </div>
@@ -1704,42 +1691,41 @@
             <div class="ops-panel-header" style="background: #FFF7ED; border-bottom: 1px solid #FED7AA;">
               <span class="ops-panel-title" style="color: var(--gov-copper);">
                 <i data-lucide="merge" style="width: 13px; height: 13px; color: var(--gov-copper);"></i>
-                <span>Case Deduplication &amp; Docket Consolidation</span>
+                <span>Case Deduplication &amp; Docket Consolidation • समान मामलों का एकीकरण</span>
               </span>
               <span class="statutory-tag" style="background: #FFEDD5; color: var(--gov-copper); border-color: #FDBA74;">Deduplication Engine</span>
             </div>
             <div class="ops-panel-body" style="padding: 12px 14px;">
               <p style="font-size: 11.5px; color: var(--ink-secondary); margin-bottom: 10px; line-height: 1.5;">
-                Merge duplicate or repetitive dockets filed for the same grievance into this master docket.
-                The duplicate will be marked as <code style="font-size: 11px; background: #FEE2E2; color: #991B1B; padding: 1px 4px; border-radius: 2px;">MERGED_DUPLICATE</code>,
-                facts consolidated, and a verified audit run log entry recorded on both dockets.
+                Merge duplicate or repetitive dockets filed for the same grievance into this master docket.<br/>
+                <span style="color: var(--ink-muted); font-size: 11px;">एक ही समस्या के कई आवेदनों को इस मुख्य केस में एकीकृत करें ताकि दोहराव न हो।</span>
               </p>
 
               <form id="mergeCaseForm" onsubmit="submitCaseMergeFromDetail(event)">
                 <div style="margin-bottom: 10px;">
-                  <label class="form-label" style="font-size: 11px; font-weight: 600;">Select Duplicate Case to Merge into this Master Docket:</label>
+                  <label class="form-label" style="font-size: 11px; font-weight: 600;">Select Duplicate Case to Merge • जोड़ने हेतु डुप्लीकेट केस चुनें:</label>
                   <select id="mergeDuplicateSelect" required style="width: 100%; font-size: 12px; padding: 6px 8px; border: 1px solid var(--border-medium); background: #FFFFFF; border-radius: 2px;">
                     <option value="">-- Choose a duplicate case to consolidate --</option>
                   </select>
                 </div>
 
                 <div style="margin-bottom: 10px;">
-                  <label class="form-label" style="font-size: 11px; font-weight: 600;">Consolidation Remarks / Legal Justification:</label>
-                  <input type="text" id="mergeRemarksInput" placeholder="e.g. Duplicate filing by same complainant for identical delay" style="width: 100%; font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--border-medium); border-radius: 2px;" />
+                  <label class="form-label" style="font-size: 11px; font-weight: 600;">Consolidation Remarks / Legal Justification • एकीकरण का कारण:</label>
+                  <input type="text" id="mergeRemarksInput" placeholder="e.g. Duplicate filing by same complainant for identical delay / समान आवेदक का दोहराव आवेदन" style="width: 100%; font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--border-medium); border-radius: 2px;" />
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                   <span id="mergeStatusMsg" style="font-size: 11px; color: var(--status-active); font-weight: 600;"></span>
                   <button type="submit" class="btn-gov-primary" style="background: var(--gov-copper); border-color: var(--gov-copper); padding: 6px 14px; font-size: 11.5px; display: inline-flex; align-items: center; gap: 6px;">
                     <i data-lucide="copy-check" style="width: 13px; height: 13px;"></i>
-                    <span>Merge &amp; Deduplicate Docket</span>
+                    <span>Merge &amp; Deduplicate Docket • केस एकीकरण करें</span>
                   </button>
                 </div>
               </form>
 
               <!-- List of Previously Merged Cases -->
               <div id="previouslyMergedSection" style="margin-top: 12px; padding-top: 8px; border-top: 1px dashed #FDBA74; display: none;">
-                <span style="font-size: 10.5px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Consolidated Duplicate Cases:</span>
+                <span style="font-size: 10.5px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">Consolidated Duplicate Cases • एकीकृत मामले:</span>
                 <div id="previouslyMergedList" style="display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;"></div>
               </div>
             </div>
@@ -1753,69 +1739,70 @@
             <div class="ops-panel-header">
               <span class="ops-panel-title">
                 <i data-lucide="clock" style="width: 13px; height: 13px; color: var(--status-active);"></i>
-                <span>Log Official Case Update with Timestamp</span>
+                <span>Log Official Case Update • केस में नया घटनाक्रम दर्ज करें</span>
               </span>
-              <span class="status-pill approved" style="font-size: 10px;">Audit-Verified Ledger</span>
+              <span class="status-pill approved" style="font-size: 10px;">Audit-Verified Ledger • सत्यापित रिकॉर्ड</span>
             </div>
             <div class="ops-panel-body" style="padding: 14px;">
               <p style="font-size: 11.5px; color: var(--ink-secondary); margin-bottom: 12px;">
-                Record official hearings, notice dispatches, citizen evidence submissions, PIO responses, or status transitions. All entries are cryptographically stamped into the immutable audit run log.
+                Record official hearings, notice dispatches, citizen evidence submissions, PIO responses, or status transitions.<br/>
+                <span style="color: var(--ink-muted); font-size: 11px;">आधिकारिक सुनवाई, नोटिस, साक्ष्य या अधिकारी के जवाब का समयबद्ध रिकॉर्ड दर्ज करें।</span>
               </p>
 
               <form id="caseUpdateForm" onsubmit="submitCaseUpdateFromDetail(event)">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div class="form-row-2col">
                   <div>
-                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Update Category</label>
+                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Update Category • घटना प्रकार</label>
                     <select id="updateTypeSelect" required style="width: 100%; font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--border-medium); background: #FFFFFF; border-radius: 2px;">
-                      <option value="HEARING_NOTE">Hearing Note / Appearance</option>
-                      <option value="PIO_RESPONSE_RECEIVED">PIO Response / Records Received</option>
-                      <option value="EVIDENCE_COLLECTED">Evidence / Documents Collected</option>
-                      <option value="FIRST_APPEAL_FILED">First Appeal Filed (Sec 19)</option>
-                      <option value="STATUTORY_NOTICE_ISSUED">Statutory Notice Issued (Sec 80 CPC)</option>
-                      <option value="REBUTTAL_SUBMITTED">Section 8 Rebuttal Submitted</option>
-                      <option value="STATUS_TRANSITION">Docket Status Transition</option>
-                      <option value="CASE_PROGRESS_NOTE" selected>General Case Progress Note</option>
+                      <option value="HEARING_NOTE">Hearing Note / सुनवाई विवरण</option>
+                      <option value="PIO_RESPONSE_RECEIVED">PIO Response / अधिकारी का जवाब</option>
+                      <option value="EVIDENCE_COLLECTED">Evidence Collected / साक्ष्य दस्तावेज</option>
+                      <option value="FIRST_APPEAL_FILED">First Appeal Filed / प्रथम अपील दर्ज</option>
+                      <option value="STATUTORY_NOTICE_ISSUED">Statutory Notice Issued / कानूनी नोटिस</option>
+                      <option value="REBUTTAL_SUBMITTED">Section 8 Rebuttal / धारा 8 प्रतिवाद</option>
+                      <option value="STATUS_TRANSITION">Docket Status Transition / स्थिति परिवर्तन</option>
+                      <option value="CASE_PROGRESS_NOTE" selected>General Case Progress / सामान्य प्रगति</option>
                     </select>
                   </div>
 
                   <div>
-                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Actor / Officer</label>
+                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Actor / Officer • प्रयोक्ता / अधिकारी</label>
                     <input type="text" id="updateActorInput" value="Adv. S. Kalra (Legal Counsel)" required style="width: 100%; font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--border-medium); background: #FFFFFF; border-radius: 2px;" />
                   </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div class="form-row-2col">
                   <div>
-                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Official Timestamp</label>
+                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Official Timestamp • आधिकारिक समय</label>
                     <input type="datetime-local" id="updateTimestampInput" required style="width: 100%; font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--border-medium); background: #FFFFFF; font-family: var(--font-mono); border-radius: 2px;" />
-                    <span style="font-size: 9.5px; color: var(--ink-muted); display: block; margin-top: 2px;">Defaults to live time; editable for backdated events</span>
+                    <span style="font-size: 9.5px; color: var(--ink-muted); display: block; margin-top: 2px;">Defaults to live time; editable for backdated events • वर्तमान समय डिफ़ॉल्ट</span>
                   </div>
 
                   <div>
-                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Status Transition (Optional)</label>
+                    <label class="form-label" style="font-size: 11px; font-weight: 600;">Status Transition • स्थिति परिवर्तन (Optional)</label>
                     <select id="updateStatusSelect" style="width: 100%; font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--border-medium); background: #FFFFFF; border-radius: 2px;">
-                      <option value="">-- Keep Current Status --</option>
-                      <option value="NEEDS_REVIEW">NEEDS_REVIEW</option>
-                      <option value="UNDER_REVIEW">UNDER_REVIEW</option>
-                      <option value="APPROVED">APPROVED</option>
-                      <option value="DISPATCHED">DISPATCHED</option>
-                      <option value="APPEAL_FILED">APPEAL_FILED</option>
-                      <option value="DISPOSED">DISPOSED</option>
-                      <option value="CLOSED">CLOSED</option>
+                      <option value="">-- Keep Current Status / वर्तमान स्थिति रखें --</option>
+                      <option value="NEEDS_REVIEW">NEEDS_REVIEW / समीक्षा आवश्यक</option>
+                      <option value="UNDER_REVIEW">UNDER_REVIEW / समीक्षाधीन</option>
+                      <option value="APPROVED">APPROVED / स्वीकृत</option>
+                      <option value="DISPATCHED">DISPATCHED / प्रेषित</option>
+                      <option value="APPEAL_FILED">APPEAL_FILED / अपील दर्ज</option>
+                      <option value="DISPOSED">DISPOSED / निस्तारित</option>
+                      <option value="CLOSED">CLOSED / बंद</option>
                     </select>
                   </div>
                 </div>
 
                 <div style="margin-bottom: 12px;">
-                  <label class="form-label" style="font-size: 11px; font-weight: 600;">Detailed Remarks / Hearing Minutes / Progress Narrative</label>
-                  <textarea id="updateRemarksTextarea" rows="3" required placeholder="Enter proceeding details, documents submitted, officer response, or evidentiary notes..." style="width: 100%; font-size: 12px; padding: 8px; border: 1px solid var(--border-medium); font-family: var(--font-ui); border-radius: 2px;"></textarea>
+                  <label class="form-label" style="font-size: 11px; font-weight: 600;">Detailed Remarks / Hearing Minutes • कार्यवाही का विवरण</label>
+                  <textarea id="updateRemarksTextarea" rows="3" required placeholder="Enter proceeding details, documents submitted, officer response... / सुनवाई, प्राप्त दस्तावेज या अधिकारी के जवाब का विवरण दर्ज करें..." style="width: 100%; font-size: 12px; padding: 8px; border: 1px solid var(--border-medium); font-family: var(--font-ui); border-radius: 2px;"></textarea>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                   <span id="updateFormStatusMsg" style="font-size: 11px; color: var(--status-active); font-weight: 600;"></span>
                   <button type="submit" class="btn-gov-primary" id="btnSubmitCaseUpdate" style="padding: 7px 18px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
                     <i data-lucide="plus-circle" style="width: 13px; height: 13px;"></i>
-                    <span>Record Timestamped Update</span>
+                    <span>Record Timestamped Update • नया अपडेट दर्ज करें</span>
                   </button>
                 </div>
               </form>
@@ -1827,11 +1814,11 @@
             <div class="ops-panel-header">
               <span class="ops-panel-title">
                 <i data-lucide="history" style="width: 13px; height: 13px; color: var(--gov-navy);"></i>
-                <span>Chronological Case Timeline &amp; Ledger (<span id="detailTimelineCount">0</span>)</span>
+                <span>Chronological Case Timeline &amp; Ledger • केस की समयबद्ध प्रगति (<span id="detailTimelineCount">0</span>)</span>
               </span>
               <button class="btn-gov-outline" style="padding: 2px 8px; font-size: 10.5px; display: inline-flex; align-items: center; gap: 4px;" onclick="refreshActiveCaseDetailTimeline()">
                 <i data-lucide="refresh-cw" style="width: 11px; height: 11px;"></i>
-                <span>Refresh</span>
+                <span>Refresh • ताज़ा करें</span>
               </button>
             </div>
             <div class="ops-panel-body" style="padding: 14px;">
@@ -1848,37 +1835,37 @@
     <div id="transferModal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
       <div class="gov-modal-card" style="max-width: 500px; width: 90%; background: var(--bg-surface); border: 1px solid var(--border-medium); border-top: 3px solid var(--gov-navy); padding: 20px; box-shadow: var(--shadow-md);">
         <div style="font-family: var(--font-serif); font-size: 15px; font-weight: 700; color: var(--gov-navy); margin-bottom: 8px;">
-          SECTION 6(3) 5-DAY MANDATORY TRANSFER
+          SECTION 6(3) 5-DAY MANDATORY TRANSFER • धारा 6(3) 5-दिवसीय अनिवार्य अंतरण
         </div>
         <p style="font-size: 11.5px; color: var(--ink-secondary); margin-bottom: 12px;">
-          Transfer this application to the rightful public authority holding records. An automated notice and run log audit will be recorded.
+          Transfer this application to the rightful public authority holding records. An automated notice and run log audit will be recorded. • इस आवेदन को संबंधित अभिलेख धारक लोक प्राधिकरण को अंतरित करें। स्वचालित नोटिस व ऑडिट लॉग दर्ज होगा।
         </p>
 
         <div style="margin-bottom: 10px;">
-          <label class="form-label">Target Public Authority</label>
+          <label class="form-label">Target Public Authority • लक्षित लोक प्राधिकरण</label>
           <select id="transferDeptSelect">
-            <option value="Revenue & Land Records">Revenue & Land Records (Tehsildar)</option>
-            <option value="Food & Civil Supplies">Food & Civil Supplies (DSO / PDS)</option>
-            <option value="Municipal Public Works & Drainage">Municipal Public Works (Executive Engineer)</option>
-            <option value="Water Supply & Jal Board">Water Supply & Jal Board (Chief Engineer / Jal Sansthan)</option>
-            <option value="Electricity & Power Discom">Electricity & Power Discom (Superintending Engineer)</option>
-            <option value="Police & Law Enforcement">Police & Law Enforcement (DCP / RTI Cell)</option>
-            <option value="Health & Family Welfare">Health & Family Welfare (Chief Medical Officer)</option>
-            <option value="Higher Education & Student Welfare">Higher Education (Deputy Registrar / Nodal PIO)</option>
-            <option value="Transport, Highways & Motor Vehicles / RTO">Transport & Motor Vehicles (RTO Officer)</option>
-            <option value="Labour, Employment, Pension & Social Security">Pension & Labour (Assistant PF Commissioner)</option>
-            <option value="Environment & Pollution Control">Environment & Pollution (Senior Environmental Engineer)</option>
+            <option value="Revenue & Land Records">Revenue & Land Records (Tehsildar) • राजस्व एवं भूमि रिकॉर्ड (तहसीलदार)</option>
+            <option value="Food & Civil Supplies">Food & Civil Supplies (DSO / PDS) • खाद्य एवं नागरिक आपूर्ति (डीएसओ / राशन)</option>
+            <option value="Municipal Public Works & Drainage">Municipal Public Works (Executive Engineer) • नगर पालिका लोक निर्माण (अधिशासी अभियंता)</option>
+            <option value="Water Supply & Jal Board">Water Supply & Jal Board (Chief Engineer / Jal Sansthan) • जल आपूर्ति एवं जल बोर्ड</option>
+            <option value="Electricity & Power Discom">Electricity & Power Discom (Superintending Engineer) • विद्युत वितरण निगम</option>
+            <option value="Police & Law Enforcement">Police & Law Enforcement (DCP / RTI Cell) • पुलिस एवं कानून प्रवर्तन (डीसीपी / आरटीआई सेल)</option>
+            <option value="Health & Family Welfare">Health & Family Welfare (Chief Medical Officer) • स्वास्थ्य एवं परिवार कल्याण (सीएमओ)</option>
+            <option value="Higher Education & Student Welfare">Higher Education (Deputy Registrar / Nodal PIO) • उच्च शिक्षा (उप कुलसचिव / नोडल पीआईओ)</option>
+            <option value="Transport, Highways & Motor Vehicles / RTO">Transport & Motor Vehicles (RTO Officer) • परिवहन एवं मोटर वाहन (आरटीओ)</option>
+            <option value="Labour, Employment, Pension & Social Security">Pension & Labour (Assistant PF Commissioner) • श्रम, पेंशन एवं सामाजिक सुरक्षा (पीएफ आयुक्त)</option>
+            <option value="Environment & Pollution Control">Environment & Pollution (Senior Environmental Engineer) • पर्यावरण एवं प्रदूषण नियंत्रण</option>
           </select>
         </div>
 
         <div style="margin-bottom: 14px;">
-          <label class="form-label">Statutory Reason</label>
-          <textarea id="transferReason" rows="2" placeholder="Subject matter falls under exclusive jurisdiction of..."></textarea>
+          <label class="form-label">Statutory Reason • विधिक आधार व कारण</label>
+          <textarea id="transferReason" rows="2" placeholder="Subject matter falls under exclusive jurisdiction of... • विषय वस्तु किसके क्षेत्राधिकार के अंतर्गत आती है..."></textarea>
         </div>
 
         <div style="display: flex; gap: 6px; justify-content: flex-end;">
-          <button class="btn-gov-outline" onclick="closeTransferModal()">Cancel</button>
-          <button class="btn-gov-primary" onclick="submitTransferSec6_3()">Execute Transfer</button>
+          <button class="btn-gov-outline" onclick="closeTransferModal()">Cancel • रद्द करें</button>
+          <button class="btn-gov-primary" onclick="submitTransferSec6_3()">Execute Transfer • अंतरण निष्पादित करें</button>
         </div>
       </div>
     </div>
@@ -1889,13 +1876,13 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
           <div>
             <div style="font-family: var(--font-serif); font-size: 16px; font-weight: 700; color: var(--gov-navy);">
-              INDIAN SPEED POST DISPATCH DOCKET & REGISTERED AD
+              INDIAN SPEED POST DISPATCH DOCKET & REGISTERED AD • भारतीय स्पीड पोस्ट प्रेषण रसीद एवं पावती
             </div>
             <div style="font-size: 11px; color: var(--ink-muted);">
-              Department of Posts, India &bull; Statutory Proof of Dispatch under Section 27 General Clauses Act
+              Department of Posts, India &bull; Statutory Proof of Dispatch under Section 27 General Clauses Act • डाक विभाग, भारत सरकार &bull; धारा 27 साधारण खंड अधिनियम के अंतर्गत विधिक प्रेषण प्रमाण
             </div>
           </div>
-          <button class="btn-gov-outline" onclick="closePostalSlipModal()">✕ Close</button>
+          <button class="btn-gov-outline" onclick="closePostalSlipModal()">✕ Close • बंद करें</button>
         </div>
 
         <div id="postalSlipModalContent">
@@ -1903,8 +1890,8 @@
         </div>
 
         <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
-          <button class="btn-gov-outline" onclick="closePostalSlipModal()">Close</button>
-          <button class="btn-gov-primary" onclick="printPostalSlip()"><i data-lucide="printer" style="width: 13px; height: 13px;"></i> Print Dispatch Slip</button>
+          <button class="btn-gov-outline" onclick="closePostalSlipModal()">Close • बंद करें</button>
+          <button class="btn-gov-primary" onclick="printPostalSlip()"><i data-lucide="printer" style="width: 13px; height: 13px;"></i> Print Dispatch Slip • रसीद प्रिंट करें</button>
         </div>
       </div>
     </div>
@@ -1912,16 +1899,16 @@
     <!-- Institutional Footer -->
     <footer class="institutional-footer">
       <div>
-        <b>ARZI</b> &mdash; Civic RTI & Statutory Legal Intelligence Platform &middot; National Legal Tech Standard
+        <span data-i18n="footer_brand">ARZI — Civic RTI & Statutory Legal Intelligence Platform • National Legal Tech Standard</span>
       </div>
       <div>
         <span>Backend: Pure Python Flask 3.x</span> &nbsp;|&nbsp; 
-        <span>Geodesy: Haversine Formula</span> &nbsp;|&nbsp; 
-        <span>Statutory: IPC 1860 &harr; BNS 2023 &middot; RTI Act 2005</span>
+        <span>Geodesy: Haversine Formula • भू-निर्देशांक गणना</span> &nbsp;|&nbsp; 
+        <span>Statutory: IPC 1860 &harr; BNS 2023 &middot; RTI Act 2005 • विधिक संहिता</span>
       </div>
     </footer>
   </div>
 
-  <script src="/app.js?v=20260907.1"></script>
+  <script src="/app.js?v=20260908.3"></script>
 </body>
 </html>

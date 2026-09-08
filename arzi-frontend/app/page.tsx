@@ -11,6 +11,7 @@ export default function Home() {
   const [runLogs, setRunLogs] = useState<any[]>([]);
   const [selectedCase, setSelectedCase] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [lang, setLang] = useState<"en" | "hi">("en");
 
   // Form State
   const [name, setName] = useState("");
@@ -22,6 +23,9 @@ export default function Home() {
   const [subDate, setSubDate] = useState("");
 
   const API_BASE = "http://localhost:5000/api/v1";
+
+  const t = (enText: string, hiText: string) => (lang === "hi" ? hiText : enText);
+
 
   useEffect(() => {
     fetchQueue(searchQuery);
@@ -131,7 +135,7 @@ export default function Home() {
   };
 
   return (
-    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "20px" }}>
+    <div className="container-responsive">
       {killSwitchActive && (
         <div style={{
           position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
@@ -161,46 +165,70 @@ export default function Home() {
       )}
 
       {/* Header */}
-      <header style={{
+      <header className="header-responsive" style={{
         background: "#FFF", border: "2px solid #1E242B", boxShadow: "4px 4px 0 #1E242B",
-        padding: "16px 24px", display: "flex", justifyContent: "space-between", marginBottom: "20px"
+        padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <div style={{ background: "#D94E28", color: "#FFF", fontWeight: "bold", fontSize: "24px", padding: "6px 16px", border: "2px solid #1E242B" }}>
-            ARZI
+            {t("ARZI", "अर्जी")}
           </div>
           <div>
-            <div style={{ fontWeight: "bold", fontSize: "18px" }}>CIVIC RTI LEGAL FILING DESK</div>
-            <div style={{ fontFamily: "monospace", fontSize: "12px", color: "#555" }}>Flask Engine + Banaras / Varanasi Multi-Domain Officer Routing</div>
+            <div style={{ fontWeight: "bold", fontSize: "18px" }}>{t("CIVIC RTI LEGAL FILING DESK", "नागरिक आरटीआई विधिक सहायता डेस्क")}</div>
+            <div style={{ fontFamily: "monospace", fontSize: "12px", color: "#555" }}>{t("Flask Engine + Banaras / Varanasi Multi-Domain Routing", "फ्लास्क इंजन + वाराणसी एवं अखिल भारतीय अधिकारी मैपिंग")}</div>
           </div>
         </div>
 
-        <button 
-          onClick={() => toggleKillSwitchSim(true)}
-          style={{ background: "#FFF", border: "2px solid #1E242B", padding: "8px 16px", cursor: "pointer", fontWeight: "bold" }}
-        >
-          SIMULATE REPO DELETION
-        </button>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          {/* Language Switcher */}
+          <div style={{ display: "inline-flex", border: "2px solid #1E242B" }}>
+            <button
+              onClick={() => setLang("en")}
+              style={{
+                padding: "6px 12px", fontWeight: "bold", border: "none", cursor: "pointer",
+                background: lang === "en" ? "#1E242B" : "#FFF", color: lang === "en" ? "#FFF" : "#1E242B"
+              }}
+            >
+              EN
+            </button>
+            <button
+              onClick={() => setLang("hi")}
+              style={{
+                padding: "6px 12px", fontWeight: "bold", border: "none", cursor: "pointer",
+                background: lang === "hi" ? "#1E242B" : "#FFF", color: lang === "hi" ? "#FFF" : "#1E242B"
+              }}
+            >
+              हिंदी
+            </button>
+          </div>
+
+          <button 
+            onClick={() => toggleKillSwitchSim(true)}
+            style={{ background: "#FFF", border: "2px solid #1E242B", padding: "6px 12px", cursor: "pointer", fontWeight: "bold", fontSize: "11px" }}
+          >
+            {t("SIMULATE BREACH", "सिमुलेशन")}
+          </button>
+        </div>
       </header>
 
       {/* Nav */}
-      <nav style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
-        {["intake", "queue", "workspace", "runlog"].map((t) => (
+      <nav className="nav-responsive" style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
+        {["intake", "queue", "workspace", "runlog"].map((tab) => (
           <button
-            key={t}
-            onClick={() => setActiveTab(t)}
+            key={tab}
+            onClick={() => setActiveTab(tab)}
             style={{
-              padding: "12px 20px", fontWeight: "bold", border: "2px solid #1E242B",
-              background: activeTab === t ? "#1E242B" : "#FFF",
-              color: activeTab === t ? "#FFF" : "#1E242B",
-              boxShadow: activeTab === t ? "4px 4px 0 #1E242B" : "2px 2px 0 #1E242B",
-              cursor: "pointer"
+              padding: "10px 16px", fontWeight: "bold", border: "2px solid #1E242B",
+              background: activeTab === tab ? "#1E242B" : "#FFF",
+              color: activeTab === tab ? "#FFF" : "#1E242B",
+              boxShadow: activeTab === tab ? "4px 4px 0 #1E242B" : "2px 2px 0 #1E242B",
+              cursor: "pointer", fontSize: "12px"
             }}
           >
-            {t === "intake" && "01. INTAKE PORTAL"}
-            {t === "queue" && `02. COMMAND CENTER (${counts.inbox})`}
-            {t === "workspace" && `03. LEGAL WORKSPACE (${selectedCase ? selectedCase.case_id : 'SELECT'})`}
-            {t === "runlog" && "04. PROOF RUN LOG"}
+            {tab === "intake" && (lang === "hi" ? "01. शिकायत पोर्टल" : "01. INTAKE PORTAL")}
+            {tab === "queue" && (lang === "hi" ? `02. सक्रिय मामले (${counts.inbox})` : `02. COMMAND CENTER (${counts.inbox})`)}
+            {tab === "workspace" && (lang === "hi" ? `03. केस विवरण (${selectedCase ? selectedCase.case_id : 'चुनें'})` : `03. LEGAL WORKSPACE (${selectedCase ? selectedCase.case_id : 'SELECT'})`)}
+            {tab === "runlog" && (lang === "hi" ? "04. ऑडिट रन लॉग" : "04. PROOF RUN LOG")}
           </button>
         ))}
       </nav>
@@ -215,7 +243,7 @@ export default function Home() {
               <input type="text" value={name} onChange={e => setName(e.target.value)} required style={{ width: "100%", padding: "10px", border: "2px solid #1E242B" }} placeholder="e.g. Shivanshu Pandey" />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
+            <div className="grid-2col-responsive">
               <div>
                 <label style={{ display: "block", fontFamily: "monospace", fontWeight: "bold" }}>PHONE / CONTACT *</label>
                 <input type="text" value={contact} onChange={e => setContact(e.target.value)} required style={{ width: "100%", padding: "10px", border: "2px solid #1E242B" }} placeholder="+91-9988776655" />
@@ -226,7 +254,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
+            <div className="grid-2col-responsive">
               <div>
                 <label style={{ display: "block", fontFamily: "monospace", fontWeight: "bold" }}>REF / ACKNOWLEDGEMENT NO</label>
                 <input type="text" value={refNo} onChange={e => setRefNo(e.target.value)} style={{ width: "100%", padding: "10px", border: "2px solid #1E242B" }} placeholder="e.g. VNS-99401" />
@@ -243,7 +271,7 @@ export default function Home() {
             </div>
 
             <button type="submit" style={{ background: "#D94E28", color: "#FFF", border: "2px solid #1E242B", padding: "12px 24px", fontWeight: "bold", cursor: "pointer", width: "100%" }}>
-              INGEST & ASSIGN BANARAS / DIVISION PIO OFFICER →
+              {t("INGEST & ASSIGN BANARAS / DIVISION PIO OFFICER →", "शिकायत दर्ज करें एवं संबंधित अधिकारी खोजें →")}
             </button>
           </form>
         </div>
@@ -254,20 +282,21 @@ export default function Home() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
             <h2>LAWYER DASHBOARD & COMMAND CENTER</h2>
             
-            <form onSubmit={handleSearchSubmit} style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <label style={{ fontWeight: "bold", fontFamily: "monospace" }}>SEARCH KEYWORD:</label>
+            <form onSubmit={handleSearchSubmit} className="search-form-responsive" style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+              <label style={{ fontWeight: "bold", fontFamily: "monospace", fontSize: "12px" }}>{t("SEARCH:", "खोजें:")}</label>
               <input
                 type="text"
-                placeholder="Unique ID, Name, Varanasi/Banaras, Address, Issue..."
+                placeholder={t("Unique ID, Name, Varanasi, Issue...", "आईडी, नाम, शहर, समस्या...")}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                style={{ width: "320px", padding: "8px 12px", border: "2px solid #1E242B" }}
+                className="search-input-responsive"
+                style={{ minWidth: "220px", padding: "8px 12px", border: "2px solid #1E242B" }}
               />
               <button 
                 type="submit" 
                 style={{ background: "#D94E28", color: "#FFF", border: "2px solid #1E242B", padding: "8px 16px", fontWeight: "bold", cursor: "pointer" }}
               >
-                SEARCH 🔍
+                {t("SEARCH 🔍", "खोजें 🔍")}
               </button>
             </form>
           </div>
@@ -276,7 +305,7 @@ export default function Home() {
             Showing {cases.length} cases. Click on any row to open the RTI Legal Workspace with full updates & timeline.
           </p>
 
-          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "8px" }}>
+          <div className="table-responsive"><table style={{ width: "100%", borderCollapse: "collapse", marginTop: "8px" }}>
             <thead>
               <tr style={{ background: "#1E242B", color: "#FFF" }}>
                 <th style={{ padding: "10px", border: "1px solid #1E242B" }}>UNIQUE CASE ID</th>
@@ -331,7 +360,7 @@ export default function Home() {
                 ))
               )}
             </tbody>
-          </table>
+          </table></div>
         </div>
       )}
 
@@ -353,7 +382,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+              <div className="grid-2col-responsive">
                 <div style={{ border: "2px solid #1E242B", padding: "16px" }}>
                   <h3 style={{ borderBottom: "1px solid #ccc", paddingBottom: "6px", marginBottom: "10px" }}>CITIZEN COMPLAINANT</h3>
                   <div><b>Name:</b> {selectedCase.complainant?.name}</div>
@@ -416,7 +445,7 @@ export default function Home() {
                     </div>
 
                     {/* Tabular Form */}
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", background: "#FFF" }}>
+                    <div className="table-responsive"><table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", background: "#FFF" }}>
                       <thead>
                         <tr style={{ background: "#1E242B", color: "#FFF" }}>
                           <th style={{ padding: "8px", border: "1px solid #1E242B" }}>TIMESTAMP</th>
@@ -441,7 +470,7 @@ export default function Home() {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </table></div>
                   </div>
                 ) : (
                   <p>No updates recorded yet.</p>
@@ -478,7 +507,7 @@ export default function Home() {
       {activeTab === "runlog" && (
         <div style={{ background: "#FFF", border: "2px solid #1E242B", boxShadow: "4px 4px 0 #1E242B", padding: "24px" }}>
           <h2>IMMUTABLE CODE-GENERATED RUN LOG</h2>
-          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "16px" }}>
+          <div className="table-responsive"><table style={{ width: "100%", borderCollapse: "collapse", marginTop: "16px" }}>
             <thead>
               <tr style={{ background: "#1E242B", color: "#FFF" }}>
                 <th style={{ padding: "10px", border: "1px solid #1E242B" }}>TIMESTAMP</th>
@@ -497,7 +526,7 @@ export default function Home() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </div>
       )}
     </div>

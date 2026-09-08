@@ -1,6 +1,342 @@
+
+
+
 // ARZI Civic RTI & Statutory Legal Intelligence Platform - Client Interaction Logic
 
 const API_BASE = "/api/v1";
+
+// =========================================================================
+// BILINGUAL (ENGLISH / HINDI) TRANSLATION ENGINE & DICTIONARY
+// =========================================================================
+let currentLang = localStorage.getItem("arzi_lang") || "bi";
+
+const I18N_DICT = {
+  // Brand & Nav
+  "brand_name": { "en": "ARZI", "hi": "अर्जी" },
+  "brand_sub": { "en": "Civic Legal Intelligence Desk", "hi": "नागरिक विधिक सहायता डेस्क" },
+  "nav_home": { "en": "Home Overview", "hi": "मुख्य पृष्ठ" },
+  "nav_about": { "en": "About & Mission", "hi": "उद्देश्य एवं परिचय" },
+  "nav_pillars": { "en": "Statutory Pillars", "hi": "कानूनी नियम" },
+  "nav_dashboard": { "en": "Operations Dashboard", "hi": "ऑपरेशंस डैशबोर्ड" },
+  "nav_dashboard_short": { "en": "Dashboard", "hi": "डैशबोर्ड" },
+  "status_operational": { "en": "Operational", "hi": "सक्रिय" },
+
+  // Hero Section
+  "hero_tag": { "en": "AUTONOMOUS CIVIC RTI & STATUTORY LEGAL INTELLIGENCE", "hi": "स्वचालित नागरिक आरटीआई एवं कानूनी सहायता डेस्क" },
+  "hero_h1_prefix": { "en": "Democratizing Indian Public Law with", "hi": "भारतीय जन-कानून का सरलीकरण" },
+  "hero_h1_span": { "en": "Autonomous Statutory Intelligence", "hi": "सटीक एवं पारदर्शी कानूनी प्रणाली" },
+  "hero_lead": {
+    "en": "ARZI simplifies public legal processes by converting citizen grievances into legally enforceable RTI applications and First Appeals. Automatically map IPC 1860 to Bharatiya Nyaya Sanhita (BNS 2023), locate your designated Public Information Officer via geodesy, and enforce statutory compliance deadlines.",
+    "hi": "अर्जी आपकी नागरिक समस्याओं को कानूनी रूप से मान्य आरटीआई और प्रथम अपील में बदलकर त्वरित समाधान दिलाती है। बीएनएस 2023 की धाराएं देखें, अपने जन सूचना अधिकारी (PIO) को खोजें और 30 दिन में जवाब सुनिश्चित करें।"
+  },
+  "hero_btn_file": { "en": "File RTI Grievance", "hi": "आरटीआई शिकायत दर्ज करें" },
+  "hero_btn_codex": { "en": "Statutory Codex", "hi": "कानूनी नियम देखें" },
+  "hero_btn_runlog": { "en": "Audit Run Log", "hi": "ऑडिट लॉग" },
+
+  // Snapshot Metrics
+  "stat_active": { "en": "Active Cases", "hi": "सक्रिय मामले" },
+  "stat_active_sub": { "en": "Pending Review", "hi": "समीक्षा हेतु लंबित" },
+  "stat_pio": { "en": "Avg PIO Distance", "hi": "औसत PIO दूरी" },
+  "stat_pio_sub": { "en": "Haversine Geodesic Match", "hi": "भू-स्थानिक निकटता" },
+  "stat_penalty": { "en": "Sec 20 Liability", "hi": "धारा 20 जुर्माना" },
+  "stat_penalty_sub": { "en": "₹250/day Mandatory Penalty", "hi": "₹250/दिन अनिवार्य जुर्माना" },
+  "stat_dockets": { "en": "Total Dockets", "hi": "कुल दर्ज मामले" },
+  "stat_dockets_sub": { "en": "Cumulative Cases", "hi": "अभिलेख में दर्ज" },
+
+  // Workflow Pipeline
+  "pipeline_title": { "en": "4-Stage Grievance-to-Enforcement Pipeline", "hi": "4-चरणीय सरल शिकायत निवारण प्रक्रिया" },
+  "pipeline_badge": { "en": "Deterministic SLA", "hi": "समयबद्ध समाधान" },
+  "pipeline_s1_title": { "en": "Ingest & Structured Parsing", "hi": "1. शिकायत दर्ज व कानूनी विश्लेषण" },
+  "pipeline_s1_desc": { "en": "Translates citizen grievances into legally enforceable questions admissible under Section 2(f) of RTI Act.", "hi": "नागरिक की आम भाषा को आरटीआई अधिनियम की धारा 2(f) के तहत कानूनी प्रश्नों में बदलता है।" },
+  "pipeline_s2_title": { "en": "11-Domain ML Classification", "hi": "2. विभाग व बीएनएस धारा चयन" },
+  "pipeline_s2_desc": { "en": "Identifies the competent public sector (Power, Water, Transport, Revenue) with confidence scoring.", "hi": "बिजली, पानी, सड़क, राशन, राजस्व आदि में से सही विभाग व बीएनएस 2023 धाराओं का निर्धारण।" },
+  "pipeline_s3_title": { "en": "Geodesic PIO Discovery", "hi": "3. संबंधित PIO की खोज" },
+  "pipeline_s3_desc": { "en": "Applies Haversine spherical geodesy to map pincodes and coordinates to the verified nodal officer.", "hi": "पिन कोड और भू-स्थानिक तकनीक द्वारा आपके क्षेत्र के सही जन सूचना अधिकारी की खोज।" },
+  "pipeline_s4_title": { "en": "Enforceable Instrument & Log", "hi": "4. आरटीआई ड्राफ्ट व ट्रैकिंग" },
+  "pipeline_s4_desc": { "en": "Compiles court-admissible Form-A PDFs with SHA-256 digital seals and immutable audit run log.", "hi": "डाउनलोड योग्य आरटीआई फॉर्म-A पीडीएफ तैयार कर 30-दिवसीय समयसीमा की ट्रैकिंग शुरू।" },
+
+  // Quick Triage Launchpad
+  "quick_triage_title": { "en": "Instant Civic Sector Triage Launchpad (1-Click Load)", "hi": "सामान्य नागरिक शिकायतें (1-क्लिक में दर्ज करें)" },
+  "quick_triage_badge": { "en": "11 Public Domains", "hi": "11 सरकारी विभाग" },
+  "preset_power_title": { "en": "Electricity & Power Discom", "hi": "बिजली व पावर डिस्कॉम" },
+  "preset_power_sub": { "en": "Transformer burnout & blackout • BSES Delhi (110019)", "hi": "ट्रांसफार्मर खराबी व बिजली कटौती • दिल्ली (110019)" },
+  "preset_water_title": { "en": "Drinking Water & Jal Board", "hi": "पेयजल आपूर्ति व जल निगम" },
+  "preset_water_sub": { "en": "Sewage contamination • Jal Sansthan Varanasi (221010)", "hi": "गंदे पानी की आपूर्ति व सीवर • वाराणसी (221010)" },
+  "preset_transport_title": { "en": "Transport & RTO Vehicles", "hi": "परिवहन विभाग व आरटीओ" },
+  "preset_transport_sub": { "en": "Driving license renewal delay • Sarai Kale Khan (110013)", "hi": "ड्राइविंग लाइसेंस में देरी • दिल्ली (110013)" },
+  "preset_pension_title": { "en": "Labour, Pension & Security", "hi": "पेंशन एवं भविष्य निधि (EPFO)" },
+  "preset_pension_sub": { "en": "EPS-95 monthly pension settlement • EPFO Delhi (110052)", "hi": "मासिक पेंशन का भुगतान न होना • दिल्ली (110052)" },
+  "preset_pollution_title": { "en": "Environment & Pollution", "hi": "पर्यावरण व प्रदूषण नियंत्रण" },
+  "preset_pollution_sub": { "en": "Illegal industrial toxic effluent • DPCC Delhi (110032)", "hi": "अवैध जहरीला कचरा व प्रदूषण • दिल्ली (110032)" },
+  "preset_land_title": { "en": "Revenue & Land Records", "hi": "राजस्व एवं जमीन नामांतरण" },
+  "preset_land_sub": { "en": "Mutation & Khasra delay • Sadar Tehsil Varanasi (221002)", "hi": "दाखिल-खारिज व खतौनी में देरी • वाराणसी (221002)" },
+
+  // About Page
+  "about_tag": { "en": "ABOUT ARZI • CIVIC ACCOUNTABILITY & MANDATE", "hi": "अर्जी के बारे में • पारदर्शिता व नागरिक अधिकार" },
+  "about_h1_prefix": { "en": "Dismantling Administrative Silence", "hi": "प्रशासनिक लेटलतीफी का अंत" },
+  "about_h1_span": { "en": "Through Autonomous Legal Engineering", "hi": "सशक्त नागरिक कानूनी तकनीक द्वारा" },
+  "about_lead": {
+    "en": "ARZI empowers citizens and advocates to dismantle bureaucratic silence by converting informal grievances into binding RTI filings with automatic Section 20 penalty tracking.",
+    "hi": "अर्जी नागरिकों और अधिवक्ताओं को यह अधिकार देती है कि वे अपनी समस्याओं को कानूनी रूप से बाध्यकारी आरटीआई में बदलकर सरकारी जवाबदेही सुनिश्चित करें।"
+  },
+  "about_crisis_title": { "en": "The Administrative Silence Crisis in India", "hi": "सरकारी विभागों में जवाब न मिलने की समस्या" },
+  "about_crisis_p1": { "en": "Across municipal corporations, tehsils, and statutory boards, millions of legitimate citizen requests languish unanswered. Bureaucratic delays become the default operating procedure.", "hi": "नगर निगमों, तहसीलों और सरकारी दफ्तरों में लाखों नागरिक आवेदन बिना किसी जवाब के धूल खाते रहते हैं।" },
+  "about_crisis_p2": { "en": "When grievances remain informal—without statutory citations—officers face zero legal accountability.", "hi": "जब शिकायतें बिना कानूनी धाराओं के दी जाती हैं, तो अधिकारियों पर कोई जवाबदेही नहीं बनती।" },
+  "about_sol_title": { "en": "The ARZI Operational Intervention", "hi": "अर्जी का ठोस समाधान" },
+  "about_sol_p1": { "en": "ARZI transforms everyday complaints into precise questions under Section 2(f), finds the nodal PIO via geodesy, and starts the strict 30-day clock.", "hi": "अर्जी आम शिकायतों को धारा 2(f) के तहत कानूनी प्रश्नों में बदलती है, सही अधिकारी खोजती है और 30 दिन की समयसीमा शुरू करती है।" },
+  "about_sol_p2": { "en": "By activating the ₹250/day personal salary deduction mandate under Section 20(1), ARZI replaces bureaucratic discretion with enforceable legal liability.", "hi": "धारा 20(1) के तहत लापरवाह अधिकारी के वेतन से ₹250/दिन व्यक्तिगत कटौती का डर जवाबदेही सुनिश्चित करता है।" },
+  "about_stake_title": { "en": "Multi-Stakeholder Operational Utility", "hi": "सभी हितधारकों के लिए उपयोगिता" },
+  "stake_citizen_title": { "en": "Citizen Complainants", "hi": "आम नागरिक" },
+  "stake_citizen_desc": { "en": "File clear, structured RTI questions in under 2 minutes without needing expensive legal representation.", "hi": "बिना किसी वकील के 2 मिनट में सटीक आरटीआई प्रश्न तैयार करें।" },
+  "stake_lawyer_title": { "en": "Legal Counsel & Advocates", "hi": "अधिवक्ता एवं विधिक पेशेवर" },
+  "stake_lawyer_desc": { "en": "Manage high-volume civic casework with automated IPC ↔ BNS concordance and rapid First Appeal generation.", "hi": "बीएनएस 2023 और प्रथम अपील के साथ नागरिक मामलों को तेजी से निपटाएं।" },
+  "stake_gov_title": { "en": "Public Grievance Desks", "hi": "लोक शिकायत प्रकोष्ठ" },
+  "stake_gov_desc": { "en": "Public authorities can execute Section 6(3) 5-day transfers seamlessly and avoid Section 20 penalty liabilities.", "hi": "धारा 6(3) के तहत 5 दिन में सही विभाग को फाइल भेजें और जुर्माने से बचें।" },
+  "about_rigor_title": { "en": "Engineering Rigor & Cryptographic Verifiability", "hi": "तकनीकी प्रामाणिकता एवं सुरक्षा" },
+  "rigor_det_title": { "en": "Deterministic Legal Reasoning", "hi": "सटीक कानूनी तर्क" },
+  "rigor_det_desc": { "en": "Zero hallucination risk. Statutory questions, time limits, and fee clauses are compiled via deterministic statutory rule engines verified against official Indian Gazettes.", "hi": "शून्य त्रुटि। कानूनी प्रश्न और समयसीमा आधिकारिक गजट के आधार पर तैयार होते हैं।" },
+  "rigor_sha_title": { "en": "SHA-256 Digital Sealing", "hi": "SHA-256 डिजिटल सुरक्षा" },
+  "rigor_sha_desc": { "en": "Every generated Form-A embeds an immutable SHA-256 cryptographic hash guaranteeing tamper-evident authenticity.", "hi": "प्रत्येक दस्तावेज में डिजिटल हैश कोड होता है जो उसकी प्रामाणिकता सिद्ध करता है।" },
+  "rigor_audit_title": { "en": "Immutable Audit Ledger", "hi": "अपरिवर्तनीय ऑडिट लेजर" },
+  "rigor_audit_desc": { "en": "Every intake, transfer, and case update is permanently journaled with microsecond ISO timestamps.", "hi": "प्रत्येक कदम और तारीख का स्थाई रिकॉर्ड दर्ज होता है जिसे बदला नहीं जा सकता।" },
+
+  // Pillars Page
+  "pillars_tag": { "en": "LEGAL CODEX & STATUTORY BENCHMARKS", "hi": "कानूनी संहिता एवं समयसीमा" },
+  "pillars_h1_prefix": { "en": "Authoritative Statutory Provisions &", "hi": "अधिनियम के मुख्य प्रावधान एवं" },
+  "pillars_h1_span": { "en": "Judicial Enforcement Standards", "hi": "न्यायिक निर्णय व मानक" },
+  "pillars_lead": {
+    "en": "Comprehensive reference guide on Section 20 penalty enforcement, Bharatiya Nyaya Sanhita criminal law transition, statutory escalation ladders, and landmark Supreme Court jurisprudence.",
+    "hi": "धारा 20 जुर्माना प्रक्रिया, बीएनएस 2023 में धाराओं का बदलाव, आरटीआई की समयसीमा और सुप्रीम कोर्ट के महत्वपूर्ण फैसलों का संपूर्ण विवरण।"
+  },
+  "ladder_title": { "en": "Statutory Escalation Ladder & Mandatory Time Limits", "hi": "आरटीआई की कानूनी समयसीमा व चरण" },
+  "ladder_day0_title": { "en": "Filing & Fee", "hi": "आवेदन व शुल्क" },
+  "ladder_day0_desc": { "en": "Form-A submission with ₹10 court fee / postal order. Receipt acknowledgment legally mandatory.", "hi": "₹10 शुल्क के साथ फॉर्म-A जमा करें; रसीद मिलना अनिवार्य है।" },
+  "ladder_day5_title": { "en": "Sec 6(3) Transfer", "hi": "धारा 6(3) अंतरण" },
+  "ladder_day5_desc": { "en": "If info held by another public authority, transfer within 5 days with written notice to citizen.", "hi": "दूसरे विभाग का मामला होने पर 5 दिन के भीतर फाइल भेजना अनिवार्य है।" },
+  "ladder_day30_title": { "en": "Statutory SLA", "hi": "30-दिवसीय समयसीमा" },
+  "ladder_day30_desc": { "en": "Standard 30-day window expires. (48 hours if life/liberty). Day 31 triggers ₹250/day penalty clock.", "hi": "जवाब देने की 30 दिन की सीमा। 31वें दिन से ₹250/दिन जुर्माना शुरू।" },
+  "ladder_day60_title": { "en": "First Appeal", "hi": "प्रथम अपील" },
+  "ladder_day60_desc": { "en": "File First Appeal under Section 19(1) to First Appellate Authority (FAA) against deemed refusal.", "hi": "जवाब न मिलने पर वरिष्ठ अधिकारी (FAA) के समक्ष प्रथम अपील करें।" },
+  "ladder_day150_title": { "en": "Second Appeal", "hi": "द्वितीय अपील" },
+  "ladder_day150_desc": { "en": "Escalate to Central / State Information Commission under Section 19(3) with prayer for Section 20 penalties.", "hi": "राज्य या केंद्रीय सूचना आयोग में अपील कर जुर्माना लगाने की मांग करें।" },
+  "p1_title": { "en": "Pillar 1: Section 20(1) Personal Penalty Clock", "hi": "स्तंभ 1: धारा 20(1) व्यक्तिगत जुर्माना" },
+  "p1_desc": { "en": "Under Section 20(1) of the RTI Act 2005, where the Commission finds that a Public Information Officer (PIO) has refused or delayed information without reasonable cause, it shall impose a penalty of ₹250 each day (up to ₹25,000) deducted from the officer's salary.", "hi": "धारा 20(1) के तहत, 30 दिन में बिना ठोस कारण सूचना न देने पर आयोग अधिकारी के वेतन से प्रतिदिन ₹250 (अधिकतम ₹25,000) जुर्माना काटता है।" },
+  "p2_title": { "en": "Pillar 2: IPC 1860 to BNS 2023 Criminal Codex", "hi": "स्तंभ 2: आईपीसी 1860 से बीएनएस 2023" },
+  "p3_title": { "en": "Pillar 3: Section 6(3) 5-Day Mandatory Transfer", "hi": "स्तंभ 3: धारा 6(3) 5-दिवसीय अंतरण" },
+  "p3_desc": { "en": "Where an application is made to an authority requesting information held by another, the officer shall transfer the application within five days and immediately inform the applicant in writing.", "hi": "यदि मांगी गई सूचना किसी अन्य विभाग से संबंधित है, तो अधिकारी 5 दिन के भीतर आवेदन को सही विभाग को भेजने के लिए बाध्य है।" },
+  "p4_title": { "en": "Pillar 4: Haversine Geodetic PIO Mapping", "hi": "स्तंभ 4: भू-स्थानिक अधिकारी मैपिंग" },
+  "p4_desc": { "en": "ARZI uses the great-circle Haversine formula across verified municipal coordinates (Delhi NCT, Varanasi, Lucknow) to assign the nearest competent Public Information Officer.", "hi": "अर्जी पिन कोड और निर्देशांकों के आधार पर आपके क्षेत्र के निकटतम सक्षम जन सूचना अधिकारी को चुनती है।" },
+  "sc_precedents_title": { "en": "Landmark Supreme Court Jurisprudence on Right to Information", "hi": "सूचना के अधिकार पर सुप्रीम कोर्ट के ऐतिहासिक फैसले" },
+  "matrix_title": { "en": "Comprehensive IPC 1860 ↔ BNS 2023 Statutory Comparison Matrix", "hi": "आईपीसी 1860 ↔ बीएनएस 2023 तुलनात्मक तालिका" },
+  "table_filter_placeholder": { "en": "Filter by section, crime, or keyword...", "hi": "धारा, अपराध या शब्द से खोजें..." },
+  "th_offense": { "en": "Offense Category", "hi": "अपराध / समस्या श्रेणी" },
+  "th_ipc": { "en": "Historical IPC (1860)", "hi": "पुराना कानून (IPC 1860)" },
+  "th_bns": { "en": "Bharatiya Nyaya Sanhita (2023)", "hi": "नया कानून (BNS 2023)" },
+  "th_punishment": { "en": "Maximum Punishment Scope", "hi": "सजा का प्रावधान" },
+  "th_status": { "en": "Cognizability & Bail Status", "hi": "संज्ञेयता व जमानत" },
+
+  // Dashboard & Subtabs
+  "subnav_casework": { "en": "01. Casework Desk", "hi": "01. शिकायत डेस्क" },
+  "subnav_statutory": { "en": "02. Statutory Library & Custom Acts", "hi": "02. कानून व अधिनियम" },
+  "subnav_pio": { "en": "03. PIO Geospatial Map", "hi": "03. अधिकारी मैप" },
+  "subnav_compliance": { "en": "04. Compliance & SLA", "hi": "04. जुर्माना कैलकुलेटर" },
+  "subnav_runlog": { "en": "05. Audit Run Log", "hi": "05. ऑडिट लॉग" },
+
+  "intake_panel_title": { "en": "Citizen Grievance Ingestion", "hi": "नागरिक शिकायत दर्ज करें" },
+  "intake_toggle_btn": { "en": "Toggle Form", "hi": "फॉर्म छिपाएं/दिखाएं" },
+  "intake_name": { "en": "Complainant / Client Full Name *", "hi": "शिकायतकर्ता का पूरा नाम *" },
+  "intake_contact": { "en": "Phone / Contact *", "hi": "फोन / संपर्क नंबर *" },
+  "intake_language": { "en": "Language / Locale", "hi": "दस्तावेज़ की भाषा" },
+  "intake_addr": { "en": "Address / Locality *", "hi": "पता / मोहल्ला / क्षेत्र *" },
+  "intake_pin": { "en": "PIN Code (6-Digit) *", "hi": "पिन कोड (6 अंक) *" },
+  "intake_urgent_label": { "en": "48-Hour Urgent Life & Liberty Fast-Track (Section 7(1) Proviso)", "hi": "48 घंटे का आपातकालीन मामला (जीवन व स्वतंत्रता)" },
+  "intake_urgent_hint": { "en": "Invokes 48-hour statutory deadline for ICU emergencies, water contamination, unlawful custody, or life threats.", "hi": "अस्पताल आपातकाल, दूषित जल, अवैध हिरासत या जीवन को खतरे के मामलों में 48 घंटे में सूचना का अधिकार।" },
+  "intake_ref": { "en": "Original Ref / Ack No.", "hi": "मूल संदर्भ / रसीद संख्या" },
+  "intake_date": { "en": "Submission Date", "hi": "आवेदन की तारीख" },
+  "intake_narrative": { "en": "Statement of Facts & Grievance Narrative *", "hi": "अपनी शिकायत का संक्षिप्त विवरण *" },
+  "intake_narrative_ph": { "en": "Enter or dictate factual details regarding public record request, administrative delay, or refusal...", "hi": "अपनी समस्या विस्तार से लिखें (जैसे राशन न मिलना, जमीन नामांतरण में देरी, सड़क या नाली की समस्या)..." },
+  "intake_submit": { "en": "Ingest, Extract Law & Route PIO →", "hi": "शिकायत जमा करें एवं अधिकारी खोजें →" },
+  "btn_ml_predict": { "en": "⚡ Predict Domain via ML", "hi": "⚡ श्रेणी जांचें (AI)" },
+  "btn_voice_dictate": { "en": "Voice Dictation", "hi": "बोलकर लिखें" },
+  "presets_label": { "en": "Common Civic Presets (1-Click):", "hi": "त्वरित उदाहरण (1-क्लिक):" },
+  "preset_ration_pill": { "en": "Ration / PDS (Delhi)", "hi": "राशन / कोटेदार (दिल्ली)" },
+  "preset_land_pill": { "en": "Land Mutation (Varanasi)", "hi": "जमीन नामांतरण (वाराणसी)" },
+  "preset_water_pill": { "en": "Water & Sewer (Jal Board)", "hi": "जल आपूर्ति व सीवर (जल निगम)" },
+  "preset_power_pill": { "en": "Electricity Discom (Power)", "hi": "बिजली आपूर्ति (डिस्कॉम)" },
+  "preset_emergency_pill": { "en": "48h Urgent (AIIMS)", "hi": "48 घंटे आपातकाल (एम्स)" },
+
+  "queue_panel_title": { "en": "Active Casework Dockets", "hi": "सक्रिय मामले" },
+  "queue_search_ph": { "en": "Search Case ID, Citizen, Varanasi, Section...", "hi": "केस आईडी, नाम, शहर या धारा से खोजें..." },
+  "queue_filter_btn": { "en": "Filter", "hi": "खोजें" },
+  "th_docket": { "en": "Docket", "hi": "केस आईडी" },
+  "th_complainant": { "en": "Complainant", "hi": "आवेदक" },
+  "th_dept": { "en": "Department", "hi": "विभाग" },
+  "th_sections": { "en": "Sections", "hi": "धाराएं" },
+  "th_pio": { "en": "Assigned PIO", "hi": "नामित अधिकारी" },
+  "th_status": { "en": "Status", "hi": "स्थिति" },
+  "th_action": { "en": "Action", "hi": "कार्रवाई" },
+  "btn_view": { "en": "View", "hi": "देखें" },
+
+  "no_case_title": { "en": "No Active Case Docket Selected", "hi": "कोई केस चयनित नहीं है" },
+  "no_case_desc": { "en": "Select a case file from the left queue, or ingest a citizen brief to open the legal evidence dossier.", "hi": "बाईं ओर की सूची से कोई केस चुनें या नया आवेदन भरें।" },
+
+  // Compliance Calculator
+  "calc_panel_title": { "en": "Interactive Section 20(1) Penalty & Statutory SLA Clock", "hi": "धारा 20(1) जुर्माना एवं समयसीमा कैलकुलेटर" },
+  "calc_heading_params": { "en": "Case Timeline & SLA Parameters", "hi": "समयसीमा व आवेदन विवरण" },
+  "calc_lbl_filing": { "en": "RTI Application Filing Date *", "hi": "आवेदन जमा करने की तिथि *" },
+  "calc_lbl_provision": { "en": "Statutory SLA Provision *", "hi": "कानूनी श्रेणी *" },
+  "calc_lbl_resp": { "en": "PIO Response Date (Leave empty if still pending)", "hi": "जवाब मिलने की तिथि (लंबित होने पर खाली छोड़ें)" },
+  "calc_lbl_dept": { "en": "Target Public Authority / Department", "hi": "संबंधित सरकारी विभाग" },
+  "calc_btn_reset_label": { "en": "Reset to 35-Day Overdue Benchmark", "hi": "डिफ़ॉल्ट पर रीसेट करें" },
+  "calc_heading_results": { "en": "Live Accrued Personal Penalty Liability", "hi": "अधिकारी पर देय जुर्माना" },
+  "calc_lbl_deadline": { "en": "Statutory Deadline", "hi": "अंतिम तिथि" },
+  "calc_lbl_elapsed": { "en": "Days Elapsed", "hi": "बीते दिन" },
+  "calc_lbl_delinquent": { "en": "Delinquent Days", "hi": "विलंब के दिन" },
+  "calc_lbl_accrued": { "en": "Accrued Penalty", "hi": "कुल जुर्माना" },
+  "calc_copy_btn": { "en": "Copy Clause", "hi": "क्लॉज कॉपी करें" },
+
+  // PIO Tab
+  "pio_geodesy_title": { "en": "Active Complaint Docket Geodesy", "hi": "शिकायत का भू-स्थानिक विवरण" },
+  "pio_visualizer_title": { "en": "Geospatial Jurisdictional Visualizer", "hi": "क्षेत्राधिकार मैप व टेलीमेट्री" },
+  "pio_nearest_title": { "en": "Nearest PIO Officers in Area", "hi": "क्षेत्र के निकटतम जन सूचना अधिकारी" },
+
+  // RunLog Tab
+  "runlog_search_title": { "en": "Search Case Dockets & Audit Trail", "hi": "केस ऑडिट ट्रायल व सर्च" },
+  "runlog_table_title": { "en": "Immutable Code-Generated Execution Run Log", "hi": "अपरिवर्तनीय कोड-जनित ऑडिट रन लॉग" },
+
+  // Case Detail Dossier
+  "dossier_return_btn": { "en": "← Return to Audit Run Log", "hi": "← वापस ऑडिट लॉग पर जाएं" },
+  "dossier_open_workspace": { "en": "Open in Casework Workspace", "hi": "शिकायत डेस्क में खोलें" },
+  "dossier_download_pdf": { "en": "Download Form-A PDF", "hi": "फॉर्म-A पीडीएफ डाउनलोड" },
+  "dossier_parties_title": { "en": "Citizen Complainant & Designated Public Authority", "hi": "नागरिक आवेदक एवं नामित जन सूचना अधिकारी" },
+  "dossier_grievance_title": { "en": "Citizen Grievance & Structured Questions", "hi": "शिकायत विवरण एवं तैयार आरटीआई प्रश्न" },
+  "dossier_ml_title": { "en": "ML Domain Classification Intelligence", "hi": "एआई वर्गीकरण व धारा विश्लेषण" },
+  "dossier_merge_title": { "en": "Case Deduplication & Docket Consolidation", "hi": "समान मामलों का एकीकरण व दोहराव निवारण" },
+  "dossier_update_title": { "en": "Log Official Case Update with Timestamp", "hi": "केस में नया घटनाक्रम / तारीख दर्ज करें" },
+  "dossier_timeline_title": { "en": "Chronological Case Timeline & Ledger", "hi": "केस की समयबद्ध प्रगति एवं लेजर" },
+
+  // Extra Utility & Component Keys
+  "btn_refresh": { "en": "Refresh", "hi": "ताज़ा करें" },
+  "btn_clear": { "en": "Clear", "hi": "हटाएं" },
+  "btn_close": { "en": "Close", "hi": "बंद करें" },
+  "btn_cancel": { "en": "Cancel", "hi": "रद्द करें" },
+  "btn_dismiss": { "en": "Dismiss", "hi": "हटाएं" },
+  "btn_print_slip": { "en": "Print Dispatch Slip", "hi": "रसीद प्रिंट करें" },
+  "btn_execute_transfer": { "en": "Execute Transfer", "hi": "अंतरण करें" },
+
+  // Statutory Library & Custom Acts
+  "statutory_codex_title": { "en": "Statutory Codex & Custom Acts Registration", "hi": "कानून एवं अधिनियम पंजीकरण" },
+  "statutory_act_title": { "en": "Act / Legislation Full Title *", "hi": "अधिनियम का पूरा नाम *" },
+  "statutory_act_sections": { "en": "Specific Section(s) / Rule *", "hi": "संबंधित धाराएं / नियम *" },
+  "statutory_act_domain": { "en": "Statutory Domain / Practice Area *", "hi": "कानूनी विभाग / विषय *" },
+  "statutory_act_author": { "en": "Advocate / Author Name *", "hi": "अधिवक्ता / लेखक का नाम *" },
+  "statutory_act_grounds": { "en": "Statutory Grounds & Legal Effect *", "hi": "कानूनी आधार व प्रभाव *" },
+  "statutory_act_link": { "en": "Link immediately to current active docket", "hi": "वर्तमान केस से तुरंत जोड़ें" },
+  "statutory_act_btn": { "en": "Register Custom Act", "hi": "अधिनियम जोड़ें" },
+  "statutory_registered_title": { "en": "Registered Legislation", "hi": "पंजीकृत कानून" },
+
+  // PIO Radar & Directory
+  "pio_banner_text": { "en": "Complaint Registered & Nearest Domain PIO Assigned!", "hi": "शिकायत दर्ज एवं संबंधित क्षेत्र के PIO का आवंटन सम्पन्न!" },
+  "pio_inspect_label": { "en": "Inspect Docket:", "hi": "केस चुनें:" },
+  "pio_kpi_docket": { "en": "Docket & Complainant", "hi": "केस व आवेदक" },
+  "pio_kpi_domain": { "en": "Complaint Domain", "hi": "शिकायत श्रेणी" },
+  "pio_kpi_assigned": { "en": "Assigned Nearest Domain PIO", "hi": "आवंटित जन सूचना अधिकारी" },
+  "pio_origin_legend": { "en": "Citizen Origin", "hi": "आवेदक का स्थान" },
+  "pio_assigned_legend": { "en": "Assigned Domain PIO", "hi": "आवंटित जन सूचना अधिकारी" },
+  "pio_nearby_legend": { "en": "Other Nearby Authorities", "hi": "अन्य निकटतम कार्यालय" },
+  "pio_filter_all": { "en": "All Nearby", "hi": "सभी निकटतम" },
+  "pio_filter_domain": { "en": "Domain Only", "hi": "केवल विभाग" },
+  "pio_filter_close": { "en": "< 3 km", "hi": "3 किमी से कम" },
+
+  // Speed Post & Transfer Modals
+  "transfer_modal_title": { "en": "SECTION 6(3) 5-DAY MANDATORY TRANSFER", "hi": "धारा 6(3) 5-दिवसीय अनिवार्य अंतरण" },
+  "transfer_modal_desc": { "en": "Transfer this application to the rightful public authority holding records. An automated notice and run log audit will be recorded.", "hi": "इस आवेदन को संबंधित विभाग को 5 दिन में अंतरित करें। इसका रिकॉर्ड ऑडिट लॉग में दर्ज होगा।" },
+  "postal_slip_modal_title": { "en": "INDIAN SPEED POST DISPATCH DOCKET & REGISTERED AD", "hi": "भारतीय स्पीड पोस्ट एवं पंजीकृत डाक रसीद" },
+  "postal_slip_modal_sub": { "en": "Department of Posts, India • Statutory Proof of Dispatch under Section 27 General Clauses Act", "hi": "डाक विभाग, भारत सरकार • धारा 27 के तहत विधिक प्रेषण प्रमाण" },
+
+  // Footer
+  "footer_brand": { "en": "ARZI — Civic RTI & Statutory Legal Intelligence Platform • National Legal Tech Standard", "hi": "अर्जी — नागरिक आरटीआई एवं कानूनी सहायता प्लेटफॉर्म • राष्ट्रीय विधिक सेवा" }
+};
+
+function t(key) {
+  if (!I18N_DICT[key]) return key;
+  if (currentLang === "bi") {
+    const en = I18N_DICT[key]["en"] || "";
+    const hi = I18N_DICT[key]["hi"] || "";
+    if (en && hi) {
+      if (en === hi) return en;
+      return `${en} / ${hi}`;
+    }
+    return en || hi || key;
+  }
+  if (I18N_DICT[key][currentLang]) {
+    return I18N_DICT[key][currentLang];
+  }
+  return I18N_DICT[key]["en"] || key;
+}
+
+function setLanguage(lang) {
+  if (lang !== "en" && lang !== "hi" && lang !== "bi") lang = "bi";
+  currentLang = lang;
+  localStorage.setItem("arzi_lang", lang);
+
+  // Update switcher button states
+  const btnBi = document.getElementById("langBi");
+  const btnEn = document.getElementById("langEn");
+  const btnHi = document.getElementById("langHi");
+  if (btnBi) btnBi.classList.toggle("active", lang === "bi");
+  if (btnEn) btnEn.classList.toggle("active", lang === "en");
+  if (btnHi) btnHi.classList.toggle("active", lang === "hi");
+
+  // Translate all [data-i18n] text nodes
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (I18N_DICT[key]) {
+      el.textContent = t(key);
+    }
+  });
+
+  // Translate all [data-i18n-html] elements
+  document.querySelectorAll("[data-i18n-html]").forEach(el => {
+    const key = el.getAttribute("data-i18n-html");
+    if (I18N_DICT[key]) {
+      if (lang === "bi" && I18N_DICT[key]["en"] && I18N_DICT[key]["hi"]) {
+        el.innerHTML = `${I18N_DICT[key]["en"]} <span style="opacity: 0.85; font-weight: normal;">/ ${I18N_DICT[key]["hi"]}</span>`;
+      } else {
+        el.innerHTML = I18N_DICT[key][lang] || I18N_DICT[key]["en"];
+      }
+    }
+  });
+
+  // Translate all [data-i18n-placeholder] inputs
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    if (I18N_DICT[key]) {
+      el.placeholder = t(key);
+    }
+  });
+
+  // Update queue table action buttons and titles if rendered
+  document.querySelectorAll(".btn-view-docket").forEach(btn => {
+    btn.textContent = t("btn_view");
+  });
+
+  const repoStatus = document.getElementById("repoStatusText");
+  if (repoStatus) {
+    repoStatus.textContent = t("status_operational");
+  }
+
+  renderLucide();
+}
+
+function initLanguage() {
+  setLanguage(currentLang);
+}
+
+window.t = t;
+window.setLanguage = setLanguage;
+window.initLanguage = initLanguage;
+
 let currentCase = null;
 let activePersona = "law_firm"; // 'law_firm' or 'gov_desk'
 let currentDocTab = "rti"; // 'rti', 'appeal', 'notice', 'section8', 'slip', 'report'
@@ -20,6 +356,7 @@ function renderLucide() {
 
 function initApp() {
   try { initTheme(); } catch (e) { console.warn("Theme init:", e); }
+  try { initLanguage(); } catch (e) { console.warn("Language init:", e); }
   try { setupNavigation(); } catch (e) { console.warn("Nav init:", e); }
   try { loadCaseQueue(); } catch (e) { console.warn("Queue init:", e); }
   try { loadRunLogs(); } catch (e) { console.warn("RunLog init:", e); }
@@ -168,7 +505,7 @@ function switchDocTab(tabName) {
   document.querySelectorAll(".doc-draft-tab, .doc-tab-btn").forEach(b => b.classList.remove("active"));
   document.querySelectorAll("[id^='docPanel']").forEach(p => p.classList.add("hidden"));
 
-  const btn = Array.from(document.querySelectorAll(".doc-draft-tab, .doc-tab-btn")).find(b => 
+  const btn = Array.from(document.querySelectorAll(".doc-draft-tab, .doc-tab-btn")).find(b =>
     b.dataset.doctab === tabName || b.textContent.toLowerCase().includes(tabName)
   );
   if (btn) btn.classList.add("active");
@@ -281,7 +618,7 @@ async function submitIntake(event) {
       if (mlBox) { mlBox.style.display = "none"; mlBox.innerHTML = ""; }
       currentCase = data.case;
       populateWorkspaceFields(data.case);
-      
+
       // Update PIO map for this registered complaint
       updatePioMapForCase(data.case);
 
@@ -552,7 +889,7 @@ async function triggerLiveMlPrediction() {
 async function loadCaseQueue() {
   const searchQuery = document.getElementById("caseSearchInput") ? document.getElementById("caseSearchInput").value.trim() : "";
   const filter = document.getElementById("queueFilter") ? document.getElementById("queueFilter").value : "";
-  
+
   let url = `${API_BASE}/cases?`;
   if (filter) url += `status=${encodeURIComponent(filter)}&`;
   if (searchQuery) url += `search=${encodeURIComponent(searchQuery)}`;
@@ -614,7 +951,7 @@ async function loadCaseQueue() {
         <td><span class="statutory-tag bns" style="font-size: 9.5px; padding: 1px 4px;">${bnsBrief}</span><br/><span class="statutory-tag ipc" style="font-size: 9.5px; padding: 1px 4px; margin-top: 2px;">${ipcBrief}</span></td>
         <td><b>${pio.pio_name || 'Designated PIO'}</b><br/><span style="font-size: 9.5px; color: var(--status-active); font-family: var(--font-mono);">${distLabel}</span></td>
         <td><span class="status-pill ${c.status === 'APPROVED' ? 'approved' : (c.status === 'TRANSFERRED_SEC_6_3' ? 'transferred' : 'under-review')}">● ${c.status}</span></td>
-        <td><button class="btn-gov-outline" style="padding: 3px 8px; font-size: 10.5px;" onclick="event.stopPropagation(); openCaseById('${c.case_id}')">View</button></td>
+        <td><button class="btn-gov-outline btn-view-docket" style="padding: 3px 8px; font-size: 10.5px;" onclick="event.stopPropagation(); openCaseById('${c.case_id}')">${t("btn_view")}</button></td>
       `;
       tbody.appendChild(tr);
     });
@@ -652,7 +989,7 @@ function populateWorkspaceFields(c) {
   if (workspaceView) workspaceView.classList.remove("hidden");
 
   document.getElementById("viewCaseId").textContent = c.case_id;
-  
+
   const statusEl = document.getElementById("viewCaseStatus");
   if (statusEl) {
     statusEl.textContent = `● ${c.status}`;
@@ -683,7 +1020,7 @@ function populateWorkspaceFields(c) {
       if (state) areaParts.push(state);
       const pinStr = pin ? ` [PIN: ${pin}]` : "";
       if (jurisArea) jurisArea.textContent = `${areaParts.join(", ")}${pinStr}`;
-      
+
       const portal = juris.digital_portal || juris.digital_land_portal;
       const rtiPortal = juris.state_rti_portal || juris.rti_portal_url;
       let portalTxt = "";
@@ -700,10 +1037,10 @@ function populateWorkspaceFields(c) {
 
   const legal = c.statutory_legal_analysis || {};
   document.getElementById("viewMeritBadge").textContent = `${legal.case_merit_score || 92}/100 Merit (${legal.win_probability || 'High'})`;
-  
+
   const pen = legal.section_20_penalty_liability_inr || 0;
   document.getElementById("viewPenaltyBadge").textContent = `Section 20(1) Penalty Liability: ₹${pen} (Mandatory ₹250/day deduction applicable on delinquent PIO)`;
-  
+
   // 48-Hour Urgent Life & Liberty Status
   const isUrgent = !!(c.is_life_liberty || c.is_urgent_48h);
   const urgencyBadge = document.getElementById("viewUrgencyBadge");
@@ -1414,9 +1751,9 @@ function renderCaseDetailTimeline(caseData) {
     const isNewest = idx === 0;
     const uType = (entry.update_type || "").toUpperCase();
     const borderCol = uType.includes("MERGE") ? "var(--gov-copper)" :
-                      uType.includes("HEARING") ? "var(--gov-navy)" :
-                      uType.includes("TRANSFER") ? "var(--gov-amber)" :
-                      "var(--status-active)";
+      uType.includes("HEARING") ? "var(--gov-navy)" :
+        uType.includes("TRANSFER") ? "var(--gov-amber)" :
+          "var(--status-active)";
 
     return `
       <div class="audit-timeline-entry" style="margin-bottom: 12px;">
@@ -2040,11 +2377,11 @@ function renderAreaPiosDirectory(c, filterType = "all") {
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-subtle); padding-top: 6px;">
           <span style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted);">ID: ${p.id || 'GOV-PIO'} &bull; (${p.latitude?.toFixed(4)}, ${p.longitude?.toFixed(4)})</span>
           <div style="display: flex; gap: 6px;">
-            ${isAssigned 
-              ? `<button class="btn-gov-primary" style="font-size: 10.5px; padding: 3px 8px; background: #16A34A; cursor: default; border: none;">✓ Assigned PIO</button>`
-              : `<button class="btn-gov-outline" style="font-size: 10.5px; padding: 3px 8px;" onclick="assignPioFromMap('${p.id}')"><span>Assign as Docket PIO</span></button>
+            ${isAssigned
+        ? `<button class="btn-gov-primary" style="font-size: 10.5px; padding: 3px 8px; background: #16A34A; cursor: default; border: none;">✓ Assigned PIO</button>`
+        : `<button class="btn-gov-outline" style="font-size: 10.5px; padding: 3px 8px;" onclick="assignPioFromMap('${p.id}')"><span>Assign as Docket PIO</span></button>
                  <button class="btn-gov-outline" style="font-size: 10.5px; padding: 3px 8px;" onclick="openTransferModalForDept('${p.department}')"><span>Transfer Sec 6(3)</span></button>`
-            }
+      }
           </div>
         </div>
       </div>
@@ -2115,7 +2452,7 @@ async function loadCustomActs() {
       const card = document.createElement("div");
       card.className = "statutory-card";
       card.style.cssText = "display: flex; flex-direction: column; justify-content: space-between; border-left: 3px solid var(--accent-gold);";
-      
+
       card.innerHTML = `
         <div>
           <div class="statutory-card-header">
@@ -2300,7 +2637,7 @@ function toggleVoiceDictation() {
 
   if (isListeningVoice) {
     if (speechRecognizer) {
-      try { speechRecognizer.stop(); } catch (e) {}
+      try { speechRecognizer.stop(); } catch (e) { }
     }
     isListeningVoice = false;
     if (btn) btn.classList.remove("recording");
@@ -2511,23 +2848,24 @@ function buildPostalSlipHtml(slipData) {
     <div class="postal-slip-card" style="border: 2px solid #0F172A; padding: 16px; background: #FFFFFF; font-family: var(--font-mono); color: #0F172A;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0F172A; padding-bottom: 8px; margin-bottom: 12px;">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <div style="background: #991B1B; color: #FFFFFF; font-weight: 800; font-size: 16px; padding: 3px 8px; border-radius: 2px;">
-            INDIA POST
+          <div style="background: #991B1B; color: #FFFFFF; font-weight: 800; font-size: 15px; padding: 3px 8px; border-radius: 2px; line-height: 1.2;">
+            INDIA POST<br/><span style="font-size: 11px; font-weight: 600;">भारतीय डाक</span>
           </div>
           <div>
-            <div style="font-weight: 700; font-size: 12.5px; letter-spacing: 0.5px;">SPEED POST & REGISTERED AD</div>
-            <div style="font-size: 9px; color: #475569;">DEPARTMENT OF POSTS, GOVT. OF INDIA</div>
+            <div style="font-weight: 700; font-size: 12.5px; letter-spacing: 0.5px;">SPEED POST & REGISTERED AD • स्पीड पोस्ट एवं पंजीकृत डाक</div>
+            <div style="font-size: 9px; color: #475569;">DEPARTMENT OF POSTS, GOVT. OF INDIA • डाक विभाग, भारत सरकार</div>
           </div>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 9.5px; font-weight: 700; color: #0F172A;">CONSIGNMENT NO:</div>
+          <div style="font-size: 9.5px; font-weight: 700; color: #0F172A;">CONSIGNMENT NO / कंसाइनमेंट नंबर:</div>
           <div style="font-size: 13.5px; font-weight: 800; letter-spacing: 1px; color: #1E3A8A;">${slipData.consignment_number}</div>
         </div>
       </div>
 
       ${isUrgent ? `
         <div style="background: #FEE2E2; border: 2px dashed #DC2626; color: #991B1B; font-weight: 800; font-size: 10.5px; padding: 6px 10px; margin-bottom: 12px; text-align: center; text-transform: uppercase;">
-          🚨 URGENT: 48-HOUR STATUTORY LIFE & LIBERTY DISPATCH — SECTION 7(1) RTI ACT 2005 🚨
+          🚨 URGENT: 48-HOUR STATUTORY LIFE & LIBERTY DISPATCH — SECTION 7(1) RTI ACT 2005 🚨<br/>
+          <span style="font-size: 9.5px; font-weight: 700;">आपातकालीन 48-घंटे विधिक प्रेषण — धारा 7(1) सूचना का अधिकार अधिनियम 2005</span>
         </div>
       ` : ''}
 
@@ -2538,16 +2876,16 @@ function buildPostalSlipHtml(slipData) {
         <div style="font-size: 11.5px; font-weight: 700; letter-spacing: 2px; margin-top: 4px;">${slipData.consignment_number}</div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border: 1px solid #CBD5E1; padding: 10px; margin-bottom: 12px;">
+      <div class="postal-parties-grid">
         <div>
-          <div style="font-size: 9px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 3px;">TO (RECIPIENT PUBLIC AUTHORITY):</div>
+          <div style="font-size: 9px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 3px;">TO / सेवा में (RECIPIENT PIO):</div>
           <div style="font-size: 11px; font-weight: 700;">${recipient.name || recipient.pio_name || 'Designated PIO'} (${recipient.designation || 'PIO'})</div>
           <div style="font-size: 10px; color: #1E293B;">Department: ${recipient.department || 'Public Authority'}</div>
           <div style="font-size: 10px; color: #334155;">${recipient.office_address || recipient.address || 'N/A'}</div>
           <div style="font-size: 9.5px; color: #334155;">Room: ${recipient.room_no || 'N/A'}</div>
         </div>
         <div>
-          <div style="font-size: 9px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 3px;">FROM (SENDER / CITIZEN / COUNSEL):</div>
+          <div style="font-size: 9px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 3px;">FROM / प्रेषक (CITIZEN / COUNSEL):</div>
           <div style="font-size: 11px; font-weight: 700;">${sender.name || 'Citizen Applicant'}</div>
           <div style="font-size: 10px; color: #334155;">${sender.address || 'N/A'}</div>
           <div style="font-size: 10px; color: #334155;">Contact: ${sender.contact || 'N/A'}</div>
@@ -2555,15 +2893,15 @@ function buildPostalSlipHtml(slipData) {
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; border-top: 1px solid #CBD5E1; padding-top: 8px; font-size: 9px;">
-        <div><b>Booking Date:</b><br/>${slipData.booking_date}</div>
-        <div><b>Weight:</b><br/>${slipData.article_weight_grams || 45}g</div>
-        <div><b>Postage Tariff:</b><br/>₹${slipData.tariff_inr || 41.00}</div>
-        <div><b>Category:</b><br/>Speed Post + AD</div>
+      <div class="postal-meta-grid">
+        <div><b>Booking Date / तिथि:</b><br/>${slipData.booking_date}</div>
+        <div><b>Weight / वजन:</b><br/>${slipData.article_weight_grams || 45}g</div>
+        <div><b>Postage Tariff / शुल्क:</b><br/>₹${slipData.tariff_inr || 41.00}</div>
+        <div><b>Category / श्रेणी:</b><br/>Speed Post + AD</div>
       </div>
 
       <div style="margin-top: 10px; padding-top: 6px; border-top: 1px dashed #94A3B8; font-size: 8px; color: #64748B; line-height: 1.3;">
-        <b>STATUTORY PROOF NOTICE:</b> ${slipData.legal_notice || 'Section 27 General Clauses Act presumption applies.'}
+        <b>STATUTORY PROOF NOTICE / विधिक प्रेषण साक्ष्य:</b> ${slipData.legal_notice || 'Section 27 General Clauses Act presumption applies. धारा 27 साधारण खंड अधिनियम के अंतर्गत विधिक तामीली मानी जाएगी।'}
       </div>
     </div>
   `;
@@ -2627,7 +2965,7 @@ function initLeafletPioMap() {
   if (!mapEl || typeof L === "undefined") return;
 
   if (leafletMap) {
-    try { leafletMap.remove(); } catch (e) {}
+    try { leafletMap.remove(); } catch (e) { }
     leafletMap = null;
   }
 
@@ -2852,7 +3190,7 @@ function resetSlaCalculator() {
   const provSelect = document.getElementById("slaProvisionType");
   const respInput = document.getElementById("slaResponseDate");
   const deptInput = document.getElementById("slaPioDepartment");
-  
+
   if (filingInput) {
     const d = new Date();
     d.setDate(d.getDate() - 35);
@@ -2867,7 +3205,7 @@ function resetSlaCalculator() {
 function calculateSlaPenalty() {
   const filingVal = document.getElementById("slaFilingDate")?.value;
   if (!filingVal) return;
-  
+
   const filingDate = new Date(filingVal);
   const provVal = document.getElementById("slaProvisionType")?.value || "30";
   let slaDays = 30;
@@ -2877,16 +3215,16 @@ function calculateSlaPenalty() {
 
   const deadlineDate = new Date(filingDate);
   deadlineDate.setDate(deadlineDate.getDate() + slaDays);
-  
+
   const respVal = document.getElementById("slaResponseDate")?.value;
   const endDate = respVal ? new Date(respVal) : new Date();
-  
+
   const diffTime = endDate.getTime() - filingDate.getTime();
   const elapsedDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
-  
+
   const overdueDays = Math.max(0, elapsedDays - slaDays);
   const penaltyAmount = Math.min(25000, overdueDays * 250);
-  
+
   const fmtOpts = { day: "2-digit", month: "short", year: "numeric" };
   const deadlineStr = deadlineDate.toLocaleDateString("en-IN", fmtOpts);
   const filingStr = filingDate.toLocaleDateString("en-IN", fmtOpts);
@@ -2931,13 +3269,29 @@ function calculateSlaPenalty() {
     if (overdueDays > 0) {
       elGuidanceBox.style.borderLeftColor = "var(--status-review)";
       elGuidanceTitle.style.color = "var(--status-review)";
-      elGuidanceTitle.textContent = `⚠️ Statutory Default: Personal Salary Deduction Triggered (${overdueDays} Days Overdue)`;
-      elGuidanceText.innerHTML = `The Designated Public Information Officer at <b>${escapeHtml(targetDept)}</b> has exceeded the statutory deadline by <b>${overdueDays} days</b> without lawful order. Under Section 20(1) of the RTI Act 2005 and Supreme Court precedent <i>Manohar Anchule (2013)</i>, a mandatory penalty of ₹250/day (Total: <b>₹${penaltyAmount.toLocaleString("en-IN")}</b>) has accrued and is deductible directly from the officer's salary. Recommended action: Immediately file First Appeal under Section 19(1) or penalty complaint under Section 18.`;
+      if (currentLang === "hi") {
+        elGuidanceTitle.textContent = `⚠️ वैधानिक डिफ़ॉल्ट: वेतन से कटौती प्रारंभ (${overdueDays} दिन का विलंब)`;
+        elGuidanceText.innerHTML = `<b>${escapeHtml(targetDept)}</b> के जन सूचना अधिकारी ने कानूनी 30-दिवसीय सीमा का <b>${overdueDays} दिन</b> उल्लंघन किया है। आरटीआई अधिनियम की धारा 20(1) के तहत ₹250/दिन की दर से कुल <b>₹${penaltyAmount.toLocaleString("en-IN")}</b> जुर्माना देय है जो अधिकारी के वेतन से काटा जाएगा। तुरंत धारा 19(1) के तहत प्रथम अपील दर्ज करें।`;
+      } else if (currentLang === "bi") {
+        elGuidanceTitle.textContent = `⚠️ Statutory Default: Personal Salary Deduction Triggered (${overdueDays} Days Overdue) • वैधानिक विलंब: वेतन कटौती लागू`;
+        elGuidanceText.innerHTML = `The Designated PIO at <b>${escapeHtml(targetDept)}</b> has exceeded statutory SLA by <b>${overdueDays} days</b>. Under Section 20(1), a mandatory ₹250/day penalty (Total: <b>₹${penaltyAmount.toLocaleString("en-IN")}</b>) has accrued.<br/><span style="color: var(--ink-secondary); font-size: 11px; display: inline-block; margin-top: 4px;">संबंधित जन सूचना अधिकारी ने तय सीमा से <b>${overdueDays} दिन</b> का विलंब किया है। धारा 20(1) के तहत कुल <b>₹${penaltyAmount.toLocaleString("en-IN")}</b> जुर्माना अधिकारी के वेतन से काटा जाएगा।</span>`;
+      } else {
+        elGuidanceTitle.textContent = `⚠️ Statutory Default: Personal Salary Deduction Triggered (${overdueDays} Days Overdue)`;
+        elGuidanceText.innerHTML = `The Designated Public Information Officer at <b>${escapeHtml(targetDept)}</b> has exceeded the statutory deadline by <b>${overdueDays} days</b> without lawful order. Under Section 20(1) of the RTI Act 2005 and Supreme Court precedent <i>Manohar Anchule (2013)</i>, a mandatory penalty of ₹250/day (Total: <b>₹${penaltyAmount.toLocaleString("en-IN")}</b>) has accrued and is deductible directly from the officer's salary. Recommended action: Immediately file First Appeal under Section 19(1) or penalty complaint under Section 18.`;
+      }
     } else {
       elGuidanceBox.style.borderLeftColor = "var(--status-active)";
       elGuidanceTitle.style.color = "var(--status-active)";
-      elGuidanceTitle.textContent = "✓ Application Within Lawful SLA Window";
-      elGuidanceText.innerHTML = `Application filed on <b>${filingStr}</b> is currently within the lawful ${slaDays}-day SLA window. The PIO has until <b>${deadlineStr}</b> to furnish the certified information or issue a Section 6(3) transfer notice.`;
+      if (currentLang === "hi") {
+        elGuidanceTitle.textContent = "✓ आवेदन वैधानिक समयसीमा के भीतर";
+        elGuidanceText.innerHTML = `<b>${filingStr}</b> को दर्ज आवेदन अभी निर्धारित ${slaDays}-दिवसीय समयसीमा में है। अधिकारी को <b>${deadlineStr}</b> तक जानकारी देनी होगी।`;
+      } else if (currentLang === "bi") {
+        elGuidanceTitle.textContent = "✓ Within Statutory Window • वैधानिक समयसीमा के भीतर";
+        elGuidanceText.innerHTML = `Application filed on <b>${filingStr}</b> is within lawful ${slaDays}-day window. PIO has until <b>${deadlineStr}</b> to furnish information.<br/><span style="color: var(--ink-secondary); font-size: 11px; display: inline-block; margin-top: 4px;">आवेदन अभी निर्धारित सीमा में है। अधिकारी को <b>${deadlineStr}</b> तक जवाब देना अनिवार्य है।</span>`;
+      } else {
+        elGuidanceTitle.textContent = "✓ Application Within Lawful SLA Window";
+        elGuidanceText.innerHTML = `Application filed on <b>${filingStr}</b> is currently within the lawful ${slaDays}-day SLA window. The PIO has until <b>${deadlineStr}</b> to furnish the certified information or issue a Section 6(3) transfer notice.`;
+      }
     }
   }
 
@@ -2954,7 +3308,7 @@ function copySlaNoticeClause() {
   const elClause = document.getElementById("slaGeneratedClause");
   const btnText = document.getElementById("copyClauseBtnText");
   if (!elClause) return;
-  
+
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(elClause.value).then(() => {
       if (btnText) {
@@ -2989,7 +3343,7 @@ function filterStatutoryMatrix() {
   if (!table) return;
   const rows = table.querySelectorAll("tbody tr");
   let matchCount = 0;
-  
+
   rows.forEach(r => {
     const text = r.textContent.toLowerCase();
     if (!query || text.includes(query)) {
@@ -2999,7 +3353,7 @@ function filterStatutoryMatrix() {
       r.style.display = "none";
     }
   });
-  
+
   const countEl = document.getElementById("statutoryFilterCount");
   if (countEl) {
     countEl.textContent = `${matchCount} Provision${matchCount === 1 ? "" : "s"} Active`;

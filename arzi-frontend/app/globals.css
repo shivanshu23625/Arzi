@@ -35,3 +35,51 @@ body {
   line-height: 1.5;
   font-size: 15px;
 }
+
+/* Responsive Utilities for Multi-Device Excellence */
+.container-responsive {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 8px;
+}
+
+.grid-2col-responsive {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .grid-2col-responsive {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+  .header-responsive {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  .nav-responsive {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .search-form-responsive {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+  .search-input-responsive {
+    width: 100% !important;
+  }
+}
+

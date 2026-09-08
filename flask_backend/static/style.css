@@ -2187,8 +2187,143 @@ button {
 }
 
 /* ================================================================= */
-/* 9. RESPONSIVE BREAKPOINT OVERRIDES FOR NEW COMPONENTS             */
 /* ================================================================= */
+/* 9. RESPONSIVE BREAKPOINT OVERRIDES & BILINGUAL DESIGN SYSTEM      */
+/* ================================================================= */
+
+/* Bilingual Language Switcher */
+.lang-switch-group {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-medium);
+  border-radius: 4px;
+  padding: 2px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-secondary);
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.lang-btn:hover {
+  color: var(--ink-primary);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.lang-btn.active {
+  background: var(--gov-navy);
+  color: #FFFFFF;
+}
+
+/* Responsive Structural Form & Grid Utilities */
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-row-addr {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.geodesy-kpi-bar {
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr auto;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.geo-coords-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 11px;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.postal-parties-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  border: 1px solid #CBD5E1;
+  padding: 10px;
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.postal-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  border-top: 1px solid #CBD5E1;
+  padding-top: 8px;
+  font-size: 9px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.simplified-presets-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.simplified-presets-bar .preset-pill {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  color: var(--ink-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.simplified-presets-bar .preset-pill:hover {
+  background: var(--bg-subtle);
+  border-color: var(--gov-navy);
+  transform: translateY(-1px);
+}
+
+.simplified-presets-bar .preset-pill.urgent {
+  background: #FEF2F2;
+  border-color: #FECACA;
+  color: #B91C1C;
+}
+
+/* Unified Media Queries */
 @media (max-width: 1024px) {
   .workflow-pipeline-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -2209,6 +2344,10 @@ button {
   .about-three-col-grid {
     grid-template-columns: repeat(2, 1fr) !important;
   }
+
+  .geodesy-kpi-bar {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -2216,8 +2355,22 @@ button {
   .pillars-four-grid,
   .precedents-grid,
   .sla-calculator-grid,
-  .compliance-benchmarks-grid {
+  .compliance-benchmarks-grid,
+  .geodesy-kpi-bar,
+  .form-row-2col,
+  .form-row-addr,
+  .geo-coords-grid,
+  .postal-parties-grid,
+  #customActsContainer {
     grid-template-columns: 1fr !important;
+  }
+
+  .postal-meta-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .sla-metrics-strip {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 
   .quick-triage-grid {
@@ -2235,19 +2388,34 @@ button {
 }
 
 @media (max-width: 480px) {
-  .workflow-pipeline-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .escalation-ladder-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .sla-metrics-strip {
-    grid-template-columns: 1fr;
+  .workflow-pipeline-grid,
+  .escalation-ladder-grid,
+  .sla-metrics-strip,
+  .postal-meta-grid {
+    grid-template-columns: 1fr !important;
   }
 
   .quick-triage-card {
     padding: 8px 10px;
   }
+
+  .hero-action-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .hero-action-row button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .header-right-actions {
+    gap: 4px !important;
+  }
+
+  .lang-btn {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
 }
+
