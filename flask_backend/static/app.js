@@ -8,7 +8,9 @@ const API_BASE = "/api/v1";
 // =========================================================================
 // BILINGUAL (ENGLISH / HINDI) TRANSLATION ENGINE & DICTIONARY
 // =========================================================================
-let currentLang = localStorage.getItem("arzi_lang") || "bi";
+let savedLang = localStorage.getItem("arzi_lang");
+let currentLang = (savedLang === "hi") ? "hi" : "en";
+localStorage.setItem("arzi_lang", currentLang);
 
 const I18N_DICT = {
   // Brand & Nav
@@ -260,15 +262,6 @@ const I18N_DICT = {
 
 function t(key) {
   if (!I18N_DICT[key]) return key;
-  if (currentLang === "bi") {
-    const en = I18N_DICT[key]["en"] || "";
-    const hi = I18N_DICT[key]["hi"] || "";
-    if (en && hi) {
-      if (en === hi) return en;
-      return `${en} / ${hi}`;
-    }
-    return en || hi || key;
-  }
   if (I18N_DICT[key][currentLang]) {
     return I18N_DICT[key][currentLang];
   }
@@ -276,17 +269,39 @@ function t(key) {
 }
 
 function setLanguage(lang) {
-  if (lang !== "en" && lang !== "hi" && lang !== "bi") lang = "bi";
+  if (lang !== "hi") lang = "en";
   currentLang = lang;
   localStorage.setItem("arzi_lang", lang);
 
+  // Set strict CSS class on <body>
+  document.body.classList.remove("lang-en", "lang-hi", "lang-bi");
+  document.body.classList.add("lang-" + lang);
+  document.documentElement.lang = (lang === "hi" ? "hi" : "en");
+
+  // Update dynamic document title
+  document.title = lang === "hi"
+    ? "अर्जी — नागरिक आरटीआई एवं विधिक सहायता डेस्क"
+    : "ARZI — Civic RTI & Statutory Legal Intelligence Desk";
+
   // Update switcher button states
-  const btnBi = document.getElementById("langBi");
   const btnEn = document.getElementById("langEn");
   const btnHi = document.getElementById("langHi");
-  if (btnBi) btnBi.classList.toggle("active", lang === "bi");
   if (btnEn) btnEn.classList.toggle("active", lang === "en");
   if (btnHi) btnHi.classList.toggle("active", lang === "hi");
+
+  // Switch all select options having data-en and data-hi
+  document.querySelectorAll("option[data-en]").forEach(opt => {
+    const en = opt.getAttribute("data-en") || "";
+    const hi = opt.getAttribute("data-hi") || "";
+    opt.textContent = (lang === "hi" ? (hi || en) : en);
+  });
+
+  // Switch all input/textarea placeholders having data-ph-en and data-ph-hi
+  document.querySelectorAll("[data-ph-en]").forEach(inp => {
+    const en = inp.getAttribute("data-ph-en") || "";
+    const hi = inp.getAttribute("data-ph-hi") || "";
+    inp.placeholder = (lang === "hi" ? (hi || en) : en);
+  });
 
   // Translate all [data-i18n] text nodes
   document.querySelectorAll("[data-i18n]").forEach(el => {
@@ -300,11 +315,7 @@ function setLanguage(lang) {
   document.querySelectorAll("[data-i18n-html]").forEach(el => {
     const key = el.getAttribute("data-i18n-html");
     if (I18N_DICT[key]) {
-      if (lang === "bi" && I18N_DICT[key]["en"] && I18N_DICT[key]["hi"]) {
-        el.innerHTML = `${I18N_DICT[key]["en"]} <span style="opacity: 0.85; font-weight: normal;">/ ${I18N_DICT[key]["hi"]}</span>`;
-      } else {
-        el.innerHTML = I18N_DICT[key][lang] || I18N_DICT[key]["en"];
-      }
+      el.innerHTML = I18N_DICT[key][lang] || I18N_DICT[key]["en"];
     }
   });
 
@@ -323,10 +334,28 @@ function setLanguage(lang) {
 
   const repoStatus = document.getElementById("repoStatusText");
   if (repoStatus) {
-    repoStatus.textContent = t("status_operational");
+    repoStatus.textContent = (lang === "hi" ? "सक्रिय" : "Operational");
   }
 
-  renderLucide();
+  // Refresh workspace or queue if active
+  if (typeof currentCase !== "undefined" && currentCase) {
+    populateWorkspaceFields(currentCase);
+  }
+  if (typeof loadCaseQueue === "function") {
+    loadCaseQueue();
+  }
+  if (typeof activeDetailCase !== "undefined" && activeDetailCase) {
+    openCaseDetailView(activeDetailCase.case_id);
+  }
+  // Re-run compliance calculator if dates are filled
+  const calcFiling = document.getElementById("calcFilingDate");
+  if (calcFiling && calcFiling.value && typeof calculateLiveSection20Penalty === "function") {
+    calculateLiveSection20Penalty();
+  }
+
+  if (typeof renderLucide === "function") {
+    renderLucide();
+  }
 }
 
 function initLanguage() {
@@ -944,12 +973,12 @@ async function loadCaseQueue() {
       const ipcBrief = legal.ipc_sections ? legal.ipc_sections[0] : "IPC Sec 420";
       const bnsBrief = legal.bns_sections ? legal.bns_sections[0] : "BNS Sec 318(4)";
       const distLabel = pio.distance_label || (c.geospatial_meta ? c.geospatial_meta.distance_label : "1.5 km away");
-      const statusMap = {
-        "APPROVED": "APPROVED • स्वीकृत",
-        "TRANSFERRED_SEC_6_3": "TRANSFERRED • अंतरित",
-        "NEEDS_REVIEW": "UNDER REVIEW • समीक्षाधीन",
-        "UNDER_REVIEW": "UNDER REVIEW • समीक्षाधीन",
-        "REJECTED": "REJECTED • अस्वीकृत"
+            const statusMap = {
+        "APPROVED": currentLang === "hi" ? "स्वीकृत" : (currentLang === "bi" ? "APPROVED • स्वीकृत" : "APPROVED"),
+        "TRANSFERRED_SEC_6_3": currentLang === "hi" ? "अंतरित (धारा 6(3))" : (currentLang === "bi" ? "TRANSFERRED • अंतरित" : "TRANSFERRED (SEC 6(3))"),
+        "NEEDS_REVIEW": currentLang === "hi" ? "समीक्षाधीन" : (currentLang === "bi" ? "UNDER REVIEW • समीक्षाधीन" : "UNDER REVIEW"),
+        "UNDER_REVIEW": currentLang === "hi" ? "समीक्षाधीन" : (currentLang === "bi" ? "UNDER REVIEW • समीक्षाधीन" : "UNDER REVIEW"),
+        "REJECTED": currentLang === "hi" ? "अस्वीकृत" : (currentLang === "bi" ? "REJECTED • अस्वीकृत" : "REJECTED")
       };
       const displayStatus = statusMap[c.status] || c.status;
       tr.innerHTML = `
@@ -998,13 +1027,13 @@ function populateWorkspaceFields(c) {
 
   document.getElementById("viewCaseId").textContent = c.case_id;
 
-  const statusMap = {
-    "APPROVED": "APPROVED • स्वीकृत",
-    "TRANSFERRED_SEC_6_3": "TRANSFERRED • अंतरित",
-    "NEEDS_REVIEW": "UNDER REVIEW • समीक्षाधीन",
-    "UNDER_REVIEW": "UNDER REVIEW • समीक्षाधीन",
-    "REJECTED": "REJECTED • अस्वीकृत"
-  };
+        const statusMap = {
+        "APPROVED": currentLang === "hi" ? "स्वीकृत" : (currentLang === "bi" ? "APPROVED • स्वीकृत" : "APPROVED"),
+        "TRANSFERRED_SEC_6_3": currentLang === "hi" ? "अंतरित (धारा 6(3))" : (currentLang === "bi" ? "TRANSFERRED • अंतरित" : "TRANSFERRED (SEC 6(3))"),
+        "NEEDS_REVIEW": currentLang === "hi" ? "समीक्षाधीन" : (currentLang === "bi" ? "UNDER REVIEW • समीक्षाधीन" : "UNDER REVIEW"),
+        "UNDER_REVIEW": currentLang === "hi" ? "समीक्षाधीन" : (currentLang === "bi" ? "UNDER REVIEW • समीक्षाधीन" : "UNDER REVIEW"),
+        "REJECTED": currentLang === "hi" ? "अस्वीकृत" : (currentLang === "bi" ? "REJECTED • अस्वीकृत" : "REJECTED")
+      };
 
   const statusEl = document.getElementById("viewCaseStatus");
   if (statusEl) {
@@ -1586,13 +1615,13 @@ async function openCaseDetailView(caseId) {
     if (pinEl) pinEl.textContent = `PIN: ${caseData.pincode || caseData.complainant?.pincode || '—'}`;
 
     // Status & SLA
-    const statusMap = {
-      "APPROVED": "APPROVED • स्वीकृत",
-      "TRANSFERRED_SEC_6_3": "TRANSFERRED • अंतरित",
-      "NEEDS_REVIEW": "UNDER REVIEW • समीक्षाधीन",
-      "UNDER_REVIEW": "UNDER REVIEW • समीक्षाधीन",
-      "REJECTED": "REJECTED • अस्वीकृत"
-    };
+          const statusMap = {
+        "APPROVED": currentLang === "hi" ? "स्वीकृत" : (currentLang === "bi" ? "APPROVED • स्वीकृत" : "APPROVED"),
+        "TRANSFERRED_SEC_6_3": currentLang === "hi" ? "अंतरित (धारा 6(3))" : (currentLang === "bi" ? "TRANSFERRED • अंतरित" : "TRANSFERRED (SEC 6(3))"),
+        "NEEDS_REVIEW": currentLang === "hi" ? "समीक्षाधीन" : (currentLang === "bi" ? "UNDER REVIEW • समीक्षाधीन" : "UNDER REVIEW"),
+        "UNDER_REVIEW": currentLang === "hi" ? "समीक्षाधीन" : (currentLang === "bi" ? "UNDER REVIEW • समीक्षाधीन" : "UNDER REVIEW"),
+        "REJECTED": currentLang === "hi" ? "अस्वीकृत" : (currentLang === "bi" ? "REJECTED • अस्वीकृत" : "REJECTED")
+      };
     const statusPill = document.getElementById("detailDocketStatusPill");
     if (statusPill) {
       statusPill.textContent = statusMap[caseData.status] || caseData.status;
@@ -1602,16 +1631,38 @@ async function openCaseDetailView(caseId) {
     const urgentBadge = document.getElementById("detailDocketUrgentBadge");
     const isUrgent = Boolean(caseData.is_life_liberty);
     if (urgentBadge) urgentBadge.style.display = isUrgent ? "inline-block" : "none";
-    if (slaBadge) slaBadge.textContent = isUrgent ? "48-Hour Urgent SLA • 48 घंटे आपातकालीन समयसीमा" : "30-Day Standard SLA • 30-दिवसीय समयसीमा";
+    if (slaBadge) {
+      if (currentLang === "hi") {
+        slaBadge.textContent = isUrgent ? "48 घंटे आपातकालीन समयसीमा" : "30-दिवसीय समयसीमा";
+      } else if (currentLang === "bi") {
+        slaBadge.textContent = isUrgent ? "48-Hour Urgent SLA • 48 घंटे आपातकालीन समयसीमा" : "30-Day Standard SLA • 30-दिवसीय समयसीमा";
+      } else {
+        slaBadge.textContent = isUrgent ? "48-Hour Urgent SLA" : "30-Day Standard SLA";
+      }
+    }
 
     const daysRemaining = caseData.sla_days_remaining !== undefined ? caseData.sla_days_remaining : 30;
     const slaCountdown = document.getElementById("detailDocketSlaCountdown");
     if (slaCountdown) {
-      slaCountdown.textContent = isUrgent ? "48 Hours • 48 घंटे" : `${daysRemaining} Days • दिन शेष`;
+      if (currentLang === "hi") {
+        slaCountdown.textContent = isUrgent ? "48 घंटे" : `${daysRemaining} दिन शेष`;
+      } else if (currentLang === "bi") {
+        slaCountdown.textContent = isUrgent ? "48 Hours • 48 घंटे" : `${daysRemaining} Days • दिन शेष`;
+      } else {
+        slaCountdown.textContent = isUrgent ? "48 Hours" : `${daysRemaining} Days Remaining`;
+      }
       slaCountdown.style.color = daysRemaining <= 5 ? "var(--status-risk)" : "var(--gov-navy)";
     }
     const dueDateEl = document.getElementById("detailDocketDueDate");
-    if (dueDateEl) dueDateEl.textContent = `Due / अंतिम तिथि: ${caseData.due_date || 'Within Statutory Period • विधिक अवधि में'}`;
+    if (dueDateEl) {
+      if (currentLang === "hi") {
+        dueDateEl.textContent = `अंतिम तिथि: ${caseData.due_date || 'विधिक अवधि में'}`;
+      } else if (currentLang === "bi") {
+        dueDateEl.textContent = `Due / अंतिम तिथि: ${caseData.due_date || 'Within Statutory Period • विधिक अवधि में'}`;
+      } else {
+        dueDateEl.textContent = `Due: ${caseData.due_date || 'Within Statutory Period'}`;
+      }
+    }
 
     // 2. Complainant & PIO Details
     const cName = document.getElementById("detailCompName");

@@ -2419,3 +2419,62 @@ button {
   }
 }
 
+/* ==========================================================================
+   STRICT LANGUAGE SEPARATION SYSTEM (ENGLISH vs HINDI vs BOTH)
+   ========================================================================== */
+body.lang-en .i18n-hi,
+body.lang-en .lang-hi,
+body.lang-en .i18n-sep {
+  display: none !important;
+}
+
+body.lang-en .i18n-en,
+body.lang-en .lang-en {
+  display: inline !important;
+}
+
+body.lang-hi .i18n-en,
+body.lang-hi .lang-en,
+body.lang-hi .i18n-sep {
+  display: none !important;
+}
+
+body.lang-hi .i18n-hi,
+body.lang-hi .lang-hi {
+  display: inline !important;
+}
+
+body.lang-bi .i18n-en,
+body.lang-bi .lang-en,
+body.lang-bi .i18n-hi,
+body.lang-bi .lang-hi,
+body.lang-bi .i18n-sep {
+  display: inline !important;
+}
+
+/* Block-level language elements */
+body.lang-en .i18n-hi-block,
+body.lang-en .lang-hi-block {
+  display: none !important;
+}
+body.lang-en .i18n-en-block,
+body.lang-en .lang-en-block {
+  display: block !important;
+}
+
+body.lang-hi .i18n-en-block,
+body.lang-hi .lang-en-block {
+  display: none !important;
+}
+body.lang-hi .i18n-hi-block,
+body.lang-hi .lang-hi-block {
+  display: block !important;
+}
+
+body.lang-bi .i18n-en-block,
+body.lang-bi .lang-en-block,
+body.lang-bi .i18n-hi-block,
+body.lang-bi .lang-hi-block {
+  display: block !important;
+}
+
